@@ -157,8 +157,8 @@ transcriptr/
     "task": "transcribe",
     "batch_size": 64,
     "return_timestamps": true,
-    "language": "english", // Optional, for better accuracy
-    "diarize": false // Optional, for speaker identification
+    "language": "english",
+    "diarize": false 
   }
 }
 ```
