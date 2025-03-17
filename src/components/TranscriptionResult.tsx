@@ -150,20 +150,25 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
   return (
     <div className="space-y-6">
       <Tabs defaultValue="txt" className="w-full">
-        <TabsList className="w-full grid grid-cols-4">
-          <TabsTrigger value="txt">TXT</TabsTrigger>
-          <TabsTrigger value="md">MD</TabsTrigger>
-          <TabsTrigger value="pdf">PDF</TabsTrigger>
-          <TabsTrigger value="docx">DOCX</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-4 mb-6 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+          <TabsTrigger value="txt" className="text-sm py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">TXT</TabsTrigger>
+          <TabsTrigger value="md" className="text-sm py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">MD</TabsTrigger>
+          <TabsTrigger value="pdf" className="text-sm py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">PDF</TabsTrigger>
+          <TabsTrigger value="docx" className="text-sm py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">DOCX</TabsTrigger>
         </TabsList>
 
         {/* TXT Tab Content */}
         <TabsContent value="txt" className="mt-4">
-          <div className="bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-4 h-80 overflow-auto">
+          <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 h-80 overflow-auto shadow-inner">
             <pre className="text-sm font-mono whitespace-pre-wrap">{transcription}</pre>
           </div>
           <div className="mt-4 flex justify-end">
-            <Button onClick={() => handleDownload('txt')}>
+            <Button onClick={() => handleDownload('txt')} className="gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
               Download as TXT
             </Button>
           </div>
@@ -244,8 +249,13 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
         </TabsContent>
       </Tabs>
 
-      <div className="flex justify-center pt-4 border-t">
-        <Button onClick={handleDownloadAll} size="lg" className="px-8">
+      <div className="flex justify-center pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+        <Button onClick={handleDownloadAll} size="lg" className="px-8 gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
           Download All Formats (ZIP)
         </Button>
       </div>

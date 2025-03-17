@@ -25,6 +25,7 @@ export default function App() {
   const [transcription, setTranscription] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // Convert file to base64 for API submission
   const fileToBase64 = (file: File): Promise<string> => {
@@ -143,6 +144,10 @@ export default function App() {
       console.log('Prediction status response:', data);
 
       if (data.status === 'succeeded') {
+        // Display success message
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 3000);
+
         // Handle different output formats
         if (typeof data.output === 'string') {
           setTranscription(data.output);
@@ -183,56 +188,75 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-gray-50">
-      <div className="w-full max-w-4xl p-4">
-        <Card className="w-full !p-6 shadow-md">
-          <CardHeader className="!px-6 !pb-4 text-center">
-            <CardTitle className="text-2xl font-bold">Audio Transcription</CardTitle>
-            <CardDescription className="text-sm text-gray-500">
-              Upload an audio file to generate a transcription using AI.
-            </CardDescription>
-          </CardHeader>
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-800 py-12">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <header className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Transcriptr</h1>
+          <p className="text-gray-600 dark:text-gray-300">Convert audio to text with AI-powered transcription</p>
+        </header>
 
-          <CardContent className="!px-6 !py-4 space-y-4">
+        <Card className="w-full overflow-hidden border-0 shadow-lg rounded-xl dark:bg-gray-800/60 dark:backdrop-blur-sm">
+          <CardContent className="p-0">
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                <div className="h-10 w-10 animate-spin rounded-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent"></div>
-                <p className="text-sm text-gray-500">Transcribing your audio... This may take a few moments.</p>
+              <div className="flex flex-col items-center justify-center py-16 px-6 space-y-4">
+                <div className="h-14 w-14 animate-spin rounded-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent"></div>
+                <p className="text-gray-500 dark:text-gray-400 text-center max-w-md">
+                  Transcribing your audio... This may take a few moments depending on the file length.
+                </p>
               </div>
             ) : error ? (
-              <div className="bg-red-50 border border-red-200 rounded-md p-4 text-center">
-                <p className="text-red-600 font-medium">Error: {error}</p>
-                <Button
-                  variant="outline"
-                  onClick={handleReset}
-                  className="mt-2"
-                >
-                  Try Again
-                </Button>
+              <div className="p-8 text-center">
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-4">
+                  <p className="text-red-600 dark:text-red-400 font-medium mb-2">Error: {error}</p>
+                  <p className="text-sm text-red-500 dark:text-red-300 mb-4">
+                    There was a problem processing your audio file. Please try again.
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={handleReset}
+                    className="bg-white dark:bg-gray-800"
+                  >
+                    Try Again
+                  </Button>
+                </div>
               </div>
             ) : !transcription ? (
-              <div>
+              <div className="p-8">
                 <UploadAudio onUpload={handleUpload} />
               </div>
             ) : (
-              <div>
+              <div className="p-8">
                 <TranscriptionResult transcription={transcription} />
               </div>
             )}
           </CardContent>
 
           {transcription && (
-            <CardFooter className="!px-6 !pt-4 flex justify-center gap-4 border-t">
-              <Button variant="outline" onClick={handleReset}>
+            <div className="px-8 py-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-100 dark:border-gray-700 flex justify-center gap-4">
+              <Button variant="outline" onClick={handleReset} className="bg-white dark:bg-gray-800">
                 New Transcription
               </Button>
-              <Button onClick={() => navigator.clipboard.writeText(transcription)}>
+              <Button onClick={() => navigator.clipboard.writeText(transcription)}
+                    className="gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
                 Copy to Clipboard
               </Button>
-            </CardFooter>
+            </div>
           )}
         </Card>
       </div>
+      {showSuccess && (
+        <div className="fixed top-4 right-4 bg-green-100 dark:bg-green-900/70 p-4 rounded-lg shadow-lg flex items-center gap-3 animate-in slide-in-from-top">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600 dark:text-green-400">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+          <span className="text-green-800 dark:text-green-200 font-medium">Transcription complete!</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -48,6 +48,11 @@ export default {
       spacing: {
         // You can add custom spacing values here if needed
       },
+      // Add backdrop filter for glass effects
+      backdropFilter: {
+        'none': 'none',
+        'blur': 'blur(20px)',
+      },
       // Add animation keyframes and utilities manually if needed
       keyframes: {
         "accordion-down": {
@@ -65,11 +70,14 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'), // For better markdown rendering
+  ],
   // Ensure core plugins are enabled
   corePlugins: {
     space: true,
     padding: true,
     margin: true,
+    backdropFilter: true, // Enable backdrop filter core plugin
   },
 }

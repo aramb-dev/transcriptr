@@ -64,9 +64,9 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-full border border-dashed border-gray-300 dark:border-gray-700 rounded-lg p-8 flex flex-col items-center">
+        <div className="w-full border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-xl p-8 transition-all hover:bg-gray-100 dark:hover:bg-gray-800 flex flex-col items-center">
           <label htmlFor="audio-file" className="sr-only">Upload audio file</label>
           <input
             id="audio-file"
@@ -79,16 +79,21 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
           />
 
           {!fileName && (
-            <div className="flex flex-col items-center space-y-4">
+            <div className="flex flex-col items-center space-y-4 py-8">
+              <div className="bg-primary/10 dark:bg-primary/20 p-4 rounded-full mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary">
+                  <path d="M12 5v14M18 11l-6-6M6 11l6-6"/>
+                </svg>
+              </div>
               <Button
                 onClick={handleButtonClick}
                 size="lg"
-                className="px-8 py-6 h-auto text-base"
+                className="px-6 py-2 h-auto text-base rounded-full"
               >
                 Select Audio File
               </Button>
-              <p className="text-sm text-gray-500 text-center max-w-xs">
-                Click the button above to choose an audio file to transcribe (max size: 100MB)
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xs">
+                Upload MP3, WAV, M4A, or other audio files up to 100MB
               </p>
             </div>
           )}
