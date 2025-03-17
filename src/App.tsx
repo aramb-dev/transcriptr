@@ -25,12 +25,18 @@ export default function App() {
     setIsLoading(true);
     try {
       const model = 'vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c';
+
+      const file = formData.get('file') as File;
+
+      const base64Audio = await fileToBase64(file);
+
       const input = {
         task: 'transcribe',
-        audio: URL.createObjectURL(formData.get('file') as File),
+        audio: base64Audio,
         batch_size: 64,
         return_timestamps: true,
       };
+
       const output = await replicate.run(model, { input });
       setTranscription((output as { text: string }).text);
     } catch (error) {
@@ -40,52 +46,59 @@ export default function App() {
     }
   };
 
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          resolve(reader.result);
+        } else {
+          reject(new Error('Failed to convert file to base64'));
+        }
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
   const handleReset = () => {
     setTranscription(null);
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-background p-8">
-      <div className="w-full max-w-[900px] mx-auto p-4 md:p-8">
-        <Card className="shadow-xl border-4 border-gray-300 rounded-xl overflow-hidden">
-          <CardHeader className="border-b p-8 !pb-8">
-            <div className="text-center">
-              <CardTitle className="text-2xl md:text-3xl font-bold mb-3">Audio Transcription</CardTitle>
-              <CardDescription className="text-sm md:text-base text-gray-500">
-                Upload an audio file to generate a transcription using AI.
-              </CardDescription>
-            </div>
+    <div className="flex min-h-screen w-full items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md p-4">
+        <Card className="w-full shadow-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold">Audio Transcription</CardTitle>
+            <CardDescription className="text-sm text-gray-500">
+              Upload an audio file to generate a transcription using AI.
+            </CardDescription>
           </CardHeader>
 
-          <CardContent className="p-8 !pt-8 !pb-6 space-y-8">
-            {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                <div className="h-12 w-12 animate-spin rounded-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent"></div>
-                <p className="text-muted-foreground text-center">Transcribing your audio...</p>
-              </div>
-            ) : !transcription ? (
-              <div className="py-4 max-w-xl mx-auto">
-                <UploadAudio onUpload={handleUpload} />
-              </div>
-            ) : (
-              <div className="py-4">
-                <TranscriptionResult transcription={transcription} />
-              </div>
-            )}
-
-            <div className="mt-8 pt-8 border-t text-center">
-              <p className="text-sm text-gray-500">
-                This tool uses AI to transcribe audio files with high accuracy.
-              </p>
-            </div>
-          </CardContent>
+          <CardContent className="p-4 space-y-4">
+  {isLoading ? (
+    <div className="flex flex-col items-center justify-center py-8 space-y-4">
+      <div className="h-10 w-10 animate-spin rounded-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent"></div>
+      <p className="text-sm text-gray-500">Transcribing your audio...</p>
+    </div>
+  ) : !transcription ? (
+    <div className="py-4">
+      <UploadAudio onUpload={handleUpload} />
+    </div>
+  ) : (
+    <div className="py-4">
+      <TranscriptionResult transcription={transcription} />
+    </div>
+  )}
+</CardContent>
 
           {transcription && (
-            <CardFooter className="flex justify-center gap-4 border-t p-8">
-              <Button variant="outline" onClick={handleReset} className="px-6">
+            <CardFooter className="flex justify-center gap-4 border-t p-4">
+              <Button variant="outline" onClick={handleReset}>
                 New Transcription
               </Button>
-              <Button variant="default" onClick={() => navigator.clipboard.writeText(transcription)} className="px-6">
+              <Button onClick={() => navigator.clipboard.writeText(transcription)}>
                 Copy to Clipboard
               </Button>
             </CardFooter>

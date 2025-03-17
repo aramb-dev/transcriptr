@@ -1,4 +1,4 @@
-/** @type {import('@tailwindcss/postcss').Config} */
+/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
@@ -45,6 +45,9 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      spacing: {
+        // You can add custom spacing values here if needed
+      },
       // Add animation keyframes and utilities manually if needed
       keyframes: {
         "accordion-down": {
@@ -61,5 +64,12 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
-  }
+  },
+  plugins: [],
+  // Ensure core plugins are enabled
+  corePlugins: {
+    space: true,
+    padding: true,
+    margin: true,
+  },
 }
