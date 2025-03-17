@@ -20,7 +20,9 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
-    }
+    },
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
