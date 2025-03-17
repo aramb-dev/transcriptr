@@ -1,4 +1,4 @@
-Collecting workspace information# Transcriptr - AI-Powered Audio Transcription
+# Transcriptr - AI-Powered Audio Transcription
 
 Transcriptr is a modern web application that converts audio files to text using artificial intelligence. It provides a clean, intuitive interface for uploading audio files and receiving high-quality transcriptions powered by Replicate's Incredibly Fast Whisper model.
 
