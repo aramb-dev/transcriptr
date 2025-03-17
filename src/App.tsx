@@ -67,34 +67,35 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen w-full items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-4">
-        <Card className="w-full shadow-md">
-          <CardHeader className="text-center">
+      <div className="w-full max-w-4xl p-4">
+        {}
+        <Card className="w-full !p-6 shadow-md">
+          <CardHeader className="!px-6 !pb-4 text-center">
             <CardTitle className="text-2xl font-bold">Audio Transcription</CardTitle>
             <CardDescription className="text-sm text-gray-500">
               Upload an audio file to generate a transcription using AI.
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="p-4 space-y-4">
-  {isLoading ? (
-    <div className="flex flex-col items-center justify-center py-8 space-y-4">
-      <div className="h-10 w-10 animate-spin rounded-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent"></div>
-      <p className="text-sm text-gray-500">Transcribing your audio...</p>
-    </div>
-  ) : !transcription ? (
-    <div className="py-4">
-      <UploadAudio onUpload={handleUpload} />
-    </div>
-  ) : (
-    <div className="py-4">
-      <TranscriptionResult transcription={transcription} />
-    </div>
-  )}
-</CardContent>
+          <CardContent className="!px-6 !py-4 space-y-4">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-8 space-y-4">
+                <div className="h-10 w-10 animate-spin rounded-full border-4 border-t-primary border-r-transparent border-b-transparent border-l-transparent"></div>
+                <p className="text-sm text-gray-500">Transcribing your audio...</p>
+              </div>
+            ) : !transcription ? (
+              <div>
+                <UploadAudio onUpload={handleUpload} />
+              </div>
+            ) : (
+              <div>
+                <TranscriptionResult transcription={transcription} />
+              </div>
+            )}
+          </CardContent>
 
           {transcription && (
-            <CardFooter className="flex justify-center gap-4 border-t p-4">
+            <CardFooter className="!px-6 !pt-4 flex justify-center gap-4 border-t">
               <Button variant="outline" onClick={handleReset}>
                 New Transcription
               </Button>

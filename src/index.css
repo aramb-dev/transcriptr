@@ -4,6 +4,13 @@
 /* Custom dark mode selector */
 @custom-selector :--dark .dark, .dark *;
 
+/* Ensure proper layout structure for the app */
+#root {
+  display: block;
+  width: 100%;
+  min-height: 100vh;
+}
+
 :root {
   --font-sans: system-ui, Avenir, Helvetica, Arial, sans-serif;
 
@@ -111,12 +118,10 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  margin: 0;
   display: block;
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
-  padding: 0;
 }
 
 a {
@@ -210,19 +215,4 @@ button:disabled,
   .container {
     max-width: 1280px;
   }
-}
-
-/* Ensure proper layout structure for the app */
-#root {
-  display: block;
-  width: 100%;
-  min-height: 100vh;
-  max-width: none;
-  padding: 0;
-  margin: 0;
-}
-
-/* Ensure App.css doesn't override your card styles */
-.card {
-  padding: inherit !important;
 }
