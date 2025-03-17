@@ -43,7 +43,7 @@ export default function App() {
   };
 
   // Handle file upload and transcription
-  const handleUpload = async (formData: FormData) => {
+  const handleUpload = async (formData: FormData, options: { language: string; diarize: boolean }) => {
     setIsLoading(true);
     setError(null);
 
@@ -60,25 +60,56 @@ export default function App() {
       // Convert file to base64
       const base64Audio = await fileToBase64(file);
 
-      // Define API input parameters
-      const input = {
+      // Define API input parameters with user-selected options
+      const apiOptions = {
+        modelId: MODEL_ID,
         task: 'transcribe',
-        audio: base64Audio,
         batch_size: 64,
         return_timestamps: true,
-        language: 'auto', // Auto-detect language
-        diarize: false, // Set to true if you want speaker identification
+        language: options.language, // Use the selected language
+        diarize: options.diarize,   // Use the diarization option
       };
 
-      // Call Replicate API
-      console.log('Sending request to Replicate API...');
-      const output = await replicate.run(MODEL_ID, { input });
+      // Call our proxy API
+      console.log('Sending request to proxy server with options:', apiOptions);
+      const response = await fetch('/api/transcribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          audioData: base64Audio,
+          options: apiOptions
+        }),
+      });
 
-      // Extract and set transcription text
-      if (output && typeof output === 'object' && 'text' in output) {
-        setTranscription((output as { text: string }).text);
-        console.log('Transcription successful');
-      } else {
+      if (!response.ok) {
+        throw new Error(`Server responded with ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('API response data:', data); // Log the full response for debugging
+
+      // If we get an immediate result (less common with Replicate)
+      if (data.output && typeof data.output === 'string') {
+        // Some models return text directly as a string
+        setTranscription(data.output);
+        console.log('Transcription successful (string output)');
+      }
+      else if (data.output && typeof data.output === 'object' && 'text' in data.output) {
+        // Some models return {text: "transcription"}
+        setTranscription(data.output.text);
+        console.log('Transcription successful (object with text)');
+      }
+      // If we need to poll for the result (typical for Replicate)
+      else if (data.id || data.urls?.get) {
+        console.log('Async prediction started, polling for result...');
+        // If we have an ID, use it for polling
+        const predictionId = data.id;
+        await pollForResult(predictionId);
+      }
+      else {
+        console.error('Unexpected API response format:', data);
         throw new Error('Invalid response format from API');
       }
     } catch (error) {
@@ -88,6 +119,61 @@ export default function App() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Poll for the result of an asynchronous prediction
+  const pollForResult = async (predictionId: string) => {
+    const maxAttempts = 60; // Poll for up to 5 minutes (60 * 5s = 5 min)
+    let attempts = 0;
+
+    const checkResult = async () => {
+      if (attempts >= maxAttempts) {
+        throw new Error('Transcription timed out after 5 minutes');
+      }
+
+      attempts++;
+
+      console.log(`Checking transcription status (attempt ${attempts})...`);
+      const response = await fetch(`/api/prediction/${predictionId}`);
+      if (!response.ok) {
+        throw new Error(`Failed to check prediction status: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Prediction status response:', data);
+
+      if (data.status === 'succeeded') {
+        // Handle different output formats
+        if (typeof data.output === 'string') {
+          setTranscription(data.output);
+          console.log('Transcription successful (string output)');
+          return;
+        }
+        else if (data.output && typeof data.output === 'object') {
+          if ('text' in data.output) {
+            setTranscription(data.output.text);
+            console.log('Transcription successful (object with text)');
+            return;
+          }
+          // Sometimes the output is an array where the first element is the text
+          else if (Array.isArray(data.output) && data.output.length > 0) {
+            setTranscription(String(data.output[0]));
+            console.log('Transcription successful (array output)');
+            return;
+          }
+        }
+        console.error('Unexpected output format:', data.output);
+        throw new Error('Invalid transcription result format');
+      } else if (data.status === 'failed') {
+        throw new Error(`Transcription failed: ${data.error || 'Unknown error'}`);
+      } else {
+        // Still processing, wait and check again
+        console.log(`Current status: ${data.status || 'unknown'}`);
+        setTimeout(checkResult, 5000); // Check every 5 seconds
+      }
+    };
+
+    await checkResult();
   };
 
   // Reset the transcription state

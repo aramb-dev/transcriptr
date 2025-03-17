@@ -2,7 +2,6 @@ import path from "path"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 
-// Removed the tailwindcss import since it's handled via PostCSS
 export default defineConfig({
   plugins: [react()],
   resolve: {
@@ -10,4 +9,15 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      }
+    }
+  },
+  build: {
+    outDir: 'dist/client',
+  }
 })

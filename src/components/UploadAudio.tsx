@@ -1,13 +1,22 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { useFileInput } from '@/hooks/use-file-input';
+import { TranscriptionOptions } from './TranscriptionOptions';
 
 interface UploadAudioProps {
-  onUpload: (formData: FormData) => void;
+  onUpload: (formData: FormData, options: { language: string; diarize: boolean }) => void;
 }
 
 export function UploadAudio({ onUpload }: UploadAudioProps) {
   const [file, setFile] = useState<File | null>(null);
+  const [transcriptionOptions, setTranscriptionOptions] = useState<{
+    language: string;
+    diarize: boolean
+  }>({
+    language: "None",
+    diarize: false
+  });
+
   const {
     fileName,
     error,
@@ -31,11 +40,15 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
     fileInputRef.current?.click();
   };
 
+  const handleOptionsChange = (options: { language: string; diarize: boolean }) => {
+    setTranscriptionOptions(options);
+  };
+
   const handleSubmit = async () => {
     if (file) {
       const formData = new FormData();
       formData.append('file', file);
-      onUpload(formData);
+      onUpload(formData, transcriptionOptions);
     }
   };
 
@@ -123,14 +136,18 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
       </div>
 
       {fileName && !error && (
-        <Button
-          onClick={handleSubmit}
-          disabled={!file || !!error}
-          className="w-full py-6 h-auto text-base"
-          size="sm"
-        >
-          Upload and Transcribe
-        </Button>
+        <>
+          <TranscriptionOptions onChange={handleOptionsChange} />
+
+          <Button
+            onClick={handleSubmit}
+            disabled={!file || !!error}
+            className="w-full py-6 h-auto text-base"
+            size="sm"
+          >
+            Upload and Transcribe
+          </Button>
+        </>
       )}
     </div>
   );
