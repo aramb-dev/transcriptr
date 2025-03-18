@@ -19,5 +19,9 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist/client',
+  },
+  define: {
+    // Make environment information available to client
+    'process.env.DEPLOY_ENV': JSON.stringify(process.env.DEPLOY_ENV || 'development')
   }
 })

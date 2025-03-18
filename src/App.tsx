@@ -12,6 +12,18 @@ import {
 } from './components/ui/card';
 import { Button } from './components/ui/button';
 
+// Add this near the top of your App.tsx file
+const isNetlify = typeof window !== 'undefined' &&
+                 (window.location.hostname.includes('netlify.app') ||
+                  process.env.DEPLOY_ENV === 'netlify');
+
+// Get the appropriate API base URL
+const getApiUrl = (endpoint: string) => {
+  return isNetlify
+    ? `/.netlify/functions/${endpoint}`
+    : `/api/${endpoint}`;
+};
+
 // Initialize Replicate client with API token
 const replicate = new Replicate({
   auth: import.meta.env.VITE_REPLICATE_API_TOKEN,
@@ -104,7 +116,7 @@ export default function App() {
         data: { message: 'Sending request to server', options: {...apiOptions, audioData: '[BASE64_DATA]'} }
       }]);
 
-      const response = await fetch('/api/transcribe', {
+      const response = await fetch(getApiUrl('transcribe'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -186,7 +198,7 @@ export default function App() {
     const poll = () => {
       attempts++;
 
-      fetch(`/api/prediction/${predictionId}`)
+      fetch(getApiUrl(`prediction/${predictionId}`))
         .then(response => {
           if (!response.ok) {
             throw new Error(`Failed to check prediction status: ${response.status} ${response.statusText}`);

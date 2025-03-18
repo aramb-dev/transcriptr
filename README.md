@@ -114,6 +114,16 @@ docker build -t transcriptr .
 docker run -p 3001:3001 -e VITE_REPLICATE_API_TOKEN=your_token_here transcriptr
 ```
 
+## Deployment Options
+
+### Local Development
+
+For local development, the app uses an Express.js server to handle API requests:
+
+```bash
+npm run dev
+```
+
 ## Project Structure
 
 ```
@@ -158,7 +168,7 @@ transcriptr/
     "batch_size": 64,
     "return_timestamps": true,
     "language": "english",
-    "diarize": false 
+    "diarize": false
   }
 }
 ```
