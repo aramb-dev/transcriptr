@@ -24,7 +24,7 @@
     "express": "^4.21.2",
     "file-saver": "^2.0.5",
     "framer-motion": "^12.5.0",
-    "jspdf": "^3.0.0",
+    "jspdf": "^3.0.1",
     "jspdf-autotable": "^5.0.2",
     "jszip": "^3.10.1",
     "lucide-react": "^0.482.0",
