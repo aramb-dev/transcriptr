@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class', // Change this from 'media' to 'class'
   theme: {
     extend: {
       colors: {
