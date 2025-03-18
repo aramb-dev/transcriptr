@@ -5,7 +5,8 @@
     "module": "ESNext",
     "target": "ES2022",
     "moduleResolution": "bundler",
-    "noEmit": false
+    "noEmit": false,
+    "allowImportingTsExtensions": false
   },
   "include": ["src/server/**/*"]
 }
