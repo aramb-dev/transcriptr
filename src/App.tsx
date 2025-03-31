@@ -84,26 +84,35 @@ export default function App() {
       if (!isFormatSupportedByReplicate(file)) {
         setApiResponses(prev => [...prev, {
           timestamp: new Date(),
-          data: { message: `File format ${file.type || file.name.split('.').pop()} is not supported by Replicate. Converting to MP3...` }
+          data: { message: `File format ${file.type || file.name.split('.').pop()} is not supported by Replicate. Attempting to convert to MP3...` }
         }]);
 
         try {
-          // Convert the file to MP3
+          // Try conversion
           setProgress(8);
-          file = await convertToMp3(file);
+          try {
+            file = await convertToMp3(file);
 
-          setApiResponses(prev => [...prev, {
-            timestamp: new Date(),
-            data: { message: `Converted to MP3 successfully: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB` }
-          }]);
-          setProgress(12);
+            setApiResponses(prev => [...prev, {
+              timestamp: new Date(),
+              data: { message: `Converted to MP3 successfully: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB` }
+            }]);
+            setProgress(12);
+          } catch (conversionError) {
+            console.error('Error converting audio format:', conversionError);
+            setApiResponses(prev => [...prev, {
+              timestamp: new Date(),
+              data: {
+                error: `Audio conversion error: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}`,
+                message: "Using original file format instead. This may not work with all audio types."
+              }
+            }]);
+            // Continue with the original file instead of throwing an error
+            console.warn('Using original file instead due to conversion error');
+          }
         } catch (conversionError) {
-          console.error('Error converting audio format:', conversionError);
-          setApiResponses(prev => [...prev, {
-            timestamp: new Date(),
-            data: { error: `Audio conversion error: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}` }
-          }]);
-          throw new Error(`Failed to convert audio format: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}`);
+          console.error('Error with audio conversion workflow:', conversionError);
+          // Still continue with the original file
         }
       }
 

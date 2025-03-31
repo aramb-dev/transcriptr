@@ -1,5 +1,5 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { fetchFile } from '@ffmpeg/util';
 
 let ffmpeg: FFmpeg | null = null;
 
@@ -13,15 +13,38 @@ export const initFFmpeg = async (): Promise<FFmpeg> => {
 
   ffmpeg = new FFmpeg();
 
-  // Configure the wasm binary location
-  const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.2/dist/umd";
-  await ffmpeg.load({
-    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
-    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),
-  });
+  try {
+    console.log('Loading FFmpeg...');
 
-  console.log('FFmpeg loaded');
-  return ffmpeg;
+    // Use local files from the public directory instead of unpkg
+    await ffmpeg.load({
+      // Using window.location.origin to ensure it works in both local and production
+      coreURL: `${window.location.origin}/ffmpeg/ffmpeg-core.js`,
+      wasmURL: `${window.location.origin}/ffmpeg/ffmpeg-core.wasm`,
+    });
+
+    console.log('FFmpeg loaded successfully');
+    return ffmpeg;
+  } catch (error) {
+    console.error('Error loading FFmpeg:', error);
+
+    // If local loading fails, try using CDN as fallback
+    console.log('Trying CDN fallback...');
+
+    try {
+      await ffmpeg.load({
+        // Using jsdelivr instead of unpkg as an alternative CDN
+        coreURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.2/dist/umd/ffmpeg-core.js',
+        wasmURL: 'https://cdn.jsdelivr.net/npm/@ffmpeg/core@0.12.2/dist/umd/ffmpeg-core.wasm',
+      });
+
+      console.log('FFmpeg loaded successfully from CDN fallback');
+      return ffmpeg;
+    } catch (fallbackError) {
+      console.error('Error loading FFmpeg from fallback:', fallbackError);
+      throw new Error('Failed to load FFmpeg after multiple attempts');
+    }
+  }
 };
 
 /**
@@ -40,39 +63,50 @@ export const convertToMp3 = async (file: File): Promise<File> => {
 
     console.log(`Converting ${file.name} (${file.type}) to MP3...`);
 
-    const ffmpegInstance = await initFFmpeg();
+    try {
+      const ffmpegInstance = await initFFmpeg();
 
-    // Get the file extension
-    const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    const inputFileName = `input.${fileExtension}`;
-    const outputFileName = 'output.mp3';
+      // Get the file extension
+      const fileExtension = file.name.split('.').pop()?.toLowerCase();
+      const inputFileName = `input.${fileExtension}`;
+      const outputFileName = 'output.mp3';
 
-    // Write the input file to the FFmpeg file system
-    const fileData = await fetchFile(file);
-    ffmpegInstance.writeFile(inputFileName, fileData);
+      console.log('Writing file to FFmpeg filesystem...');
+      // Write the input file to the FFmpeg file system
+      const fileData = await fetchFile(file);
+      ffmpegInstance.writeFile(inputFileName, fileData);
 
-    // Convert to MP3
-    await ffmpegInstance.exec([
-      '-i', inputFileName,
-      '-vn', // No video
-      '-ar', '44100', // Audio sample rate
-      '-ac', '2', // Stereo
-      '-b:a', '192k', // Bitrate
-      outputFileName
-    ]);
+      console.log('Starting conversion process...');
+      // Convert to MP3
+      await ffmpegInstance.exec([
+        '-i', inputFileName,
+        '-vn', // No video
+        '-ar', '44100', // Audio sample rate
+        '-ac', '2', // Stereo
+        '-b:a', '192k', // Bitrate
+        outputFileName
+      ]);
 
-    // Read the converted file from the FFmpeg file system
-    const outputData = await ffmpegInstance.readFile(outputFileName);
+      console.log('Reading converted file...');
+      // Read the converted file from the FFmpeg file system
+      const outputData = await ffmpegInstance.readFile(outputFileName);
 
-    // Create a new file object with the MP3 data
-    const mp3File = new File(
-      [outputData],
-      `${file.name.split('.')[0]}.mp3`,
-      { type: 'audio/mpeg' }
-    );
+      // Create a new file object with the MP3 data
+      const mp3File = new File(
+        [outputData],
+        `${file.name.split('.')[0]}.mp3`,
+        { type: 'audio/mpeg' }
+      );
 
-    console.log(`Conversion complete: ${mp3File.size} bytes`);
-    return mp3File;
+      console.log(`Conversion complete: ${mp3File.size} bytes`);
+      return mp3File;
+    } catch (ffmpegError) {
+      console.error('FFmpeg processing error:', ffmpegError);
+
+      // If conversion fails, return the original file as a fallback
+      console.warn('Conversion failed, using original file');
+      return file;
+    }
   } catch (error) {
     console.error('Error converting audio to MP3:', error);
     throw new Error(`Failed to convert audio format: ${error instanceof Error ? error.message : String(error)}`);

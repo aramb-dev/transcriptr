@@ -97,7 +97,7 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
                   Upload MP3, WAV, M4A, or other audio files up to 100MB
                 </p>
                 <p className="text-xs opacity-80">
-                  Unsupported formats like M4A will be automatically converted to MP3
+                  MP3, WAV, FLAC, and OGG files work best. Other formats will be converted if possible.
                 </p>
               </div>
             </div>
