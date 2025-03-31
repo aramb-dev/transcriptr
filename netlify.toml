@@ -5,10 +5,9 @@
 
 [functions]
   node_bundler = "esbuild"
-  external_node_modules = ["dotenv", "firebase"]
 
-[[plugins]]
-  package = "./netlify/plugins/install-function-dependencies"
+  # Specify external Node modules that should not be bundled
+  external_node_modules = ["dotenv", "firebase", "node-fetch"]
 
 [[redirects]]
   from = "/api/*"
