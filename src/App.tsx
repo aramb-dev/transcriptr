@@ -7,6 +7,7 @@ import {
 } from './components/ui/card';
 import { Button } from './components/ui/button';
 import { isLargeFile, uploadLargeFile, deleteFile } from './lib/storage-service';
+import { convertToMp3, isFormatSupportedByReplicate } from './lib/audio-conversion';
 
 const isNetlify = typeof window !== 'undefined' &&
                  (window.location.hostname.includes('netlify.app') ||
@@ -67,7 +68,7 @@ export default function App() {
     let firebaseFilePath: string | null = null;
 
     try {
-      const file = formData.get('file') as File;
+      let file = formData.get('file') as File;
 
       if (!file) {
         throw new Error('No file selected');
@@ -78,6 +79,33 @@ export default function App() {
         timestamp: new Date(),
         data: { message: `Processing file: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB, Type: ${file.type}` }
       }]);
+
+      // Check if the file format is supported by Replicate
+      if (!isFormatSupportedByReplicate(file)) {
+        setApiResponses(prev => [...prev, {
+          timestamp: new Date(),
+          data: { message: `File format ${file.type || file.name.split('.').pop()} is not supported by Replicate. Converting to MP3...` }
+        }]);
+
+        try {
+          // Convert the file to MP3
+          setProgress(8);
+          file = await convertToMp3(file);
+
+          setApiResponses(prev => [...prev, {
+            timestamp: new Date(),
+            data: { message: `Converted to MP3 successfully: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB` }
+          }]);
+          setProgress(12);
+        } catch (conversionError) {
+          console.error('Error converting audio format:', conversionError);
+          setApiResponses(prev => [...prev, {
+            timestamp: new Date(),
+            data: { error: `Audio conversion error: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}` }
+          }]);
+          throw new Error(`Failed to convert audio format: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}`);
+        }
+      }
 
       const apiOptions = {
         modelId: MODEL_ID,
@@ -204,7 +232,7 @@ export default function App() {
       }
     } catch (error) {
       console.error('Error transcribing audio:', error);
-      setError(error instanceof Error ? error.message : 'Unknown error occurred');
+      setError(formatErrorMessage(error instanceof Error ? error.message : 'Unknown error occurred'));
       setTransStatus('failed');
       setProgress(0);
       setTranscription(null);
@@ -378,6 +406,13 @@ export default function App() {
     }
   };
 
+  const formatErrorMessage = (error: string): string => {
+    if (error.includes('Soundfile is either not in the correct format')) {
+      return 'The audio file format is not supported. Please try a different file or format (MP3, WAV, FLAC recommended).';
+    }
+    return error;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-800 py-12">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -390,11 +425,12 @@ export default function App() {
           <CardContent className="p-0">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-12 px-6 space-y-6">
-                {}
                 <div className="w-full max-w-md mx-auto">
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      {transStatus.charAt(0).toUpperCase() + transStatus.slice(1)}
+                      {progress < 15 && transStatus === 'starting'
+                        ? "Converting Format"
+                        : transStatus.charAt(0).toUpperCase() + transStatus.slice(1)}
                     </span>
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {progress}%
@@ -408,12 +444,12 @@ export default function App() {
                   </div>
                 </div>
 
-                {}
                 <p className="text-gray-700 dark:text-gray-300 text-center max-w-md font-medium">
-                  {statusMessages[transStatus]}
+                  {progress < 15 && transStatus === 'starting'
+                    ? "Converting audio format for better compatibility..."
+                    : statusMessages[transStatus]}
                 </p>
 
-                {}
                 <div className="w-full max-w-md">
                   <div className="flex justify-center">
                     <Button
