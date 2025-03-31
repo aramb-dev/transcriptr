@@ -12,6 +12,9 @@ import {
 } from './components/ui/card';
 import { Button } from './components/ui/button';
 
+// Add these imports at the top
+import { isLargeFile, uploadLargeFile, deleteFile } from './lib/storage-service';
+
 // Add this near the top of your App.tsx file
 const isNetlify = typeof window !== 'undefined' &&
                  (window.location.hostname.includes('netlify.app') ||
@@ -80,6 +83,9 @@ export default function App() {
     setProgress(5); // Start at 5%
     setApiResponses([]);
 
+    // For tracking if we need to delete a Firebase file later
+    let fileUrl: string | null = null;
+
     try {
       const file = formData.get('file') as File;
 
@@ -94,26 +100,55 @@ export default function App() {
         data: { message: `Processing file: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB, Type: ${file.type}` }
       }]);
 
-      // Convert file to base64
-      const base64Audio = await fileToBase64(file);
-      setProgress(15); // File converted to base64
-
       // Define API input parameters with user-selected options
       const apiOptions = {
         modelId: MODEL_ID,
         task: 'transcribe',
         batch_size: 64,
         return_timestamps: true,
-        language: options.language, // Use the selected language
-        diarize: options.diarize,   // Use the diarization option
+        language: options.language,
+        diarize: options.diarize,
       };
 
-      // Call our proxy API
-      console.log('Sending request to proxy server with options:', apiOptions);
+      // Check if we should use Firebase Storage
+      let requestBody: any = { options: apiOptions };
 
+      if (isLargeFile(file)) {
+        setProgress(10);
+        setApiResponses(prev => [...prev, {
+          timestamp: new Date(),
+          data: { message: `Large file detected (>${import.meta.env.VITE_LARGE_FILE_THRESHOLD}MB). Uploading to temporary storage...` }
+        }]);
+
+        // Upload to Firebase and get URL
+        fileUrl = await uploadLargeFile(file);
+        setProgress(20);
+
+        setApiResponses(prev => [...prev, {
+          timestamp: new Date(),
+          data: { message: 'File uploaded to temporary storage successfully' }
+        }]);
+
+        // Use the URL in the request
+        requestBody.audioUrl = fileUrl;
+      } else {
+        // Convert small file to base64
+        const base64Audio = await fileToBase64(file);
+        setProgress(15);
+
+        // Use base64 data in the request
+        requestBody.audioData = base64Audio;
+      }
+
+      // Call our proxy API
+      console.log('Sending request to server with options:', apiOptions);
       setApiResponses(prev => [...prev, {
         timestamp: new Date(),
-        data: { message: 'Sending request to server', options: {...apiOptions, audioData: '[BASE64_DATA]'} }
+        data: {
+          message: 'Sending request to server',
+          options: apiOptions,
+          method: fileUrl ? 'Using file URL' : 'Using base64 data'
+        }
       }]);
 
       const response = await fetch(getApiUrl('transcribe'), {
@@ -121,10 +156,7 @@ export default function App() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          audioData: base64Audio,
-          options: apiOptions
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -178,6 +210,19 @@ export default function App() {
         timestamp: new Date(),
         data: { error: error instanceof Error ? error.message : 'Unknown error occurred' }
       }]);
+    } finally {
+      // Delete the temporary file from Firebase if it was uploaded
+      if (fileUrl) {
+        try {
+          await deleteFile(fileUrl);
+          setApiResponses(prev => [...prev, {
+            timestamp: new Date(),
+            data: { message: 'Temporary storage file cleaned up' }
+          }]);
+        } catch (e) {
+          console.error('Failed to delete temporary file:', e);
+        }
+      }
     }
   };
 
