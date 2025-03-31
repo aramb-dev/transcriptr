@@ -61,6 +61,20 @@ async function uploadBase64ToFirebase(base64Data, mimeType = 'audio/mpeg') {
 }
 
 export async function handler(event, context) {
+  console.log("Transcribe function called, event size:", event.body.length);
+
+  // Check if body is too large
+  if (event.body.length > 5 * 1024 * 1024) {
+    console.log("Request body is too large:", (event.body.length / 1024 / 1024).toFixed(2) + "MB");
+    return {
+      statusCode: 413,
+      body: JSON.stringify({
+        error: "Request body too large",
+        details: "Please upload large files to storage first and provide a URL"
+      })
+    };
+  }
+
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -69,7 +83,15 @@ export async function handler(event, context) {
   }
 
   try {
-    const { audioData, audioUrl, options } = JSON.parse(event.body);
+    const requestBody = JSON.parse(event.body);
+    const { audioData, audioUrl, options } = requestBody;
+
+    console.log("Request received:", {
+      hasAudioData: !!audioData,
+      hasAudioUrl: !!audioUrl,
+      audioDataLength: audioData ? `${(audioData.length / 1024 / 1024).toFixed(2)}MB` : "N/A",
+      options
+    });
 
     // Format input parameters
     const inputParams = {
@@ -79,29 +101,32 @@ export async function handler(event, context) {
       diarize: options.diarize || false,
     };
 
-    // Set audio source - check file size by base64 length
-    let finalAudioUrl = audioUrl;
-
-    // If no URL is provided but we have base64 data, check if it's large
-    if (!audioUrl && audioData) {
-      // Estimate size of base64 (rough estimate: base64 size * 0.75 = binary size)
+    // Check if we received a URL or base64 data
+    if (audioUrl) {
+      console.log("Using provided audio URL");
+      inputParams.audio = audioUrl;
+    } else if (audioData) {
+      // Check if the base64 data is too large
       const estimatedSizeInMB = (audioData.length * 0.75) / (1024 * 1024);
 
+      console.log(`Estimated audio size: ${estimatedSizeInMB.toFixed(2)}MB`);
+
       if (estimatedSizeInMB > 1) {
-        // Large file detected, upload to Firebase
-        console.log(`Large audio file detected (${estimatedSizeInMB.toFixed(2)}MB), uploading to Firebase`);
+        // Large file, upload to Firebase
+        console.log("Base64 data is large, uploading to Firebase");
         const uploadResult = await uploadBase64ToFirebase(audioData);
-        finalAudioUrl = uploadResult.url;
-        console.log('Uploaded to Firebase, URL:', finalAudioUrl);
+        inputParams.audio = uploadResult.url;
+        console.log("Uploaded to Firebase, using URL");
       } else {
         // Small file, use base64 directly
+        console.log("Using base64 data directly");
         inputParams.audio = audioData;
       }
-    }
-
-    // If we have a URL (either provided or from Firebase upload), use it
-    if (finalAudioUrl) {
-      inputParams.audio = finalAudioUrl;
+    } else {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'No audio data or URL provided' })
+      };
     }
 
     // Only include language if it's not "None" (auto-detect)
@@ -111,6 +136,8 @@ export async function handler(event, context) {
 
     // Extract version hash from modelId
     const [ownerAndModel, versionHash] = options.modelId.split(':');
+
+    console.log("Calling Replicate API with input:", { ...inputParams, audio: inputParams.audio ? (typeof inputParams.audio === 'string' && inputParams.audio.startsWith('http') ? inputParams.audio : 'base64_data') : 'none' });
 
     // Call Replicate API
     const response = await fetch('https://api.replicate.com/v1/predictions', {
@@ -128,6 +155,7 @@ export async function handler(event, context) {
     const data = await response.json();
 
     if (!response.ok) {
+      console.error("Replicate API error:", response.status, data);
       return {
         statusCode: response.status,
         body: JSON.stringify({
@@ -137,14 +165,20 @@ export async function handler(event, context) {
       };
     }
 
-    // If we used Firebase, include the reference in the response for later cleanup
-    if (finalAudioUrl && finalAudioUrl !== audioUrl) {
-      data.firebaseRef = `Used Firebase Storage for large file`;
-    }
+    console.log("Replicate API response:", data);
 
     return {
       statusCode: 200,
       body: JSON.stringify(data)
+    };
+  } catch (parseError) {
+    console.error("Error parsing request body:", parseError);
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        error: "Invalid JSON",
+        details: parseError.message
+      })
     };
   } catch (error) {
     console.error('Error in transcribe function:', error);

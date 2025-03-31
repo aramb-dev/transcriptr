@@ -15,7 +15,10 @@ const generateUniqueFilename = (originalName: string) => {
 export const isLargeFile = (file: File): boolean => {
   // Convert file size from bytes to MB
   const fileSizeInMB = file.size / (1024 * 1024);
-  return fileSizeInMB > LARGE_FILE_THRESHOLD;
+  const threshold = parseInt(import.meta.env.VITE_LARGE_FILE_THRESHOLD || '1', 10);
+
+  console.log(`File size: ${fileSizeInMB.toFixed(2)}MB, Threshold: ${threshold}MB`);
+  return fileSizeInMB > threshold;
 };
 
 export const uploadLargeFile = async (file: File): Promise<string> => {

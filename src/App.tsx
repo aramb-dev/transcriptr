@@ -1,45 +1,34 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import Replicate from 'replicate';
 import { UploadAudio } from './components/UploadAudio';
 import { TranscriptionResult } from './components/TranscriptionResult';
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+  CardContent
 } from './components/ui/card';
 import { Button } from './components/ui/button';
 
-// Add these imports at the top
 import { isLargeFile, uploadLargeFile, deleteFile } from './lib/storage-service';
 
-// Add this near the top of your App.tsx file
 const isNetlify = typeof window !== 'undefined' &&
                  (window.location.hostname.includes('netlify.app') ||
                   process.env.DEPLOY_ENV === 'netlify');
 
-// Get the appropriate API base URL
 const getApiUrl = (endpoint: string) => {
   return isNetlify
     ? `/.netlify/functions/${endpoint}`
     : `/api/${endpoint}`;
 };
 
-// Initialize Replicate client with API token
 const replicate = new Replicate({
   auth: import.meta.env.VITE_REPLICATE_API_TOKEN,
   userAgent: 'transcriptr-app',
 });
 
-// Model ID for Incredibly Fast Whisper
 const MODEL_ID = 'vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c';
 
-// Define possible transcription statuses
 type TranscriptionStatus = 'idle' | 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled';
 
-// Define status messages
 const statusMessages: Record<TranscriptionStatus, string> = {
   idle: 'Ready to transcribe',
   starting: 'Transcription engine starting. Please wait 4-5 seconds.',
@@ -60,7 +49,6 @@ export default function App() {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
-  // Convert file to base64 for API submission
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -76,14 +64,12 @@ export default function App() {
     });
   };
 
-  // Handle file upload and transcription
   const handleUpload = async (formData: FormData, options: { language: string; diarize: boolean }) => {
     setTransStatus('starting');
     setError(null);
-    setProgress(5); // Start at 5%
+    setProgress(5);
     setApiResponses([]);
 
-    // For tracking if we need to delete a Firebase file later
     let fileUrl: string | null = null;
 
     try {
@@ -93,14 +79,12 @@ export default function App() {
         throw new Error('No file selected');
       }
 
-      // Log file details for debugging
       console.log(`Processing file: ${file.name}, Size: ${file.size / 1024 / 1024} MB, Type: ${file.type}`);
       setApiResponses(prev => [...prev, {
         timestamp: new Date(),
         data: { message: `Processing file: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB, Type: ${file.type}` }
       }]);
 
-      // Define API input parameters with user-selected options
       const apiOptions = {
         modelId: MODEL_ID,
         task: 'transcribe',
@@ -110,37 +94,43 @@ export default function App() {
         diarize: options.diarize,
       };
 
-      // Check if we should use Firebase Storage
       let requestBody: any = { options: apiOptions };
 
       if (isLargeFile(file)) {
         setProgress(10);
         setApiResponses(prev => [...prev, {
           timestamp: new Date(),
-          data: { message: `Large file detected (>${import.meta.env.VITE_LARGE_FILE_THRESHOLD}MB). Uploading to temporary storage...` }
+          data: { message: `Large file detected (${(file.size / 1024 / 1024).toFixed(2)}MB > ${import.meta.env.VITE_LARGE_FILE_THRESHOLD}MB). Uploading to temporary storage...` }
         }]);
 
-        // Upload to Firebase and get URL
-        fileUrl = await uploadLargeFile(file);
-        setProgress(20);
+        try {
+          console.log(`Uploading file to Firebase: ${file.name}`);
+          fileUrl = await uploadLargeFile(file);
+          console.log('File uploaded successfully, URL:', fileUrl);
+          setProgress(20);
 
-        setApiResponses(prev => [...prev, {
-          timestamp: new Date(),
-          data: { message: 'File uploaded to temporary storage successfully' }
-        }]);
+          setApiResponses(prev => [...prev, {
+            timestamp: new Date(),
+            data: { message: 'File uploaded to temporary storage successfully', url: fileUrl }
+          }]);
 
-        // Use the URL in the request
-        requestBody.audioUrl = fileUrl;
+          requestBody.audioUrl = fileUrl;
+          delete requestBody.audioData;
+        } catch (uploadError) {
+          console.error('Error uploading to Firebase:', uploadError);
+          setApiResponses(prev => [...prev, {
+            timestamp: new Date(),
+            data: { error: `Firebase upload error: ${uploadError.message}` }
+          }]);
+          throw new Error(`Failed to upload file to temporary storage: ${uploadError.message}`);
+        }
       } else {
-        // Convert small file to base64
         const base64Audio = await fileToBase64(file);
         setProgress(15);
 
-        // Use base64 data in the request
         requestBody.audioData = base64Audio;
       }
 
-      // Call our proxy API
       console.log('Sending request to server with options:', apiOptions);
       setApiResponses(prev => [...prev, {
         timestamp: new Date(),
@@ -171,27 +161,22 @@ export default function App() {
         data: { message: 'Received initial response', response: data }
       }]);
 
-      setProgress(25); // Request sent and initial response received
+      setProgress(25);
 
-      // If we get an immediate result (less common with Replicate)
       if (data.output && typeof data.output === 'string') {
-        // Some models return text directly as a string
         setTransStatus('succeeded');
         setProgress(100);
         setTranscription(data.output);
         console.log('Transcription successful (string output)');
       }
       else if (data.output && typeof data.output === 'object' && 'text' in data.output) {
-        // Some models return {text: "transcription"}
         setTransStatus('succeeded');
         setProgress(100);
         setTranscription(data.output.text);
         console.log('Transcription successful (object with text)');
       }
-      // If we need to poll for the result (typical for Replicate)
       else if (data.id || data.urls?.get) {
         console.log('Async prediction started, polling for result...');
-        // If we have an ID, use it for polling
         const predictionId = data.id;
         await pollForResult(predictionId);
       }
@@ -211,7 +196,6 @@ export default function App() {
         data: { error: error instanceof Error ? error.message : 'Unknown error occurred' }
       }]);
     } finally {
-      // Delete the temporary file from Firebase if it was uploaded
       if (fileUrl) {
         try {
           await deleteFile(fileUrl);
@@ -226,19 +210,16 @@ export default function App() {
     }
   };
 
-  // Poll for the result of an asynchronous prediction
   const pollForResult = async (predictionId: string) => {
-    // Clear any existing interval
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
     }
 
     let attempts = 0;
-    const maxAttempts = 200; // Higher limit for longer transcriptions (about 5 minutes at 1.5s intervals)
-    let progressIncrement = 50 / maxAttempts; // Distribute 50% of progress over polling duration
+    const maxAttempts = 200;
+    let progressIncrement = 50 / maxAttempts;
 
-    // Set initial polling progress
-    setProgress(prev => Math.min(prev + progressIncrement, 95)); // Start at current + increment, max 95%
+    setProgress(prev => Math.min(prev + progressIncrement, 95));
 
     const poll = () => {
       attempts++;
@@ -253,7 +234,6 @@ export default function App() {
         .then(data => {
           console.log(`Prediction status (attempt ${attempts}):`, data);
 
-          // Add response to API responses log
           setApiResponses(prev => [...prev, {
             timestamp: new Date(),
             data: {
@@ -263,14 +243,11 @@ export default function App() {
             }
           }]);
 
-          // Update progress based on status
           setProgress(prev => {
-            // Calculate new progress, keeping within bounds
             const newProgress = Math.min(25 + (attempts * progressIncrement), 95);
             return newProgress;
           });
 
-          // Update status based on API response
           if (data.status === 'starting') {
             setTransStatus('starting');
           } else if (data.status === 'processing') {
@@ -282,7 +259,6 @@ export default function App() {
             setShowSuccess(true);
             setTimeout(() => setShowSuccess(false), 3000);
 
-            // Handle different output formats
             if (typeof data.output === 'string') {
               setTranscription(data.output);
             }
@@ -290,7 +266,6 @@ export default function App() {
               if ('text' in data.output) {
                 setTranscription(data.output.text);
               }
-              // Sometimes the output is an array where the first element is the text
               else if (Array.isArray(data.output) && data.output.length > 0) {
                 setTranscription(String(data.output[0]));
               } else {
@@ -311,7 +286,6 @@ export default function App() {
             throw new Error('Transcription was canceled');
           }
 
-          // Stop if we've reached the maximum number of attempts
           if (attempts >= maxAttempts) {
             clearInterval(pollIntervalRef.current!);
             throw new Error('Transcription timed out');
@@ -331,16 +305,12 @@ export default function App() {
         });
     };
 
-    // Initial poll
     poll();
 
-    // Start polling at 1.5-second intervals
     pollIntervalRef.current = setInterval(poll, 1500);
   };
 
-  // Reset the transcription state
   const handleReset = () => {
-    // Clear polling interval if it exists
     if (pollIntervalRef.current) {
       clearInterval(pollIntervalRef.current);
       pollIntervalRef.current = null;
@@ -354,12 +324,10 @@ export default function App() {
     setShowApiDetails(false);
   };
 
-  // Format timestamp for API responses
   const formatTimestamp = (date: Date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   };
 
-  // Generate progress bar color based on status
   const getProgressColor = () => {
     switch (transStatus) {
       case 'starting': return 'bg-blue-500';
@@ -371,17 +339,14 @@ export default function App() {
     }
   };
 
-  // Determine if we're in a loading state
   const isLoading = transStatus === 'starting' || transStatus === 'processing';
 
-  // Add this function to handle clipboard copy with feedback
   const handleCopyToClipboard = async () => {
     if (transcription) {
       try {
         await navigator.clipboard.writeText(transcription);
         setCopySuccess(true);
 
-        // Reset after 2 seconds
         setTimeout(() => {
           setCopySuccess(false);
         }, 2000);
@@ -403,7 +368,7 @@ export default function App() {
           <CardContent className="p-0">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-12 px-6 space-y-6">
-                {/* Progress bar */}
+                {}
                 <div className="w-full max-w-md mx-auto">
                   <div className="flex justify-between mb-1">
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -421,12 +386,12 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Status message */}
+                {}
                 <p className="text-gray-700 dark:text-gray-300 text-center max-w-md font-medium">
                   {statusMessages[transStatus]}
                 </p>
 
-                {/* Additional information */}
+                {}
                 <div className="w-full max-w-md">
                   <div className="flex justify-center">
                     <Button
@@ -439,7 +404,7 @@ export default function App() {
                     </Button>
                   </div>
 
-                  {/* API response log */}
+                  {}
                   {showApiDetails && (
                     <div className="mt-4 bg-gray-100 dark:bg-gray-800 rounded-md p-3 text-xs font-mono h-60 overflow-auto">
                       {apiResponses.map((response, index) => (
@@ -520,7 +485,7 @@ export default function App() {
                   </Button>
                 </div>
 
-                {/* API Logs for debugging */}
+                {}
                 {apiResponses.length > 0 && (
                   <div className="mt-6">
                     <Button
