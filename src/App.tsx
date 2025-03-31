@@ -71,6 +71,7 @@ export default function App() {
     setApiResponses([]);
 
     let fileUrl: string | null = null;
+    let firebaseFilePath: string | null = null;
 
     try {
       const file = formData.get('file') as File;
@@ -105,7 +106,10 @@ export default function App() {
 
         try {
           console.log(`Uploading file to Firebase: ${file.name}`);
-          fileUrl = await uploadLargeFile(file);
+          const uploadResult = await uploadLargeFile(file);
+          fileUrl = uploadResult.url;
+          firebaseFilePath = uploadResult.path; // Store the path for later cleanup
+
           console.log('File uploaded successfully, URL:', fileUrl);
           setProgress(20);
 
@@ -115,7 +119,7 @@ export default function App() {
           }]);
 
           requestBody.audioUrl = fileUrl;
-          delete requestBody.audioData;
+          // Important: DON'T delete audioData from the request body yet
         } catch (uploadError) {
           console.error('Error uploading to Firebase:', uploadError);
           setApiResponses(prev => [...prev, {
@@ -129,6 +133,11 @@ export default function App() {
         setProgress(15);
 
         requestBody.audioData = base64Audio;
+      }
+
+      // Now we remove audioData if we have a URL
+      if (fileUrl) {
+        delete requestBody.audioData;
       }
 
       console.log('Sending request to server with options:', apiOptions);
@@ -163,6 +172,11 @@ export default function App() {
 
       setProgress(25);
 
+      // Check if the response contains an additional Firebase path (from Netlify function)
+      if (data.firebaseFilePath && !firebaseFilePath) {
+        firebaseFilePath = data.firebaseFilePath;
+      }
+
       if (data.output && typeof data.output === 'string') {
         setTransStatus('succeeded');
         setProgress(100);
@@ -196,13 +210,17 @@ export default function App() {
         data: { error: error instanceof Error ? error.message : 'Unknown error occurred' }
       }]);
     } finally {
-      if (fileUrl) {
+      // Only clean up the file after we're completely done with it
+      if (firebaseFilePath) {
         try {
-          await deleteFile(fileUrl);
-          setApiResponses(prev => [...prev, {
-            timestamp: new Date(),
-            data: { message: 'Temporary storage file cleaned up' }
-          }]);
+          // Add a slight delay to ensure the file isn't deleted before Replicate reads it
+          setTimeout(async () => {
+            await deleteFile(firebaseFilePath!);
+            setApiResponses(prev => [...prev, {
+              timestamp: new Date(),
+              data: { message: 'Temporary storage file cleaned up' }
+            }]);
+          }, 10000); // 10 second delay before cleanup
         } catch (e) {
           console.error('Failed to delete temporary file:', e);
         }
