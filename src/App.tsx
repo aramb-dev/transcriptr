@@ -58,6 +58,44 @@ export default function App() {
     });
   };
 
+  const convertAudioUsingNetlifyFunction = async (file: File): Promise<string> => {
+    // First upload the file to Firebase to get a URL
+    console.log('Uploading file to get URL for conversion');
+    const { url, path } = await uploadLargeFile(file);
+
+    console.log('File uploaded, URL:', url);
+    console.log('Converting using Netlify function');
+
+    // Call the conversion function with the URL
+    const response = await fetch(getApiUrl('convert-audio'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        audioUrl: url,
+        fileName: file.name,
+        fileType: file.type
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Conversion failed: ${errorData.error || response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    // Delete the original file since we now have a converted version
+    try {
+      await deleteFile(path);
+    } catch (deleteError) {
+      console.warn('Failed to delete original file:', deleteError);
+    }
+
+    return data.url;
+  };
+
   const handleUpload = async (formData: FormData, options: { language: string; diarize: boolean }) => {
     setTransStatus('starting');
     setError(null);
@@ -84,31 +122,77 @@ export default function App() {
       if (!isFormatSupportedByReplicate(file)) {
         setApiResponses(prev => [...prev, {
           timestamp: new Date(),
-          data: { message: `File format ${file.type || file.name.split('.').pop()} is not supported by Replicate. Attempting to convert to MP3...` }
+          data: { message: `File format ${file.type || file.name.split('.').pop()} is not supported by Replicate. Converting to MP3...` }
         }]);
 
         try {
-          // Try conversion
           setProgress(8);
-          try {
-            file = await convertToMp3(file);
 
-            setApiResponses(prev => [...prev, {
-              timestamp: new Date(),
-              data: { message: `Converted to MP3 successfully: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB` }
-            }]);
-            setProgress(12);
-          } catch (conversionError) {
-            console.error('Error converting audio format:', conversionError);
-            setApiResponses(prev => [...prev, {
-              timestamp: new Date(),
-              data: {
-                error: `Audio conversion error: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}`,
-                message: "Using original file format instead. This may not work with all audio types."
-              }
-            }]);
-            // Continue with the original file instead of throwing an error
-            console.warn('Using original file instead due to conversion error');
+          if (isNetlify) {
+            // Use Netlify function for conversion on Netlify
+            try {
+              const convertedAudioUrl = await convertAudioUsingNetlifyFunction(file);
+              console.log('Converted using Netlify function, URL:', convertedAudioUrl);
+
+              setApiResponses(prev => [...prev, {
+                timestamp: new Date(),
+                data: { message: `Converted to MP3 successfully via server` }
+              }]);
+
+              setProgress(12);
+
+              // Use the converted URL in the request
+              fileUrl = convertedAudioUrl;
+
+              // Skip the regular file upload since we already have a URL
+              const apiOptions = {
+                modelId: MODEL_ID,
+                task: 'transcribe',
+                batch_size: 64,
+                return_timestamps: true,
+                language: options.language,
+                diarize: options.diarize,
+              };
+
+              requestBody = {
+                options: apiOptions,
+                audioUrl: convertedAudioUrl
+              };
+
+              // Continue with sending the request
+            } catch (conversionError) {
+              console.error('Error using Netlify conversion:', conversionError);
+              setApiResponses(prev => [...prev, {
+                timestamp: new Date(),
+                data: {
+                  error: `Server conversion error: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}`,
+                  message: "Using original file format instead. This may not work with all audio types."
+                }
+              }]);
+              // Continue with the original file
+            }
+          } else {
+            // Try client-side conversion first as a fallback
+            try {
+              file = await convertToMp3(file);
+
+              setApiResponses(prev => [...prev, {
+                timestamp: new Date(),
+                data: { message: `Converted to MP3 successfully: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB` }
+              }]);
+              setProgress(12);
+            } catch (conversionError) {
+              console.error('Error converting audio format:', conversionError);
+              setApiResponses(prev => [...prev, {
+                timestamp: new Date(),
+                data: {
+                  error: `Audio conversion error: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}`,
+                  message: "Using original file format instead. This may not work with all audio types."
+                }
+              }]);
+              // Continue with the original file instead of throwing an error
+              console.warn('Using original file instead due to conversion error');
+            }
           }
         } catch (conversionError) {
           console.error('Error with audio conversion workflow:', conversionError);
@@ -116,64 +200,64 @@ export default function App() {
         }
       }
 
-      const apiOptions = {
-        modelId: MODEL_ID,
-        task: 'transcribe',
-        batch_size: 64,
-        return_timestamps: true,
-        language: options.language,
-        diarize: options.diarize,
-      };
+      if (!requestBody) {
+        // If we haven't created a requestBody during conversion, create it now
+        const apiOptions = {
+          modelId: MODEL_ID,
+          task: 'transcribe',
+          batch_size: 64,
+          return_timestamps: true,
+          language: options.language,
+          diarize: options.diarize,
+        };
 
-      const requestBody: {
-        options: typeof apiOptions;
-        audioUrl?: string;
-        audioData?: string;
-      } = { options: apiOptions };
+        requestBody = { options: apiOptions };
 
-      if (isLargeFile(file)) {
-        setProgress(10);
-        setApiResponses(prev => [...prev, {
-          timestamp: new Date(),
-          data: { message: `Large file detected (${(file.size / 1024 / 1024).toFixed(2)}MB > ${import.meta.env.VITE_LARGE_FILE_THRESHOLD}MB). Uploading to temporary storage...` }
-        }]);
-
-        try {
-          console.log(`Uploading file to Firebase: ${file.name}`);
-          const uploadResult = await uploadLargeFile(file);
-          fileUrl = uploadResult.url;
-          firebaseFilePath = uploadResult.path; // Store the path for later cleanup
-
-          console.log('File uploaded successfully, URL:', fileUrl);
-          setProgress(20);
-
+        // Handle large files
+        if (isLargeFile(file)) {
+          setProgress(10);
           setApiResponses(prev => [...prev, {
             timestamp: new Date(),
-            data: { message: 'File uploaded to temporary storage successfully', url: fileUrl }
+            data: { message: `Large file detected (${(file.size / 1024 / 1024).toFixed(2)}MB > ${import.meta.env.VITE_LARGE_FILE_THRESHOLD}MB). Uploading to temporary storage...` }
           }]);
 
-          // Ensure we're properly setting the URL in the request body
-          requestBody.audioUrl = fileUrl;
+          try {
+            console.log(`Uploading file to Firebase: ${file.name}`);
+            const uploadResult = await uploadLargeFile(file);
+            fileUrl = uploadResult.url;
+            firebaseFilePath = uploadResult.path; // Store the path for later cleanup
 
-          // Log to confirm the URL is set
-          console.log('Set audioUrl in request body:', requestBody.audioUrl);
+            console.log('File uploaded successfully, URL:', fileUrl);
+            setProgress(20);
 
-          // Remove audioData to avoid sending both
-          delete requestBody.audioData;
-        } catch (error) {
-          const uploadError = error as Error;
-          console.error('Error uploading to Firebase:', uploadError);
-          setApiResponses(prev => [...prev, {
-            timestamp: new Date(),
-            data: { error: `Firebase upload error: ${uploadError.message}` }
-          }]);
-          throw new Error(`Failed to upload file to temporary storage: ${uploadError.message}`);
+            setApiResponses(prev => [...prev, {
+              timestamp: new Date(),
+              data: { message: 'File uploaded to temporary storage successfully', url: fileUrl }
+            }]);
+
+            // Ensure we're properly setting the URL in the request body
+            requestBody.audioUrl = fileUrl;
+
+            // Log to confirm the URL is set
+            console.log('Set audioUrl in request body:', requestBody.audioUrl);
+
+            // Remove audioData to avoid sending both
+            delete requestBody.audioData;
+          } catch (error) {
+            const uploadError = error as Error;
+            console.error('Error uploading to Firebase:', uploadError);
+            setApiResponses(prev => [...prev, {
+              timestamp: new Date(),
+              data: { error: `Firebase upload error: ${uploadError.message}` }
+            }]);
+            throw new Error(`Failed to upload file to temporary storage: ${uploadError.message}`);
+          }
+        } else {
+          const base64Audio = await fileToBase64(file);
+          setProgress(15);
+
+          requestBody.audioData = base64Audio;
         }
-      } else {
-        const base64Audio = await fileToBase64(file);
-        setProgress(15);
-
-        requestBody.audioData = base64Audio;
       }
 
       // Now we remove audioData if we have a URL
@@ -181,12 +265,12 @@ export default function App() {
         delete requestBody.audioData;
       }
 
-      console.log('Sending request to server with options:', apiOptions);
+      console.log('Sending request to server with options:', requestBody.options);
       setApiResponses(prev => [...prev, {
         timestamp: new Date(),
         data: {
           message: 'Sending request to server',
-          options: apiOptions,
+          options: requestBody.options,
           method: fileUrl ? 'Using file URL' : 'Using base64 data'
         }
       }]);
