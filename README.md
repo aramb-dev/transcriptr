@@ -1,3 +1,4 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/2a08872b-ce65-4b82-be7f-3a7a4fd6b0ad/deploy-status)](https://app.netlify.com/sites/transcriptr/deploys)
 # Transcriptr - AI-Powered Audio Transcription
 
 Transcriptr is a modern web application that converts audio files to text using artificial intelligence. It provides a clean, intuitive interface for uploading audio files and receiving high-quality transcriptions powered by Replicate's Incredibly Fast Whisper model.
