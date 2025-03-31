@@ -19,6 +19,7 @@
     "@tabler/icons-react": "^3.31.0",
     "@tailwindcss/typography": "^0.5.16",
     "class-variance-authority": "^0.7.1",
+    "cloudconvert": "^2.3.1",
     "clsx": "^2.1.1",
     "cors": "^2.8.5",
     "docx": "^9.3.0",

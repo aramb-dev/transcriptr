@@ -120,8 +120,8 @@ export const convertToMp3 = async (file: File): Promise<File> => {
  * @returns true if the format is supported, false otherwise
  */
 export const isFormatSupportedByReplicate = (file: File): boolean => {
-  // List of formats that Replicate's Whisper model supports
-  const supportedFormats = [
+  // List of formats that Replicate's Whisper model directly supports
+  const supportedMimeTypes = [
     'audio/mpeg', // .mp3
     'audio/wav', // .wav
     'audio/x-wav', // Also .wav
@@ -130,11 +130,11 @@ export const isFormatSupportedByReplicate = (file: File): boolean => {
     'audio/ogg', // .ogg
   ];
 
-  // Also check by extension for cases where MIME type might not be accurate
+  // Check by extension for cases where MIME type might not be accurate
   const supportedExtensions = ['.mp3', '.wav', '.flac', '.ogg'];
 
   const fileExtension = `.${file.name.split('.').pop()?.toLowerCase()}`;
 
-  return supportedFormats.includes(file.type) ||
+  return supportedMimeTypes.includes(file.type) ||
          supportedExtensions.includes(fileExtension);
 };
