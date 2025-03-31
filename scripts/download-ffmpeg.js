@@ -1,14 +1,17 @@
-// Fix imports to work with ESM
 import { createRequire } from 'module';
+import { fileURLToPath } from 'url';
+import { dirname, resolve, join } from 'path';
+
 const require = createRequire(import.meta.url);
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 const fs = require('fs');
-const path = require('path');
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const FFMPEG_CORE_VERSION = '0.12.2';
-const PUBLIC_FFMPEG_DIR = path.resolve('./public/ffmpeg');
+const PUBLIC_FFMPEG_DIR = resolve(__dirname, '../public/ffmpeg');
 
-// Create directory if it doesn't exist
 if (!fs.existsSync(PUBLIC_FFMPEG_DIR)) {
   fs.mkdirSync(PUBLIC_FFMPEG_DIR, { recursive: true });
   console.log(`Created directory: ${PUBLIC_FFMPEG_DIR}`);
@@ -17,11 +20,11 @@ if (!fs.existsSync(PUBLIC_FFMPEG_DIR)) {
 const files = [
   {
     url: `https://unpkg.com/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/umd/ffmpeg-core.js`,
-    dest: path.join(PUBLIC_FFMPEG_DIR, 'ffmpeg-core.js')
+    dest: join(PUBLIC_FFMPEG_DIR, 'ffmpeg-core.js')
   },
   {
     url: `https://unpkg.com/@ffmpeg/core@${FFMPEG_CORE_VERSION}/dist/umd/ffmpeg-core.wasm`,
-    dest: path.join(PUBLIC_FFMPEG_DIR, 'ffmpeg-core.wasm')
+    dest: join(PUBLIC_FFMPEG_DIR, 'ffmpeg-core.wasm')
   }
 ];
 
