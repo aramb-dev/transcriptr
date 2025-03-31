@@ -1,5 +1,5 @@
+import * as dotenv from 'dotenv';
 
-import dotenv from 'dotenv';
 dotenv.config();
 
 export async function handler(event, context) {

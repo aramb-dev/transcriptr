@@ -1,7 +1,8 @@
-import dotenv from 'dotenv';
+import * as dotenv from 'dotenv';
 import { initializeApp } from 'firebase/app';
 import { getStorage, ref, deleteObject } from 'firebase/storage';
 import { getFirebaseConfig } from './firebase-config.js';
+
 dotenv.config();
 
 export async function handler(event, context) {

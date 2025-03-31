@@ -1,6 +1,9 @@
-import fetch from 'node-fetch';
-import fs from 'fs';
-import path from 'path';
+// Fix imports to work with ESM
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const fetch = require('node-fetch');
+const fs = require('fs');
+const path = require('path');
 
 const FFMPEG_CORE_VERSION = '0.12.2';
 const PUBLIC_FFMPEG_DIR = path.resolve('./public/ffmpeg');
