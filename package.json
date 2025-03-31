@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"vite\" \"npx tsx watch src/server/index.ts\"",
-    "build": "node scripts/download-ffmpeg.js && vite build && tsc -p tsconfig.server.json",
-    "build:netlify": "node scripts/download-ffmpeg.js && DEPLOY_ENV=netlify vite build",
+    "build": "node scripts/download-ffmpeg-alt.js && vite build && tsc -p tsconfig.server.json",
+    "build:netlify": "node scripts/download-ffmpeg-alt.js && DEPLOY_ENV=netlify vite build",
     "start": "NODE_ENV=production node dist/server/index.js",
     "lint": "eslint .",
     "preview": "vite preview",

@@ -3,6 +3,9 @@
   publish = "dist/client"
   functions = "netlify/functions"
 
+[build.environment]
+  NODE_VERSION = "18" # Use Node.js 18 which has built-in fetch
+
 [functions]
   node_bundler = "esbuild"
 
