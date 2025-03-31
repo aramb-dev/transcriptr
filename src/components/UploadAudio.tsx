@@ -26,7 +26,7 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
     fileSize
   } = useFileInput({
     accept: 'audio/*',
-    maxSize: 100 // Max file size in MB
+    maxSize: 100
   });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

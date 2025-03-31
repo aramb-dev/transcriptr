@@ -22,14 +22,11 @@ export async function handler(event, context) {
       };
     }
 
-    // Initialize Firebase
     const app = initializeApp(getFirebaseConfig());
     const storage = getStorage(app);
 
-    // Create a reference to the file
     const fileRef = ref(storage, filePath);
 
-    // Delete the file
     await deleteObject(fileRef);
 
     return {

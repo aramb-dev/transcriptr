@@ -16,7 +16,6 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isGeneratingDocx, setIsGeneratingDocx] = useState(false);
 
-  // Cleanup when component unmounts
   useEffect(() => {
     return () => {
       if (pdfUrl) {
@@ -25,21 +24,16 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
     };
   }, [pdfUrl]);
 
-  // Generate PDF from transcription text
   const generatePdf = async () => {
     setIsGeneratingPdf(true);
     try {
-      // Create a new jsPDF instance
       const doc = new jsPDF();
 
-      // Split text to fit page width (180mm is a good width for A4)
       const splitText = doc.splitTextToSize(transcription, 180);
 
-      // Add text to document
       doc.setFontSize(12);
       doc.text(splitText, 15, 20);
 
-      // Create blob URL for preview
       const pdfBlob = doc.output('blob');
       const url = URL.createObjectURL(pdfBlob);
       setPdfUrl(url);
@@ -53,21 +47,18 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
     }
   };
 
-  // Generate DOCX from transcription text
   const generateDocx = async () => {
     setIsGeneratingDocx(true);
     try {
-      // Create paragraphs from transcription lines
       const paragraphs = transcription
         .split('\n')
         .map(line => new Paragraph({
-          text: line.trim() || ' ', // Ensure empty lines have at least a space
+          text: line.trim() || ' ',
           spacing: {
             after: 200
           }
         }));
 
-      // Create document
       const doc = new DocxDocument({
         sections: [{
           properties: {},
@@ -75,7 +66,6 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
         }]
       });
 
-      // Generate blob
       const blob = await Packer.toBlob(doc);
       setIsGeneratingDocx(false);
       return blob;
@@ -86,7 +76,6 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
     }
   };
 
-  // Handle individual format downloads
   const handleDownload = async (format: 'txt' | 'md' | 'pdf' | 'docx') => {
     let blob: Blob | null = null;
 
@@ -115,34 +104,27 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
     }
   };
 
-  // Handle downloading all formats as a zip file
   const handleDownloadAll = async () => {
     const zip = new JSZip();
 
-    // Add text file
     zip.file("transcription.txt", transcription);
 
-    // Add markdown file
     zip.file("transcription.md", transcription);
 
-    // Add PDF file
     const pdfBlob = await generatePdf();
     if (pdfBlob) {
       zip.file("transcription.pdf", pdfBlob);
     }
 
-    // Add DOCX file
     const docxBlob = await generateDocx();
     if (docxBlob) {
       zip.file("transcription.docx", docxBlob);
     }
 
-    // Generate and download zip
     const content = await zip.generateAsync({ type: "blob" });
     saveAs(content, "transcription-files.zip");
   };
 
-  // Render HTML from markdown
   const renderMarkdown = () => {
     return { __html: marked(transcription) };
   };
@@ -157,7 +139,7 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
           <TabsTrigger value="docx" className="text-sm py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">DOCX</TabsTrigger>
         </TabsList>
 
-        {/* TXT Tab Content */}
+        {}
         <TabsContent value="txt" className="mt-4">
           <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 h-80 overflow-auto shadow-inner">
             <pre className="text-sm font-mono whitespace-pre-wrap">{transcription}</pre>
@@ -174,7 +156,7 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
           </div>
         </TabsContent>
 
-        {/* MD Tab Content */}
+        {}
         <TabsContent value="md" className="mt-4">
           <div className="bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-4 h-80 overflow-auto">
             <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={renderMarkdown()} />
@@ -186,7 +168,7 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
           </div>
         </TabsContent>
 
-        {/* PDF Tab Content */}
+        {}
         <TabsContent value="pdf" className="mt-4">
           <div className="bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-4 min-h-80 flex flex-col items-center">
             {isGeneratingPdf ? (
@@ -195,7 +177,7 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
               </div>
             ) : pdfUrl ? (
               <div className="w-full h-80 overflow-auto">
-                {/* Replace react-pdf with iframe for improved compatibility */}
+                {}
                 <iframe
                   src={pdfUrl}
                   className="w-full h-full border-0"
@@ -221,7 +203,7 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
           </div>
         </TabsContent>
 
-        {/* DOCX Tab Content */}
+        {}
         <TabsContent value="docx" className="mt-4">
           <div className="bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-4 h-80 flex flex-col items-center justify-center">
             <div className="text-center space-y-4 max-w-md">

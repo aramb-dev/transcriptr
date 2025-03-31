@@ -15,12 +15,12 @@ const generateUniqueFilename = (originalName: string) => {
 export const isLargeFile = (file: File): boolean => {
   // Convert file size from bytes to MB
   const fileSizeInMB = file.size / (1024 * 1024);
-  const threshold = parseInt(import.meta.env.VITE_LARGE_FILE_THRESHOLD || '1', 10);
 
-  console.log(`File size: ${fileSizeInMB.toFixed(2)}MB, Threshold: ${threshold}MB`);
-  return fileSizeInMB > threshold;
+  console.log(`File size: ${fileSizeInMB.toFixed(2)}MB, Threshold: ${LARGE_FILE_THRESHOLD}MB`);
+  return fileSizeInMB > LARGE_FILE_THRESHOLD;
 };
 
+// Update the uploadLargeFile function to add more detailed error logging:
 export const uploadLargeFile = async (file: File): Promise<{ url: string, path: string }> => {
   try {
     // Create a unique filename to avoid collisions
@@ -28,16 +28,32 @@ export const uploadLargeFile = async (file: File): Promise<{ url: string, path: 
     const filePath = `temp_audio/${filename}`;
     const storageRef = ref(storage, filePath);
 
+    console.log('Starting Firebase upload for:', filePath);
+
     // Upload file to Firebase Storage
-    const snapshot = await uploadBytes(storageRef, file);
-    console.log('File uploaded successfully:', snapshot.metadata.name);
+    try {
+      const snapshot = await uploadBytes(storageRef, file);
+      console.log('File uploaded successfully:', snapshot.metadata.name);
+    } catch (uploadError) {
+      console.error('Firebase uploadBytes error:', uploadError);
+      throw uploadError;
+    }
 
     // Get the download URL
-    const downloadURL = await getDownloadURL(snapshot.ref);
+    let downloadURL;
+    try {
+      downloadURL = await getDownloadURL(storageRef);
+      console.log('Got download URL:', downloadURL);
+    } catch (urlError) {
+      console.error('Firebase getDownloadURL error:', urlError);
+      throw urlError;
+    }
+
     return { url: downloadURL, path: filePath };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error uploading file to Firebase:', error);
-    throw new Error('Failed to upload large audio file');
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to upload large audio file: ${errorMessage}`);
   }
 };
 

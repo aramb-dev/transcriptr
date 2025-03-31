@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import Replicate from 'replicate';
 import { UploadAudio } from './components/UploadAudio';
 import { TranscriptionResult } from './components/TranscriptionResult';
 import {
@@ -7,7 +6,6 @@ import {
   CardContent
 } from './components/ui/card';
 import { Button } from './components/ui/button';
-
 import { isLargeFile, uploadLargeFile, deleteFile } from './lib/storage-service';
 
 const isNetlify = typeof window !== 'undefined' &&
@@ -19,11 +17,6 @@ const getApiUrl = (endpoint: string) => {
     ? `/.netlify/functions/${endpoint}`
     : `/api/${endpoint}`;
 };
-
-const replicate = new Replicate({
-  auth: import.meta.env.VITE_REPLICATE_API_TOKEN,
-  userAgent: 'transcriptr-app',
-});
 
 const MODEL_ID = 'vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c';
 
@@ -43,7 +36,7 @@ export default function App() {
   const [transStatus, setTransStatus] = useState<TranscriptionStatus>('idle');
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [apiResponses, setApiResponses] = useState<Array<{timestamp: Date, data: any}>>([]);
+  const [apiResponses, setApiResponses] = useState<Array<{timestamp: Date, data: Record<string, unknown>}>>([]);
   const [showApiDetails, setShowApiDetails] = useState(false);
   const [progress, setProgress] = useState(0);
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -95,7 +88,11 @@ export default function App() {
         diarize: options.diarize,
       };
 
-      let requestBody: any = { options: apiOptions };
+      const requestBody: {
+        options: typeof apiOptions;
+        audioUrl?: string;
+        audioData?: string;
+      } = { options: apiOptions };
 
       if (isLargeFile(file)) {
         setProgress(10);
@@ -118,9 +115,16 @@ export default function App() {
             data: { message: 'File uploaded to temporary storage successfully', url: fileUrl }
           }]);
 
+          // Ensure we're properly setting the URL in the request body
           requestBody.audioUrl = fileUrl;
-          // Important: DON'T delete audioData from the request body yet
-        } catch (uploadError) {
+
+          // Log to confirm the URL is set
+          console.log('Set audioUrl in request body:', requestBody.audioUrl);
+
+          // Remove audioData to avoid sending both
+          delete requestBody.audioData;
+        } catch (error) {
+          const uploadError = error as Error;
           console.error('Error uploading to Firebase:', uploadError);
           setApiResponses(prev => [...prev, {
             timestamp: new Date(),
@@ -235,7 +239,7 @@ export default function App() {
 
     let attempts = 0;
     const maxAttempts = 200;
-    let progressIncrement = 50 / maxAttempts;
+    const progressIncrement = 50 / maxAttempts;
 
     setProgress(prev => Math.min(prev + progressIncrement, 95));
 
@@ -262,7 +266,7 @@ export default function App() {
           }]);
 
           setProgress(prev => {
-            const newProgress = Math.min(25 + (attempts * progressIncrement), 95);
+            const newProgress = Math.min(prev + progressIncrement, 95);
             return newProgress;
           });
 

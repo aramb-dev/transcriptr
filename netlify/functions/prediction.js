@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export async function handler(event, context) {
-  // Extract prediction ID from path parameter
   const predictionId = event.path.split('/').pop();
 
   if (!predictionId) {

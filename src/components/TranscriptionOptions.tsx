@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-// Language options based on error message
 const LANGUAGES = [
   { value: "None", label: "Auto Detect" },
   { value: "english", label: "English" },
@@ -17,16 +16,6 @@ const LANGUAGES = [
   { value: "russian", label: "Russian" },
 ] as const;
 
-// Full list available as needed from the error message
-// Uncomment to add more languages
-/*
-const ALL_LANGUAGES = [
-  { value: "None", label: "Auto Detect" },
-  { value: "afrikaans", label: "Afrikaans" },
-  { value: "albanian", label: "Albanian" },
-  // ...and so on
-];
-*/
 
 export interface TranscriptionOptionsProps {
   onChange: (options: {
@@ -62,7 +51,7 @@ export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
       </h3>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        {/* Language selection styling improvements */}
+        {}
         <div className="space-y-2">
           <label htmlFor="language" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Language
@@ -84,7 +73,7 @@ export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
           </p>
         </div>
 
-        {/* Diarization toggle styling improvements */}
+        {}
       </div>
     </div>
   );
