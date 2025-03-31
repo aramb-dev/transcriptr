@@ -64,47 +64,65 @@ export default function App() {
     console.log('Uploading file to get URL for conversion');
     const { url, path } = await uploadLargeFile(file);
 
-    console.log('File uploaded, URL:', url);
-    console.log('Converting using CloudConvert');
-
-    // Call the CloudConvert function with the URL
-    const response = await fetch(getApiUrl('cloud-convert'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        audioUrl: url,
-        fileName: file.name,
-        fileType: file.type
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ error: response.statusText }));
-
-      // Delete the original file since conversion failed
-      try {
-        await deleteFile(path);
-        console.log('Deleted original file after failed conversion:', path);
-      } catch (deleteError) {
-        console.warn('Failed to delete original file:', deleteError);
-      }
-
-      throw new Error(`Conversion failed: ${errorData.error || response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    // Delete the original file since we now have a converted version
     try {
-      await deleteFile(path);
-      console.log('Deleted original file after successful conversion:', path);
-    } catch (deleteError) {
-      console.warn('Failed to delete original file:', deleteError);
-    }
+      console.log('File uploaded, URL:', url);
+      console.log('Converting using CloudConvert');
 
-    return data.url;
+      // Add timeout handling to prevent long-running requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
+      try {
+        // Call the CloudConvert function with the URL
+        const response = await fetch(getApiUrl('cloud-convert'), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            audioUrl: url,
+            fileName: file.name,
+            fileType: file.type
+          }),
+          signal: controller.signal
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: response.statusText }));
+
+          // Delete the original file since conversion failed
+          try {
+            await deleteFile(path);
+            console.log('Deleted original file after failed conversion:', path);
+          } catch (deleteError) {
+            console.warn('Failed to delete original file:', deleteError);
+          }
+
+          throw new Error(`Conversion failed: ${errorData.error || response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        // Delete the original file since we now have a converted version
+        try {
+          await deleteFile(path);
+          console.log('Deleted original file after successful conversion:', path);
+        } catch (deleteError) {
+          console.warn('Failed to delete original file:', deleteError);
+        }
+
+        return data.url;
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        throw fetchError;
+      }
+    } catch (error) {
+      // If conversion fails, just use the original file
+      console.error('Error in file conversion, using original file:', error);
+      return url;
+    }
   };
 
   const handleUpload = async (formData: FormData, options: { language: string; diarize: boolean }) => {
@@ -154,34 +172,38 @@ export default function App() {
           setProgress(8);
 
           if (isNetlify) {
-            // Use CloudConvert for conversion on Netlify
             try {
+              // Try to use CloudConvert for conversion
               const convertedAudioUrl = await convertAudioUsingNetlifyFunction(file);
-              console.log('Converted using CloudConvert, URL:', convertedAudioUrl);
 
-              setApiResponses(prev => [...prev, {
-                timestamp: new Date(),
-                data: { message: `Converted to MP3 successfully via CloudConvert` }
-              }]);
+              if (convertedAudioUrl) {
+                console.log('Converted using CloudConvert, URL:', convertedAudioUrl);
 
-              setProgress(15);
+                setApiResponses(prev => [...prev, {
+                  timestamp: new Date(),
+                  data: { message: `Converted to MP3 successfully via CloudConvert` }
+                }]);
 
-              // Use the converted URL in the request
-              fileUrl = convertedAudioUrl;
+                setProgress(15);
 
-              // Update requestBody with the converted URL
-              requestBody = {
-                options: apiOptions,
-                audioUrl: convertedAudioUrl
-              };
+                // Use the converted URL in the request
+                fileUrl = convertedAudioUrl;
 
+                // Update requestBody with the converted URL
+                requestBody = {
+                  options: apiOptions,
+                  audioUrl: convertedAudioUrl
+                };
+              } else {
+                throw new Error('No converted URL returned');
+              }
             } catch (conversionError) {
               console.error('Error using CloudConvert:', conversionError);
               setApiResponses(prev => [...prev, {
                 timestamp: new Date(),
                 data: {
                   error: `CloudConvert error: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}`,
-                  message: "Using original file format instead. This may not work with all audio types."
+                  message: "Trying with original file format instead. This may or may not work with the transcription service."
                 }
               }]);
 
@@ -189,7 +211,7 @@ export default function App() {
               // It will be set below in the normal flow
             }
           } else {
-            // Try client-side conversion for local development
+            // Use client-side conversion for local development
             try {
               file = await convertToMp3(file);
 
