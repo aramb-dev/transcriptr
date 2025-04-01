@@ -1,4 +1,5 @@
 [![Netlify Status](https://api.netlify.com/api/v1/badges/2a08872b-ce65-4b82-be7f-3a7a4fd6b0ad/deploy-status)](https://app.netlify.com/sites/transcriptr/deploys)
+
 # Transcriptr - AI-Powered Audio Transcription
 
 Transcriptr is a modern web application that converts audio files to text using artificial intelligence. It provides a clean, intuitive interface for uploading audio files and receiving high-quality transcriptions powered by Replicate's Incredibly Fast Whisper model.
@@ -187,6 +188,19 @@ transcriptr/
 - `id`: The prediction ID returned from the transcribe endpoint
 
 **Response**: JSON object with prediction status and results (if complete)
+
+## Audio Format Support
+
+Transcriptr currently supports the following audio formats:
+
+- MP3 (.mp3)
+- WAV (.wav)
+- FLAC (.flac)
+- OGG (.ogg)
+
+For other formats like M4A, AAC, or WMA, please convert your files to one of the supported formats before uploading. You can use online tools like [CloudConvert](https://cloudconvert.com/m4a-to-mp3) for this purpose.
+
+We're working on adding native support for more audio formats. Contributions are welcome!
 
 ## Contributing
 

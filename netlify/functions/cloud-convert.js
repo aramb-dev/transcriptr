@@ -156,75 +156,14 @@ async function uploadToFirebase(fileUrl, fileName) {
   }
 }
 
+// Replace the function with a simpler version that returns an informative message
 export async function handler(event, context) {
-  console.log("CloudConvert function called");
-  console.log("API Key present:", !!process.env.VITE_CLOUDCONVERT_API_KEY);
-
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: 'Method not allowed' })
-    };
-  }
-
-  try {
-    const { audioUrl, fileName, fileType } = JSON.parse(event.body);
-
-    if (!audioUrl) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'No audio URL provided' })
-      };
-    }
-
-    console.log(`Starting conversion process for: ${fileName || 'unnamed file'} (${fileType || 'unknown type'})`);
-
-    // Determine input format from file name or file type
-    let inputFormat = 'm4a';
-    if (fileName) {
-      const extension = fileName.split('.').pop().toLowerCase();
-      if (extension) {
-        inputFormat = extension;
-      }
-    } else if (fileType) {
-      // Extract format from MIME type (e.g., 'audio/x-m4a' -> 'm4a')
-      const match = fileType.match(/audio\/(?:x-)?(.+)/);
-      if (match && match[1]) {
-        inputFormat = match[1];
-      }
-    }
-
-    console.log(`Using input format: ${inputFormat}`);
-
-    // Use the CloudConvert API directly
-    const convertedFileUrl = await convertWithCloudConvert(audioUrl, inputFormat);
-
-    // Generate a unique name for the final file
-    const outputFileName = generateUniqueFilename(fileName || 'converted-audio');
-
-    // Upload the converted file to Firebase
-    const uploadResult = await uploadToFirebase(convertedFileUrl, outputFileName);
-
-    console.log('Conversion workflow complete, returning file URL:', uploadResult.url);
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        url: uploadResult.url,
-        path: uploadResult.path,
-        message: 'Audio converted successfully via CloudConvert'
-      })
-    };
-
-  } catch (error) {
-    console.error('Error in CloudConvert function:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: 'Failed to convert audio',
-        details: error.message,
-        stack: error.stack
-      })
-    };
-  }
+  return {
+    statusCode: 501,
+    body: JSON.stringify({
+      error: 'Feature not available',
+      message: 'Audio format conversion is currently under development. Please convert your file to MP3, WAV, or FLAC format before uploading.',
+      supportedFormats: ['mp3', 'wav', 'flac', 'ogg']
+    })
+  };
 }

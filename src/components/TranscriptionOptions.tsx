@@ -75,6 +75,9 @@ export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
 
         {}
       </div>
+      <div className="text-xs text-gray-500 mt-2">
+        Note: Only MP3, WAV, FLAC, and OGG formats are currently supported for direct transcription.
+      </div>
     </div>
   );
 }

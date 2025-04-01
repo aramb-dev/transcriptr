@@ -81,73 +81,14 @@ async function uploadToFirebase(filePath, fileName, contentType) {
   };
 }
 
+// Similar to cloud-convert.js, replace with a simpler version
 export async function handler(event, context) {
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: 'Method not allowed' })
-    };
-  }
-
-  let tempDir = null;
-
-  try {
-    const { audioUrl, fileName, fileType } = JSON.parse(event.body);
-
-    if (!audioUrl) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'No audio URL provided' })
-      };
-    }
-
-    // Create a temporary directory for processing
-    tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'audio-conversion-'));
-    const originalFileName = fileName || 'audio';
-    const fileBaseName = generateUniqueFilename(originalFileName);
-
-    // Setup file paths
-    const inputExtension = path.extname(originalFileName) || '.m4a';
-    const inputPath = path.join(tempDir, `input${inputExtension}`);
-    const outputPath = path.join(tempDir, 'output.mp3');
-
-    console.log(`Downloading file from ${audioUrl} to ${inputPath}`);
-    await downloadFile(audioUrl, inputPath);
-
-    console.log(`Converting ${inputPath} to MP3 format`);
-    await convertToMp3(inputPath, outputPath);
-
-    console.log(`Uploading converted file to Firebase`);
-    const uploadResult = await uploadToFirebase(outputPath, fileBaseName, 'audio/mpeg');
-
-    console.log(`Conversion complete, URL: ${uploadResult.url}`);
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        url: uploadResult.url,
-        path: uploadResult.path,
-        message: 'Audio converted successfully'
-      })
-    };
-  } catch (error) {
-    console.error('Error converting audio:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: 'Failed to convert audio',
-        details: error.message,
-        stack: error.stack
-      })
-    };
-  } finally {
-    // Clean up temporary files
-    if (tempDir) {
-      try {
-        await fs.rm(tempDir, { recursive: true, force: true });
-      } catch (cleanupError) {
-        console.error('Error cleaning up temporary files:', cleanupError);
-      }
-    }
-  }
+  return {
+    statusCode: 501,
+    body: JSON.stringify({
+      error: 'Feature not available',
+      message: 'Audio format conversion is currently under development. Please convert your file to MP3, WAV, or FLAC format before uploading.',
+      supportedFormats: ['mp3', 'wav', 'flac', 'ogg']
+    })
+  };
 }

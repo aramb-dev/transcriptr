@@ -125,6 +125,7 @@ export default function App() {
     }
   };
 
+  // Update handleUpload function to provide clear guidance for unsupported formats
   const handleUpload = async (formData: FormData, options: { language: string; diarize: boolean }) => {
     setTransStatus('starting');
     setError(null);
@@ -163,126 +164,67 @@ export default function App() {
 
       // Check if the file format is supported by Replicate
       if (!isFormatSupportedByReplicate(file)) {
+        // Instead of trying complex conversion, show a helpful message
         setApiResponses(prev => [...prev, {
           timestamp: new Date(),
-          data: { message: `File format ${file.type || file.name.split('.').pop()} is not supported by Replicate. Converting to MP3...` }
+          data: {
+            error: `File format not supported: ${file.type || file.name.split('.').pop()}`,
+            message: `This file format is not directly supported by our transcription service. Please convert your file to MP3, WAV, or FLAC format before uploading. You can use a service like https://cloudconvert.com/m4a-to-mp3 to convert your file.`
+          }
+        }]);
+
+        // Add contributor message
+        setApiResponses(prev => [...prev, {
+          timestamp: new Date(),
+          data: {
+            message: `We're working on adding support for more formats. If you'd like to help, please consider contributing: https://github.com/aramb-dev/transcriptr`
+          }
+        }]);
+
+        throw new Error('Unsupported file format. Please convert to MP3, WAV, or FLAC before uploading.');
+      }
+
+      // Handle files based on size (for supported formats)
+      if (isLargeFile(file)) {
+        setProgress(10);
+        setApiResponses(prev => [...prev, {
+          timestamp: new Date(),
+          data: { message: `Large file detected (${(file.size / 1024 / 1024).toFixed(2)}MB > ${import.meta.env.VITE_LARGE_FILE_THRESHOLD}MB). Uploading to temporary storage...` }
         }]);
 
         try {
-          setProgress(8);
+          console.log(`Uploading file to Firebase: ${file.name}`);
+          const uploadResult = await uploadLargeFile(file);
+          fileUrl = uploadResult.url;
+          firebaseFilePath = uploadResult.path;
 
-          if (isNetlify) {
-            try {
-              // Try to use CloudConvert for conversion
-              const convertedAudioUrl = await convertAudioUsingNetlifyFunction(file);
+          console.log('File uploaded successfully, URL:', fileUrl);
+          setProgress(20);
 
-              if (convertedAudioUrl) {
-                console.log('Converted using CloudConvert, URL:', convertedAudioUrl);
-
-                setApiResponses(prev => [...prev, {
-                  timestamp: new Date(),
-                  data: { message: `Converted to MP3 successfully via CloudConvert` }
-                }]);
-
-                setProgress(15);
-
-                // Use the converted URL in the request
-                fileUrl = convertedAudioUrl;
-
-                // Update requestBody with the converted URL
-                requestBody = {
-                  options: apiOptions,
-                  audioUrl: convertedAudioUrl
-                };
-              } else {
-                throw new Error('No converted URL returned');
-              }
-            } catch (conversionError) {
-              console.error('Error using CloudConvert:', conversionError);
-              setApiResponses(prev => [...prev, {
-                timestamp: new Date(),
-                data: {
-                  error: `CloudConvert error: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}`,
-                  message: "Trying with original file format instead. This may or may not work with the transcription service."
-                }
-              }]);
-
-              // Continue with original file - don't set requestBody yet
-              // It will be set below in the normal flow
-            }
-          } else {
-            // Use client-side conversion for local development
-            try {
-              file = await convertToMp3(file);
-
-              setApiResponses(prev => [...prev, {
-                timestamp: new Date(),
-                data: { message: `Converted to MP3 successfully: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB` }
-              }]);
-              setProgress(12);
-
-              // Don't set requestBody yet - the normal flow below will handle it
-            } catch (conversionError) {
-              console.error('Error converting audio format:', conversionError);
-              setApiResponses(prev => [...prev, {
-                timestamp: new Date(),
-                data: {
-                  error: `Audio conversion error: ${conversionError instanceof Error ? conversionError.message : String(conversionError)}`,
-                  message: "Using original file format instead. This may not work with all audio types."
-                }
-              }]);
-              // Continue with the original file
-            }
-          }
-        } catch (conversionError) {
-          console.error('Error with audio conversion workflow:', conversionError);
-          // Still continue with the original file
-        }
-      }
-
-      // If fileUrl isn't set from conversion, process the file normally
-      if (!fileUrl) {
-        if (isLargeFile(file)) {
-          setProgress(10);
           setApiResponses(prev => [...prev, {
             timestamp: new Date(),
-            data: { message: `Large file detected (${(file.size / 1024 / 1024).toFixed(2)}MB > ${import.meta.env.VITE_LARGE_FILE_THRESHOLD}MB). Uploading to temporary storage...` }
+            data: { message: 'File uploaded to temporary storage successfully', url: fileUrl }
           }]);
 
-          try {
-            console.log(`Uploading file to Firebase: ${file.name}`);
-            const uploadResult = await uploadLargeFile(file);
-            fileUrl = uploadResult.url;
-            firebaseFilePath = uploadResult.path;
-
-            console.log('File uploaded successfully, URL:', fileUrl);
-            setProgress(20);
-
-            setApiResponses(prev => [...prev, {
-              timestamp: new Date(),
-              data: { message: 'File uploaded to temporary storage successfully', url: fileUrl }
-            }]);
-
-            // Update requestBody with the file URL
-            requestBody.audioUrl = fileUrl;
-          } catch (uploadError) {
-            console.error('Error uploading to Firebase:', uploadError);
-            setApiResponses(prev => [...prev, {
-              timestamp: new Date(),
-              data: { error: `Firebase upload error: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}` }
-            }]);
-            throw new Error(`Failed to upload file to temporary storage: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`);
-          }
-        } else {
-          // For small files, convert to base64
-          try {
-            const base64Audio = await fileToBase64(file);
-            setProgress(15);
-            requestBody.audioData = base64Audio;
-          } catch (base64Error) {
-            console.error('Error converting file to base64:', base64Error);
-            throw new Error(`Failed to prepare file for upload: ${base64Error instanceof Error ? base64Error.message : String(base64Error)}`);
-          }
+          // Set audioUrl in requestBody
+          requestBody.audioUrl = fileUrl;
+        } catch (uploadError) {
+          console.error('Error uploading to Firebase:', uploadError);
+          setApiResponses(prev => [...prev, {
+            timestamp: new Date(),
+            data: { error: `Firebase upload error: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}` }
+          }]);
+          throw new Error(`Failed to upload file to temporary storage: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`);
+        }
+      } else {
+        // For small files, convert to base64
+        try {
+          const base64Audio = await fileToBase64(file);
+          setProgress(15);
+          requestBody.audioData = base64Audio;
+        } catch (base64Error) {
+          console.error('Error converting file to base64:', base64Error);
+          throw new Error(`Failed to prepare file for upload: ${base64Error instanceof Error ? base64Error.message : String(base64Error)}`);
         }
       }
 
@@ -519,6 +461,9 @@ export default function App() {
   };
 
   const formatErrorMessage = (error: string): string => {
+    if (error.includes('Unsupported file format') || error.includes('File format not supported')) {
+      return 'Unsupported file format. Please convert to MP3, WAV, or FLAC before uploading.';
+    }
     if (error.includes('Soundfile is either not in the correct format')) {
       return 'The audio file format is not supported. Please try a different file or format (MP3, WAV, FLAC recommended).';
     }

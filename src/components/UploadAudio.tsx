@@ -94,10 +94,13 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
               </Button>
               <div className="text-sm text-gray-500 dark:text-gray-400 text-center max-w-xs">
                 <p className="mb-1">
-                  Upload MP3, WAV, M4A, or other audio files up to 100MB
+                  Upload MP3, WAV, FLAC, or OGG files up to 100MB
                 </p>
                 <p className="text-xs opacity-80">
-                  MP3, WAV, FLAC, and OGG files work best. Other formats will be converted if possible.
+                  <strong>Supported formats:</strong> MP3, WAV, FLAC, OGG
+                </p>
+                <p className="text-xs opacity-80 mt-1">
+                  Other formats like M4A need to be converted first.
                 </p>
               </div>
             </div>
