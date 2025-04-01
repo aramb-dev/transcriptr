@@ -471,7 +471,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-800 py-12">
+    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 text-gray-900 dark:text-gray-100">
       <div className="container mx-auto px-4 max-w-4xl">
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Transcriptr</h1>
@@ -594,7 +594,7 @@ export default function App() {
                   )}
                   <Button
                     onClick={handleReset}
-                    className="mt-2"
+                    className="mt-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                   >
                     Try Again
                   </Button>
@@ -607,7 +607,7 @@ export default function App() {
                       variant="outline"
                       size="sm"
                       onClick={() => setShowApiDetails(!showApiDetails)}
-                      className="mb-4"
+                      className="mb-4 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                     >
                       {showApiDetails ? 'Hide Error Details' : 'View Error Details'}
                     </Button>
@@ -642,12 +642,12 @@ export default function App() {
 
           {transcription && (
             <div className="px-8 py-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-100 dark:border-gray-700 flex justify-center gap-4">
-              <Button variant="outline" onClick={handleReset} className="bg-white dark:bg-gray-800">
+              <Button variant="outline" onClick={handleReset} className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">
                 New Transcription
               </Button>
               <Button
                 onClick={handleCopyToClipboard}
-                className="gap-2"
+                className="gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
                 disabled={copySuccess}
               >
                 {copySuccess ? (

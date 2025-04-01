@@ -133,16 +133,15 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
     <div className="space-y-6">
       <Tabs defaultValue="txt" className="w-full">
         <TabsList className="w-full grid grid-cols-4 mb-6 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
-          <TabsTrigger value="txt" className="text-sm py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">TXT</TabsTrigger>
-          <TabsTrigger value="md" className="text-sm py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">MD</TabsTrigger>
-          <TabsTrigger value="pdf" className="text-sm py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">PDF</TabsTrigger>
-          <TabsTrigger value="docx" className="text-sm py-2 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700">DOCX</TabsTrigger>
+          <TabsTrigger value="txt" className="text-sm py-2 text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100">TXT</TabsTrigger>
+          <TabsTrigger value="md" className="text-sm py-2 text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100">MD</TabsTrigger>
+          <TabsTrigger value="pdf" className="text-sm py-2 text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100">PDF</TabsTrigger>
+          <TabsTrigger value="docx" className="text-sm py-2 text-gray-700 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-gray-900 dark:data-[state=active]:text-gray-100">DOCX</TabsTrigger>
         </TabsList>
 
-        {}
         <TabsContent value="txt" className="mt-4">
           <div className="bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 p-4 h-80 overflow-auto shadow-inner">
-            <pre className="text-sm font-mono whitespace-pre-wrap">{transcription}</pre>
+            <pre className="text-sm font-mono whitespace-pre-wrap text-gray-800 dark:text-gray-200">{transcription}</pre>
           </div>
           <div className="mt-4 flex justify-end">
             <Button onClick={() => handleDownload('txt')} className="gap-2">
@@ -156,7 +155,6 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
           </div>
         </TabsContent>
 
-        {}
         <TabsContent value="md" className="mt-4">
           <div className="bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-4 h-80 overflow-auto">
             <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={renderMarkdown()} />
@@ -168,7 +166,6 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
           </div>
         </TabsContent>
 
-        {}
         <TabsContent value="pdf" className="mt-4">
           <div className="bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-4 min-h-80 flex flex-col items-center">
             {isGeneratingPdf ? (
@@ -177,7 +174,6 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
               </div>
             ) : pdfUrl ? (
               <div className="w-full h-80 overflow-auto">
-                {}
                 <iframe
                   src={pdfUrl}
                   className="w-full h-full border-0"
@@ -203,7 +199,6 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
           </div>
         </TabsContent>
 
-        {}
         <TabsContent value="docx" className="mt-4">
           <div className="bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-4 h-80 flex flex-col items-center justify-center">
             <div className="text-center space-y-4 max-w-md">

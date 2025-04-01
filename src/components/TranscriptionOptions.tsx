@@ -51,7 +51,6 @@ export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
       </h3>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        {}
         <div className="space-y-2">
           <label htmlFor="language" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Language
@@ -60,10 +59,10 @@ export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
             id="language"
             value={language}
             onChange={handleLanguageChange}
-            className="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-sm shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+            className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 py-2 pl-3 pr-10 text-sm text-gray-900 dark:text-gray-100 shadow-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:focus:border-primary"
           >
             {LANGUAGES.map((lang) => (
-              <option key={lang.value} value={lang.value}>
+              <option key={lang.value} value={lang.value} className="text-gray-900 dark:text-gray-100">
                 {lang.label}
               </option>
             ))}
@@ -73,9 +72,23 @@ export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
           </p>
         </div>
 
-        {}
+        <div className="space-y-2">
+          <label htmlFor="diarize" className="flex items-center space-x-3 text-gray-700 dark:text-gray-300">
+            <input
+              type="checkbox"
+              id="diarize"
+              checked={diarize}
+              onChange={handleDiarizeChange}
+              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary dark:border-gray-600 dark:bg-gray-700"
+            />
+            <span className="text-sm font-medium">Speaker Diarization</span>
+          </label>
+          <p className="text-xs text-gray-500 dark:text-gray-400 ml-7">
+            Identify different speakers in the transcription
+          </p>
+        </div>
       </div>
-      <div className="text-xs text-gray-500 mt-2">
+      <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
         Note: Only MP3, WAV, FLAC, and OGG formats are currently supported for direct transcription.
       </div>
     </div>

@@ -40,6 +40,12 @@ export default {
           DEFAULT: "var(--card)",
           foreground: "var(--card-foreground)",
         },
+        // Add explicit dark mode text colors for better control
+        'dark-text': {
+          primary: 'var(--dark-text-primary, #f3f4f6)',
+          secondary: 'var(--dark-text-secondary, #d1d5db)',
+          muted: 'var(--dark-text-muted, #9ca3af)',
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -68,6 +74,12 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      // Add CSS variables for dark mode text
+      textColor: {
+        'dark-primary': 'var(--dark-text-primary, #f3f4f6)',
+        'dark-secondary': 'var(--dark-text-secondary, #d1d5db)',
+        'dark-muted': 'var(--dark-text-muted, #9ca3af)',
       },
     },
   },
