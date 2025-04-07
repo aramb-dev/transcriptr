@@ -6,6 +6,10 @@ import { saveAs } from 'file-saver';
 import { marked } from 'marked';
 import { Document as DocxDocument, Paragraph, Packer } from 'docx';
 import { jsPDF } from 'jspdf';
+// Add these imports for UTF-8 font support
+import 'jspdf-autotable';
+import pdfMake from 'pdfmake/build/pdfmake';
+import pdfFonts from 'pdfmake/build/vfs_fonts';
 
 interface TranscriptionResultProps {
   transcription: string;
@@ -15,8 +19,16 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isGeneratingDocx, setIsGeneratingDocx] = useState(false);
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+  const [pdfTitle, setPdfTitle] = useState("Transcription");
 
   useEffect(() => {
+    // Initialize pdfMake with default fonts
+    // Correctly assign the virtual file system
+    pdfMake.vfs = pdfFonts.vfs;
+
+    setFontsLoaded(true);
+
     return () => {
       if (pdfUrl) {
         URL.revokeObjectURL(pdfUrl);
@@ -27,19 +39,36 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
   const generatePdf = async () => {
     setIsGeneratingPdf(true);
     try {
-      const doc = new jsPDF();
+      // Check if text contains Arabic
+      const containsArabic = /[\u0600-\u06FF]/.test(transcription);
 
-      const splitText = doc.splitTextToSize(transcription, 180);
+      // Define document definition
+      const docDefinition = {
+        content: [
+          {
+            text: transcription,
+            fontSize: 12
+          }
+        ],
+        // Set RTL direction for Arabic
+        rtl: containsArabic,
+        // Use default font since custom font loading is complex
+        defaultStyle: {
+          font: 'Roboto'
+        }
+      };
 
-      doc.setFontSize(12);
-      doc.text(splitText, 15, 20);
+      // Generate PDF
+      const pdfDocGenerator = pdfMake.createPdf(docDefinition);
 
-      const pdfBlob = doc.output('blob');
-      const url = URL.createObjectURL(pdfBlob);
-      setPdfUrl(url);
-
-      setIsGeneratingPdf(false);
-      return pdfBlob;
+      return new Promise<Blob>((resolve, reject) => {
+        pdfDocGenerator.getBlob((blob) => {
+          const url = URL.createObjectURL(blob);
+          setPdfUrl(url);
+          setIsGeneratingPdf(false);
+          resolve(blob);
+        });
+      });
     } catch (error) {
       console.error('Error generating PDF:', error);
       setIsGeneratingPdf(false);
@@ -125,6 +154,17 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
     saveAs(content, "transcription-files.zip");
   };
 
+  const handlePrinterzExport = () => {
+    const printerzData = {
+      title: pdfTitle, // Use the custom title from your state
+      content: transcription
+    };
+
+    console.log("Sending to Printerz:", printerzData);
+    // Integration with Printerz API would go here
+    // For example: window.open("https://app.printerz.app/generate?template=your-template-id&data=" + encodeURIComponent(JSON.stringify(printerzData)), "_blank");
+  };
+
   const renderMarkdown = () => {
     return { __html: marked(transcription) };
   };
@@ -183,7 +223,7 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
             ) : (
               <div className="flex flex-col items-center justify-center h-80 space-y-4">
                 <p className="text-gray-500">Preview your PDF before downloading</p>
-                <Button onClick={generatePdf}>
+                <Button onClick={generatePdf} disabled={!fontsLoaded}>
                   Generate PDF Preview
                 </Button>
               </div>
@@ -192,7 +232,7 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
           <div className="mt-4 flex justify-end">
             <Button
               onClick={() => handleDownload('pdf')}
-              disabled={isGeneratingPdf}
+              disabled={isGeneratingPdf || !fontsLoaded}
             >
               {isGeneratingPdf ? 'Generating...' : 'Download as PDF'}
             </Button>
@@ -203,7 +243,7 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
           <div className="bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-4 h-80 flex flex-col items-center justify-center">
             <div className="text-center space-y-4 max-w-md">
               <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="mx-auto text-blue-600">
-                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/>
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0-2 2h12a2 2 0 0 0-2-2V7.5L14.5 2z"/>
                 <polyline points="14 2 14 8 20 8"/>
                 <path d="M8 13h8"/>
                 <path d="M8 17h8"/>
@@ -234,6 +274,17 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
           Download All Formats (ZIP)
+        </Button>
+        <Button
+          onClick={() => handlePrinterzExport()}
+          className="gap-2"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6 9v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9"></path>
+            <path d="M3 6h18"></path>
+            <path d="M12 3v9"></path>
+          </svg>
+          Generate with Printerz
         </Button>
       </div>
     </div>
