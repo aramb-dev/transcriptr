@@ -8,6 +8,17 @@ import {
 import { Button } from './components/ui/button';
 import { isLargeFile, uploadLargeFile, deleteFile } from './lib/storage-service';
 import { isFormatSupportedByReplicate } from './lib/audio-conversion';
+import { FeedbackForm } from './components/FeedbackForm';
+
+// Need to add this to recognize the feedbackType property
+declare global {
+  interface Window {
+    feedbackType: 'general' | 'issue' | 'feature' | 'other';
+  }
+}
+
+// Default to general feedback
+window.feedbackType = 'general';
 
 const isNetlify = typeof window !== 'undefined' &&
                  (window.location.hostname.includes('netlify.app') ||
@@ -490,6 +501,9 @@ export default function App() {
         <header className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Transcriptr</h1>
           <p className="text-gray-600 dark:text-gray-300">Convert audio to text with AI-powered transcription</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            Developed by <a href="https://github.com/aramb-dev" className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">Abdur-Rahman Bilal (aramb-dev)</a> and AI | <a href="https://github.com/aramb-dev/transcriptr" className="text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">View on Github</a>
+          </p>
         </header>
 
         <Card className="w-full overflow-hidden border-0 shadow-lg rounded-xl dark:bg-gray-800/60 dark:backdrop-blur-sm">
@@ -695,6 +709,69 @@ export default function App() {
           <span className="text-green-800 dark:text-green-200 font-medium">Transcription complete!</span>
         </div>
       )}
+
+      {/* Footer */}
+      <footer className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
+          <a
+            href="#feedback"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('feedback-modal')?.classList.remove('hidden');
+              // Set initial feedback type to 'general'
+              window.feedbackType = 'general';
+            }}
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            Provide Feedback
+          </a>
+          <span>•</span>
+          <a
+            href="#issue"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('feedback-modal')?.classList.remove('hidden');
+              // Set initial feedback type to 'issue'
+              window.feedbackType = 'issue';
+            }}
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            Report an Issue
+          </a>
+          <span>•</span>
+          <a
+            href="https://github.com/aramb-dev/transcriptr"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            Star on GitHub
+          </a>
+        </div>
+        <p className="mt-4">© {new Date().getFullYear()} Transcriptr. All rights reserved.</p>
+      </footer>
+
+      {/* Feedback Modal */}
+      <div
+        id="feedback-modal"
+        className="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      >
+        <div className="relative w-full max-w-md">
+          <button
+            onClick={() => document.getElementById('feedback-modal')?.classList.add('hidden')}
+            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <FeedbackForm
+            initialType={window.feedbackType}
+            onClose={() => document.getElementById('feedback-modal')?.classList.add('hidden')}
+          />
+        </div>
+      </div>
     </div>
   );
 }

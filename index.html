@@ -11,6 +11,15 @@
 
 <body>
   <div id="root"></div>
+  <!-- Hidden form for Netlify -->
+  <form name="feedback" netlify netlify-honeypot="bot-field" hidden>
+    <input type="text" name="name" />
+    <input type="email" name="email" />
+    <input type="text" name="feedbackType" />
+    <input type="text" name="browser" />
+    <input type="text" name="operatingSystem" />
+    <textarea name="feedback"></textarea>
+  </form>
   <script type="module" src="/src/main.tsx"></script>
 </body>
 
