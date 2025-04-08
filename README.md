@@ -21,7 +21,10 @@ Transcriptr is a modern web application that converts audio files to text using 
 - **UI**: Tailwind CSS with shadcn/ui components for a modern interface
 - **Backend**: Express.js server for handling API requests
 - **AI Integration**: Replicate API for accessing the Incredibly Fast Whisper model
-- **Document Handling**: Libraries for generating PDF, DOCX, and ZIP files
+- **Document Handling**:
+  - Printerz for high-quality PDF template rendering
+  - Libraries for generating DOCX, and ZIP files
+- **Storage**: Firebase Storage for saving generated documents
 
 ## Getting Started
 
@@ -60,6 +63,64 @@ Transcriptr is a modern web application that converts audio files to text using 
 
 5. Open your browser to `http://localhost:5173` to see the application.
 
+Collecting workspace information# Adding Environment Variables Section to README.md
+
+Based on your .env file and existing documentation, I'll create an environment variables section for your README.md that explains all the required environment variables for Transcriptr:
+
+## Environment Variables
+
+Transcriptr requires several environment variables to function properly. Create a `.env` file in the project root with the following variables:
+
+### Required Environment Variables
+
+| Variable                            | Description                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------ |
+| `VITE_REPLICATE_API_TOKEN`          | Your Replicate API token for accessing the Incredibly Fast Whisper model |
+| `VITE_FIREBASE_API_KEY`             | Firebase API key for storage services                                    |
+| `VITE_FIREBASE_AUTH_DOMAIN`         | Firebase auth domain                                                     |
+| `VITE_FIREBASE_PROJECT_ID`          | Firebase project ID                                                      |
+| `VITE_FIREBASE_STORAGE_BUCKET`      | Firebase storage bucket for storing transcriptions and PDFs              |
+| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID                                             |
+| `VITE_FIREBASE_APP_ID`              | Firebase application ID                                                  |
+| `VITE_PRINTERZ_API_KEY`             | API key for Printerz PDF generation services                             |
+| `VITE_LARGE_FILE_THRESHOLD`         | Threshold in MB for large file warnings                                  |
+
+### Optional Environment Variables
+
+| Variable                    | Description                                                            | Default       |
+| --------------------------- | ---------------------------------------------------------------------- | ------------- |
+| `VITE_CLOUDCONVERT_API_KEY` | API key for CloudConvert services (for additional file format support) | None          |
+| `PORT`                      | Port for the server to listen on                                       | `3001`        |
+| `NODE_ENV`                  | Environment mode (`development` or `production`)                       | `development` |
+
+### Example .env file
+
+```
+VITE_REPLICATE_API_TOKEN=your_replicate_token_here
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your-project-id
+VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
+VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef1234567890
+VITE_PRINTERZ_API_KEY=your_printerz_api_key
+VITE_LARGE_FILE_THRESHOLD=1
+VITE_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
+```
+
+### Getting API Keys
+
+- **Replicate API Token**: Sign up at [Replicate](https://replicate.com/) and create an API token
+- **Firebase**: Set up a project in [Firebase Console](https://console.firebase.google.com/) and get your credentials
+- **Printerz**: Create an account at [Printerz](https://printerz.dev/) and get your API key
+- **CloudConvert** (optional): Register at [CloudConvert](https://cloudconvert.com/) for additional file format conversion capabilities
+
+````
+
+This section provides clear documentation on all the environment variables needed for your application, where to get them, and which ones are optional versus required. The table format makes it easy to understand what each variable is for.
+
+You can place this section in your README.md after the "Getting Started" section and before the "Build and Deployment" section to maintain a logical flow of information.
+
 ## Build and Deployment
 
 ### Building for Production
@@ -68,7 +129,7 @@ To build the application for production:
 
 ```bash
 npm run build
-```
+````
 
 This command creates optimized production builds for both client and server:
 
@@ -189,6 +250,30 @@ transcriptr/
 
 **Response**: JSON object with prediction status and results (if complete)
 
+### `/api/printerz/render`
+
+**Method**: POST
+
+**Description**: Proxy endpoint for rendering PDFs with Printerz
+
+**Request Body**:
+
+```json
+{
+  "templateId": "your-printerz-template-id",
+  "printerzData": {
+    "variables": {
+      "title": "Document Title",
+      "content": "Document Content",
+      "timestamp": "Formatted Date"
+    },
+    "options": {
+      "printBackground": true
+    }
+  }
+}
+```
+
 ## Audio Format Support
 
 Transcriptr currently supports the following audio formats:
@@ -223,6 +308,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [React](https://reactjs.org/) for the UI framework
 - [Vite](https://vitejs.dev/) for the build tool
+- [Printerz](https://printerz.dev/) for PDF template rendering and generation
 
 ---
 
