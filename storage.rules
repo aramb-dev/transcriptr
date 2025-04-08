@@ -1,0 +1,14 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /temp_audio/{allPaths=**} {
+      allow read, write: if true;
+    }
+    match /test/{allPaths=**} {
+      allow read, write: if true;
+    }
+    match /transcriptions/{allPaths=**} {
+      allow read, write: if true;
+    }
+  }
+}
