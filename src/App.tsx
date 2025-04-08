@@ -7,7 +7,7 @@ import {
 } from './components/ui/card';
 import { Button } from './components/ui/button';
 import { isLargeFile, uploadLargeFile, deleteFile } from './lib/storage-service';
-import { convertToMp3, isFormatSupportedByReplicate } from './lib/audio-conversion';
+import { isFormatSupportedByReplicate } from './lib/audio-conversion';
 
 const isNetlify = typeof window !== 'undefined' &&
                  (window.location.hostname.includes('netlify.app') ||
@@ -58,7 +58,9 @@ export default function App() {
     });
   };
 
-  // Update the convertAudioUsingNetlifyFunction function to use CloudConvert instead
+  /*
+  // Commented out since this function is not being used
+  // If you need audio conversion, uncomment and call this function
   const convertAudioUsingNetlifyFunction = async (file: File): Promise<string> => {
     // First upload the file to Firebase to get a URL
     console.log('Uploading file to get URL for conversion');
@@ -124,6 +126,7 @@ export default function App() {
       return url;
     }
   };
+  */
 
   // Update handleUpload function to provide clear guidance for unsupported formats
   const handleUpload = async (formData: FormData, options: { language: string; diarize: boolean }) => {
@@ -134,10 +137,21 @@ export default function App() {
 
     let fileUrl: string | null = null;
     let firebaseFilePath: string | null = null;
-    let requestBody: any = { options: null }; // Initialize requestBody to avoid undefined errors
+    const requestBody: {
+      options: {
+        modelId?: string;
+        task?: string;
+        batch_size?: number;
+        return_timestamps?: boolean;
+        language?: string;
+        diarize?: boolean;
+      } | null;
+      audioData?: string;
+      audioUrl?: string;
+    } = { options: null }; // Initialize requestBody to avoid undefined errors
 
     try {
-      let file = formData.get('file') as File;
+      const file = formData.get('file') as File;
 
       if (!file) {
         throw new Error('No file selected');
