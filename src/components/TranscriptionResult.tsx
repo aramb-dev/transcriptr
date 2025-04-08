@@ -5,11 +5,12 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { marked } from 'marked';
 import { Document as DocxDocument, Paragraph, Packer } from 'docx';
-import { jsPDF } from 'jspdf';
 // Add these imports for UTF-8 font support
 import 'jspdf-autotable';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
 
 interface TranscriptionResultProps {
   transcription: string;
@@ -20,7 +21,19 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isGeneratingDocx, setIsGeneratingDocx] = useState(false);
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [pdfTitle, setPdfTitle] = useState("Transcription");
+
+  // Set default title with timestamp
+  const getDefaultTitle = () => {
+    const now = new Date();
+    return `Transcription ${now.toLocaleDateString('en-US', {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    })} ${now.toLocaleTimeString('en-US')}`;
+  };
+
+  const [pdfTitle, setPdfTitle] = useState(getDefaultTitle());
 
   useEffect(() => {
     // Initialize pdfMake with default fonts
@@ -154,15 +167,82 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
     saveAs(content, "transcription-files.zip");
   };
 
-  const handlePrinterzExport = () => {
-    const printerzData = {
-      title: pdfTitle, // Use the custom title from your state
-      content: transcription
-    };
+  const handlePrinterzExport = async () => {
+    try {
+      // Get current date and time in a readable format
+      const now = new Date();
+      const formattedDate = now.toLocaleString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
 
-    console.log("Sending to Printerz:", printerzData);
-    // Integration with Printerz API would go here
-    // For example: window.open("https://app.printerz.app/generate?template=your-template-id&data=" + encodeURIComponent(JSON.stringify(printerzData)), "_blank");
+      // Default title includes timestamp if user hasn't changed it
+      if (pdfTitle === "Transcription") {
+        setPdfTitle(`Transcription ${formattedDate}`);
+      }
+
+      // Prepare data for Printerz
+      const printerzData = {
+        variables: {
+          title: pdfTitle,
+          content: transcription,
+          timestamp: formattedDate
+        },
+        options: {
+          printBackground: true
+        }
+      };
+
+      const templateId = '9fa3ff8e-c6dc-49b5-93ba-3532638cfe47';
+
+      // Show loading indicator
+      setIsGeneratingPdf(true);
+
+      // Use our proxy server instead of calling Printerz directly
+      const isNetlify = typeof window !== 'undefined' &&
+                        (window.location.hostname.includes('netlify.app') ||
+                         process.env.DEPLOY_ENV === 'netlify');
+
+      const apiUrl = isNetlify
+        ? '/.netlify/functions/printerz-proxy'
+        : '/api/printerz/render';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          templateId,
+          printerzData
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Proxy error: ${response.status} ${response.statusText}`);
+      }
+
+      // Get PDF as blob
+      const pdfBuffer = await response.arrayBuffer();
+      const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+
+      // Save the file
+      saveAs(blob, `${pdfTitle.replace(/[/\\?%*:|"<>]/g, '-')}.pdf`);
+
+      // Clear loading state
+      setIsGeneratingPdf(false);
+
+    } catch (error) {
+      console.error('Error generating PDF with Printerz:', error);
+      setIsGeneratingPdf(false);
+      // Show error message to user
+      alert('Error generating PDF. Please try again later.');
+    }
   };
 
   const renderMarkdown = () => {
@@ -207,34 +287,58 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
         </TabsContent>
 
         <TabsContent value="pdf" className="mt-4">
-          <div className="bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-4 min-h-80 flex flex-col items-center">
-            {isGeneratingPdf ? (
-              <div className="flex items-center justify-center h-80">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-              </div>
-            ) : pdfUrl ? (
-              <div className="w-full h-80 overflow-auto">
-                <iframe
-                  src={pdfUrl}
-                  className="w-full h-full border-0"
-                  title="PDF Preview"
-                />
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-80 space-y-4">
-                <p className="text-gray-500">Preview your PDF before downloading</p>
-                <Button onClick={generatePdf} disabled={!fontsLoaded}>
-                  Generate PDF Preview
-                </Button>
-              </div>
-            )}
+          <div className="bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-4">
+            {/* Add title customization field */}
+            <div className="mb-4">
+              <Label htmlFor="pdf-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Choose a title for your PDF
+              </Label>
+              <Input
+                id="pdf-title"
+                type="text"
+                value={pdfTitle}
+                onChange={(e) => setPdfTitle(e.target.value)}
+                className="block w-full rounded-md border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                placeholder="Transcription with timestamp will be added automatically"
+              />
+            </div>
+
+            <div className="min-h-80 flex flex-col items-center">
+              {isGeneratingPdf ? (
+                <div className="flex items-center justify-center h-80">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+                </div>
+              ) : pdfUrl ? (
+                <div className="w-full h-80 overflow-auto">
+                  <iframe
+                    src={pdfUrl}
+                    className="w-full h-full border-0"
+                    title="PDF Preview"
+                  />
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center h-80 space-y-4">
+                  <p className="text-gray-500">Preview your PDF before downloading</p>
+                  <Button onClick={generatePdf} disabled={!fontsLoaded}>
+                    Generate PDF Preview
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
-          <div className="mt-4 flex justify-end">
+          <div className="mt-4 flex justify-end space-x-2">
             <Button
               onClick={() => handleDownload('pdf')}
               disabled={isGeneratingPdf || !fontsLoaded}
             >
               {isGeneratingPdf ? 'Generating...' : 'Download as PDF'}
+            </Button>
+            <Button
+              onClick={handlePrinterzExport}
+              disabled={isGeneratingPdf}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              {isGeneratingPdf ? 'Generating...' : 'Generate with Printerz'}
             </Button>
           </div>
         </TabsContent>

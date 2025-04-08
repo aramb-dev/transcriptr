@@ -125,6 +125,59 @@ app.get('/api/prediction/:id', (async (req: Request, res: Response) => {
   }
 }) as RequestHandler);
 
+app.post('/api/printerz/render', (async (req: Request, res: Response) => {
+  try {
+    const { templateId, printerzData } = req.body;
+
+    if (!templateId || !printerzData) {
+      return res.status(400).json({
+        error: 'Missing required parameters: templateId and printerzData'
+      });
+    }
+
+    // Get API key from environment variables
+    const apiKey = process.env.VITE_PRINTERZ_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Printerz API key not configured' });
+    }
+
+    console.log(`Proxying request to Printerz template: ${templateId}`);
+
+    const response = await fetch(`https://api.printerz.dev/templates/${templateId}/render`, {
+      method: 'POST',
+      headers: {
+        'x-api-key': apiKey,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(printerzData)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Printerz API error:', response.status, errorText);
+      return res.status(response.status).json({
+        error: `Printerz API error: ${response.status} ${response.statusText}`,
+        details: errorText
+      });
+    }
+
+    // Get the PDF data directly
+    const pdfBuffer = await response.arrayBuffer();
+
+    // Set appropriate headers for PDF
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="transcription.pdf"');
+
+    // Send the PDF data
+    res.status(200).send(Buffer.from(pdfBuffer));
+  } catch (error) {
+    console.error('Error proxying to Printerz:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Failed to communicate with Printerz API'
+    });
+  }
+}) as RequestHandler);
+
 if (process.env.NODE_ENV === 'production') {
   const buildPath = path.resolve(__dirname, '../../dist');
   app.use(express.static(buildPath));
