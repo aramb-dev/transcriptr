@@ -5,10 +5,6 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { marked } from 'marked';
 import { Document as DocxDocument, Paragraph, Packer } from 'docx';
-// Add these imports for UTF-8 font support
-import 'jspdf-autotable';
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 
@@ -20,7 +16,6 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isGeneratingDocx, setIsGeneratingDocx] = useState(false);
-  const [fontsLoaded, setFontsLoaded] = useState(false);
 
   // Set default title with timestamp
   const getDefaultTitle = () => {
@@ -36,12 +31,6 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
   const [pdfTitle, setPdfTitle] = useState(getDefaultTitle());
 
   useEffect(() => {
-    // Initialize pdfMake with default fonts
-    // Correctly assign the virtual file system
-    pdfMake.vfs = pdfFonts.vfs;
-
-    setFontsLoaded(true);
-
     return () => {
       if (pdfUrl) {
         URL.revokeObjectURL(pdfUrl);
@@ -49,42 +38,79 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
     };
   }, [pdfUrl]);
 
-  const generatePdf = async () => {
-    setIsGeneratingPdf(true);
+  const generatePrinterzPdf = async (preview = true) => {
     try {
-      // Check if text contains Arabic
-      const containsArabic = /[\u0600-\u06FF]/.test(transcription);
+      setIsGeneratingPdf(true);
 
-      // Define document definition
-      const docDefinition = {
-        content: [
-          {
-            text: transcription,
-            fontSize: 12
-          }
-        ],
-        // Set RTL direction for Arabic
-        rtl: containsArabic,
-        // Use default font since custom font loading is complex
-        defaultStyle: {
-          font: 'Roboto'
+      // Get current date and time in a readable format
+      const now = new Date();
+      const formattedDate = now.toLocaleString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+
+      // Prepare data for Printerz
+      const printerzData = {
+        variables: {
+          title: pdfTitle,
+          content: transcription,
+          timestamp: formattedDate
+        },
+        options: {
+          printBackground: true
         }
       };
 
-      // Generate PDF
-      const pdfDocGenerator = pdfMake.createPdf(docDefinition);
+      const templateId = '9fa3ff8e-c6dc-49b5-93ba-3532638cfe47';
 
-      return new Promise<Blob>((resolve, reject) => {
-        pdfDocGenerator.getBlob((blob) => {
-          const url = URL.createObjectURL(blob);
-          setPdfUrl(url);
-          setIsGeneratingPdf(false);
-          resolve(blob);
-        });
+      // Use our proxy server instead of calling Printerz directly
+      const isNetlify = typeof window !== 'undefined' &&
+                        (window.location.hostname.includes('netlify.app') ||
+                         process.env.DEPLOY_ENV === 'netlify');
+
+      const apiUrl = isNetlify
+        ? '/.netlify/functions/printerz-proxy'
+        : '/api/printerz/render';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          templateId,
+          printerzData
+        })
       });
-    } catch (error) {
-      console.error('Error generating PDF:', error);
+
+      if (!response.ok) {
+        throw new Error(`Proxy error: ${response.status} ${response.statusText}`);
+      }
+
+      // Get PDF as blob
+      const pdfBuffer = await response.arrayBuffer();
+      const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
+
+      if (preview) {
+        // Create a URL for preview
+        const url = URL.createObjectURL(blob);
+        setPdfUrl(url);
+      } else {
+        // Save the file directly
+        saveAs(blob, `${pdfTitle.replace(/[/\\?%*:|"<>]/g, '-')}.pdf`);
+      }
+
       setIsGeneratingPdf(false);
+      return blob;
+    } catch (error) {
+      console.error('Error generating PDF with Printerz:', error);
+      setIsGeneratingPdf(false);
+      alert('Error generating PDF. Please try again later.');
       return null;
     }
   };
@@ -129,14 +155,14 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
         blob = new Blob([transcription], { type: 'text/markdown' });
         break;
       case 'pdf':
-        blob = await generatePdf();
+        blob = await generatePrinterzPdf(false);
         break;
       case 'docx':
         blob = await generateDocx();
         break;
     }
 
-    if (blob) {
+    if (blob && format !== 'pdf') { // Skip for PDF as it's already handled by saveAs in generatePrinterzPdf
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -150,10 +176,9 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
     const zip = new JSZip();
 
     zip.file("transcription.txt", transcription);
-
     zip.file("transcription.md", transcription);
 
-    const pdfBlob = await generatePdf();
+    const pdfBlob = await generatePrinterzPdf(false);
     if (pdfBlob) {
       zip.file("transcription.pdf", pdfBlob);
     }
@@ -165,84 +190,6 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
 
     const content = await zip.generateAsync({ type: "blob" });
     saveAs(content, "transcription-files.zip");
-  };
-
-  const handlePrinterzExport = async () => {
-    try {
-      // Get current date and time in a readable format
-      const now = new Date();
-      const formattedDate = now.toLocaleString('en-US', {
-        weekday: 'short',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      });
-
-      // Default title includes timestamp if user hasn't changed it
-      if (pdfTitle === "Transcription") {
-        setPdfTitle(`Transcription ${formattedDate}`);
-      }
-
-      // Prepare data for Printerz
-      const printerzData = {
-        variables: {
-          title: pdfTitle,
-          content: transcription,
-          timestamp: formattedDate
-        },
-        options: {
-          printBackground: true
-        }
-      };
-
-      const templateId = '9fa3ff8e-c6dc-49b5-93ba-3532638cfe47';
-
-      // Show loading indicator
-      setIsGeneratingPdf(true);
-
-      // Use our proxy server instead of calling Printerz directly
-      const isNetlify = typeof window !== 'undefined' &&
-                        (window.location.hostname.includes('netlify.app') ||
-                         process.env.DEPLOY_ENV === 'netlify');
-
-      const apiUrl = isNetlify
-        ? '/.netlify/functions/printerz-proxy'
-        : '/api/printerz/render';
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          templateId,
-          printerzData
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error(`Proxy error: ${response.status} ${response.statusText}`);
-      }
-
-      // Get PDF as blob
-      const pdfBuffer = await response.arrayBuffer();
-      const blob = new Blob([pdfBuffer], { type: 'application/pdf' });
-
-      // Save the file
-      saveAs(blob, `${pdfTitle.replace(/[/\\?%*:|"<>]/g, '-')}.pdf`);
-
-      // Clear loading state
-      setIsGeneratingPdf(false);
-
-    } catch (error) {
-      console.error('Error generating PDF with Printerz:', error);
-      setIsGeneratingPdf(false);
-      // Show error message to user
-      alert('Error generating PDF. Please try again later.');
-    }
   };
 
   const renderMarkdown = () => {
@@ -288,7 +235,7 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
 
         <TabsContent value="pdf" className="mt-4">
           <div className="bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800 p-4">
-            {/* Add title customization field */}
+            {/* Title customization field */}
             <div className="mb-4">
               <Label htmlFor="pdf-title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Choose a title for your PDF
@@ -319,26 +266,19 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
               ) : (
                 <div className="flex flex-col items-center justify-center h-80 space-y-4">
                   <p className="text-gray-500">Preview your PDF before downloading</p>
-                  <Button onClick={generatePdf} disabled={!fontsLoaded}>
+                  <Button onClick={() => generatePrinterzPdf(true)} disabled={isGeneratingPdf}>
                     Generate PDF Preview
                   </Button>
                 </div>
               )}
             </div>
           </div>
-          <div className="mt-4 flex justify-end space-x-2">
+          <div className="mt-4 flex justify-end">
             <Button
               onClick={() => handleDownload('pdf')}
-              disabled={isGeneratingPdf || !fontsLoaded}
+              disabled={isGeneratingPdf}
             >
               {isGeneratingPdf ? 'Generating...' : 'Download as PDF'}
-            </Button>
-            <Button
-              onClick={handlePrinterzExport}
-              disabled={isGeneratingPdf}
-              className="bg-emerald-600 hover:bg-emerald-700"
-            >
-              {isGeneratingPdf ? 'Generating...' : 'Generate with Printerz'}
             </Button>
           </div>
         </TabsContent>
@@ -370,7 +310,7 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
         </TabsContent>
       </Tabs>
 
-      <div className="flex justify-center pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex justify-center pt-6 mt-6 border-t border-gray-200 dark:border-gray-700 space-x-4">
         <Button onClick={handleDownloadAll} size="lg" className="px-8 gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -378,17 +318,6 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
             <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
           Download All Formats (ZIP)
-        </Button>
-        <Button
-          onClick={() => handlePrinterzExport()}
-          className="gap-2"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6 9v8a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V9"></path>
-            <path d="M3 6h18"></path>
-            <path d="M12 3v9"></path>
-          </svg>
-          Generate with Printerz
         </Button>
       </div>
     </div>
