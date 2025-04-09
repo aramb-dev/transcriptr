@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { UploadAudio } from './components/UploadAudio';
 import { TranscriptionResult } from './components/TranscriptionResult';
 import {
@@ -9,8 +9,11 @@ import { Button } from './components/ui/button';
 import { isLargeFile, uploadLargeFile, deleteFile } from './lib/storage-service';
 import { isFormatSupportedByReplicate } from './lib/audio-conversion';
 import { FeedbackForm } from './components/FeedbackForm';
+import { Toaster } from './components/ui/sonner';
+import { showCookieConsent } from './components/CookieConsent';
+import { initializeAnalytics, enableAnalytics, disableAnalytics, trackEvent } from './lib/analytics';
 
-// Need to add this to recognize the feedbackType property
+// Remove the global declaration, since we don't need it anymore for analytics
 declare global {
   interface Window {
     feedbackType: 'general' | 'issue' | 'feature' | 'other';
@@ -54,6 +57,46 @@ export default function App() {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
+  // Cookie consent state
+  const [cookieConsent, setCookieConsent] = useState<boolean | null>(null);
+
+  // Check if the user has already made a cookie consent choice
+  useEffect(() => {
+    const savedConsent = localStorage.getItem('cookieConsent');
+    if (savedConsent !== null) {
+      const hasConsent = savedConsent === 'true';
+      setCookieConsent(hasConsent);
+
+      // Initialize analytics with the saved consent preference
+      initializeAnalytics(hasConsent);
+    } else {
+      // Initialize analytics with consent mode disabled by default
+      initializeAnalytics(false);
+
+      // Show the cookie consent toast if no preference has been saved
+      showCookieConsent({
+        onAccept: handleAcceptCookies,
+        onDecline: handleDeclineCookies
+      });
+    }
+  }, []);
+
+  // Handle cookie consent actions
+  const handleAcceptCookies = () => {
+    localStorage.setItem('cookieConsent', 'true');
+    setCookieConsent(true);
+    enableAnalytics();
+
+    // Track consent event
+    trackEvent('Consent', 'Accept', 'Cookie Consent');
+  };
+
+  const handleDeclineCookies = () => {
+    localStorage.setItem('cookieConsent', 'false');
+    setCookieConsent(false);
+    disableAnalytics();
+  };
+
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -68,76 +111,6 @@ export default function App() {
       reader.onerror = (error) => reject(error);
     });
   };
-
-  /*
-  // Commented out since this function is not being used
-  // If you need audio conversion, uncomment and call this function
-  const convertAudioUsingNetlifyFunction = async (file: File): Promise<string> => {
-    // First upload the file to Firebase to get a URL
-    console.log('Uploading file to get URL for conversion');
-    const { url, path } = await uploadLargeFile(file);
-
-    try {
-      console.log('File uploaded, URL:', url);
-      console.log('Converting using CloudConvert');
-
-      // Add timeout handling to prevent long-running requests
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
-
-      try {
-        // Call the CloudConvert function with the URL
-        const response = await fetch(getApiUrl('cloud-convert'), {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            audioUrl: url,
-            fileName: file.name,
-            fileType: file.type
-          }),
-          signal: controller.signal
-        });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: response.statusText }));
-
-          // Delete the original file since conversion failed
-          try {
-            await deleteFile(path);
-            console.log('Deleted original file after failed conversion:', path);
-          } catch (deleteError) {
-            console.warn('Failed to delete original file:', deleteError);
-          }
-
-          throw new Error(`Conversion failed: ${errorData.error || response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        // Delete the original file since we now have a converted version
-        try {
-          await deleteFile(path);
-          console.log('Deleted original file after successful conversion:', path);
-        } catch (deleteError) {
-          console.warn('Failed to delete original file:', deleteError);
-        }
-
-        return data.url;
-      } catch (fetchError) {
-        clearTimeout(timeoutId);
-        throw fetchError;
-      }
-    } catch (error) {
-      // If conversion fails, just use the original file
-      console.error('Error in file conversion, using original file:', error);
-      return url;
-    }
-  };
-  */
 
   // Update handleUpload function to provide clear guidance for unsupported formats
   const handleUpload = async (formData: FormData, options: { language: string; diarize: boolean }) => {
@@ -160,6 +133,9 @@ export default function App() {
       audioData?: string;
       audioUrl?: string;
     } = { options: null }; // Initialize requestBody to avoid undefined errors
+
+    // Track transcription start
+    trackEvent('Transcription', 'Start', options.language);
 
     try {
       const file = formData.get('file') as File;
@@ -309,6 +285,9 @@ export default function App() {
         console.error('Unexpected API response format:', data);
         throw new Error('Invalid response format from API');
       }
+
+      // Track successful transcription
+      trackEvent('Transcription', 'Success', options.language);
     } catch (error) {
       console.error('Error transcribing audio:', error);
       setError(formatErrorMessage(error instanceof Error ? error.message : 'Unknown error occurred'));
@@ -320,6 +299,9 @@ export default function App() {
         timestamp: new Date(),
         data: { error: error instanceof Error ? error.message : 'Unknown error occurred' }
       }]);
+
+      // Track failed transcription
+      trackEvent('Transcription', 'Error', error instanceof Error ? error.message : 'Unknown error');
     } finally {
       // Only clean up the file after we're completely done with it
       if (firebaseFilePath) {
@@ -823,6 +805,9 @@ export default function App() {
           />
         </div>
       </div>
+
+      {/* Add the Sonner Toaster component */}
+      <Toaster />
     </div>
   );
 }
