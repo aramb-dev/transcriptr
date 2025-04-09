@@ -1,4 +1,4 @@
-import { init as initClarity } from '@microsoft/clarity-js';
+import Clarity from '@microsoft/clarity';
 import ReactGA from 'react-ga4';
 
 // Initialize analytics services
@@ -8,7 +8,7 @@ export const initializeAnalytics = (consent: boolean = false) => {
 
   if (clarityId) {
     // Initialize Clarity with consent mode
-    initClarity({
+    Clarity.init({
       projectId: clarityId,
       upload: consent ? 'always' : 'none', // Only track if consent is given
       delay: 500, // Small delay to ensure the page is loaded
@@ -40,7 +40,7 @@ export const enableAnalytics = () => {
 
   if (clarityId) {
     // For Clarity, we need to reinitialize with consent
-    initClarity({
+    Clarity.init({
       projectId: clarityId,
       upload: 'always',
     });

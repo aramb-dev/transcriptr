@@ -182,6 +182,7 @@ if (process.env.NODE_ENV === 'production') {
   const buildPath = path.resolve(__dirname, '../../dist');
   app.use(express.static(buildPath));
 
+  // Handle client-side routing - this is important for React Router
   app.get('*', (_req: Request, res: Response) => {
     res.sendFile(path.join(buildPath, 'index.html'));
   });

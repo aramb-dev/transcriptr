@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
+import { Routes, Route, Link } from 'react-router-dom';
 import { UploadAudio } from './components/UploadAudio';
 import { TranscriptionResult } from './components/TranscriptionResult';
+import { TermsOfService } from './components/TermsOfService';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
 import {
   Card,
   CardContent
@@ -46,7 +49,7 @@ const statusMessages: Record<TranscriptionStatus, string> = {
   canceled: 'This transcription was cancelled, please try again.'
 };
 
-export default function App() {
+function MainApp() {
   const [transcription, setTranscription] = useState<string | null>(null);
   const [transStatus, setTransStatus] = useState<TranscriptionStatus>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -57,45 +60,48 @@ export default function App() {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
-  // Cookie consent state
-  const [cookieConsent, setCookieConsent] = useState<boolean | null>(null);
-
-  // Check if the user has already made a cookie consent choice
+  // Initialize analytics with cookie consent
   useEffect(() => {
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .adsbox {
+        height: 1px;
+        width: 1px;
+        position: absolute;
+        left: -10000px;
+        top: -10000px;
+      }
+    `;
+    document.head.appendChild(style);
+
     const savedConsent = localStorage.getItem('cookieConsent');
     if (savedConsent !== null) {
       const hasConsent = savedConsent === 'true';
       setCookieConsent(hasConsent);
 
-      // Initialize analytics with the saved consent preference
       initializeAnalytics(hasConsent);
     } else {
-      // Initialize analytics with consent mode disabled by default
       initializeAnalytics(false);
 
-      // Show the cookie consent toast if no preference has been saved
       showCookieConsent({
-        onAccept: handleAcceptCookies,
-        onDecline: handleDeclineCookies
+        onAccept: () => {
+          localStorage.setItem('cookieConsent', 'true');
+          setCookieConsent(true);
+          enableAnalytics();
+          trackEvent('Consent', 'Accept', 'Cookie Consent');
+        },
+        onDecline: () => {
+          localStorage.setItem('cookieConsent', 'false');
+          setCookieConsent(false);
+          disableAnalytics();
+        }
       });
     }
+
+    return () => {
+      document.head.removeChild(style);
+    };
   }, []);
-
-  // Handle cookie consent actions
-  const handleAcceptCookies = () => {
-    localStorage.setItem('cookieConsent', 'true');
-    setCookieConsent(true);
-    enableAnalytics();
-
-    // Track consent event
-    trackEvent('Consent', 'Accept', 'Cookie Consent');
-  };
-
-  const handleDeclineCookies = () => {
-    localStorage.setItem('cookieConsent', 'false');
-    setCookieConsent(false);
-    disableAnalytics();
-  };
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -112,7 +118,6 @@ export default function App() {
     });
   };
 
-  // Update handleUpload function to provide clear guidance for unsupported formats
   const handleUpload = async (formData: FormData, options: { language: string; diarize: boolean }) => {
     setTransStatus('starting');
     setError(null);
@@ -132,9 +137,8 @@ export default function App() {
       } | null;
       audioData?: string;
       audioUrl?: string;
-    } = { options: null }; // Initialize requestBody to avoid undefined errors
+    } = { options: null };
 
-    // Track transcription start
     trackEvent('Transcription', 'Start', options.language);
 
     try {
@@ -150,7 +154,6 @@ export default function App() {
         data: { message: `Processing file: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB, Type: ${file.type}` }
       }]);
 
-      // Create the API options object
       const apiOptions = {
         modelId: MODEL_ID,
         task: 'transcribe',
@@ -160,12 +163,9 @@ export default function App() {
         diarize: options.diarize,
       };
 
-      // Initialize requestBody with options
       requestBody.options = apiOptions;
 
-      // Check if the file format is supported by Replicate
       if (!isFormatSupportedByReplicate(file)) {
-        // Instead of trying complex conversion, show a helpful message
         setApiResponses(prev => [...prev, {
           timestamp: new Date(),
           data: {
@@ -174,7 +174,6 @@ export default function App() {
           }
         }]);
 
-        // Add contributor message
         setApiResponses(prev => [...prev, {
           timestamp: new Date(),
           data: {
@@ -185,7 +184,6 @@ export default function App() {
         throw new Error('Unsupported file format. Please convert to MP3, WAV, or FLAC before uploading.');
       }
 
-      // Handle files based on size (for supported formats)
       if (isLargeFile(file)) {
         setProgress(10);
         setApiResponses(prev => [...prev, {
@@ -207,7 +205,6 @@ export default function App() {
             data: { message: 'File uploaded to temporary storage successfully', url: fileUrl }
           }]);
 
-          // Set audioUrl in requestBody
           requestBody.audioUrl = fileUrl;
         } catch (uploadError) {
           console.error('Error uploading to Firebase:', uploadError);
@@ -218,7 +215,6 @@ export default function App() {
           throw new Error(`Failed to upload file to temporary storage: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`);
         }
       } else {
-        // For small files, convert to base64
         try {
           const base64Audio = await fileToBase64(file);
           setProgress(15);
@@ -229,7 +225,6 @@ export default function App() {
         }
       }
 
-      // Remove audioData if we have a URL to avoid sending both
       if (requestBody.audioUrl) {
         delete requestBody.audioData;
       }
@@ -259,7 +254,6 @@ export default function App() {
 
       setProgress(25);
 
-      // Check if the response contains an additional Firebase path (from Netlify function)
       if (data.firebaseFilePath && !firebaseFilePath) {
         firebaseFilePath = data.firebaseFilePath;
       }
@@ -286,7 +280,6 @@ export default function App() {
         throw new Error('Invalid response format from API');
       }
 
-      // Track successful transcription
       trackEvent('Transcription', 'Success', options.language);
     } catch (error) {
       console.error('Error transcribing audio:', error);
@@ -300,20 +293,17 @@ export default function App() {
         data: { error: error instanceof Error ? error.message : 'Unknown error occurred' }
       }]);
 
-      // Track failed transcription
       trackEvent('Transcription', 'Error', error instanceof Error ? error.message : 'Unknown error');
     } finally {
-      // Only clean up the file after we're completely done with it
       if (firebaseFilePath) {
         try {
-          // Add a slight delay to ensure the file isn't deleted before Replicate reads it
           setTimeout(async () => {
             await deleteFile(firebaseFilePath!);
             setApiResponses(prev => [...prev, {
               timestamp: new Date(),
               data: { message: 'Temporary storage file cleaned up' }
             }]);
-          }, 10000); // 10 second delay before cleanup
+          }, 10000);
         } catch (e) {
           console.error('Failed to delete temporary file:', e);
         }
@@ -736,6 +726,14 @@ export default function App() {
           >
             Star on GitHub
           </a>
+          <span>•</span>
+          <Link to="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
+            Terms of Service
+          </Link>
+          <span>•</span>
+          <Link to="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
+            Privacy Policy
+          </Link>
         </div>
         <p className="mt-4">© {new Date().getFullYear()} Transcriptr. All rights reserved.</p>
       </footer>
@@ -806,8 +804,17 @@ export default function App() {
         </div>
       </div>
 
-      {/* Add the Sonner Toaster component */}
       <Toaster />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<MainApp />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+    </Routes>
   );
 }
