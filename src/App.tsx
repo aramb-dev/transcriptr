@@ -717,9 +717,8 @@ export default function App() {
             href="#feedback"
             onClick={(e) => {
               e.preventDefault();
-              document.getElementById('feedback-modal')?.classList.remove('hidden');
-              // Set initial feedback type to 'general'
               window.feedbackType = 'general';
+              document.getElementById('feedback-modal')?.classList.remove('hidden');
             }}
             className="text-blue-600 dark:text-blue-400 hover:underline"
           >
@@ -730,13 +729,24 @@ export default function App() {
             href="#issue"
             onClick={(e) => {
               e.preventDefault();
-              document.getElementById('feedback-modal')?.classList.remove('hidden');
-              // Set initial feedback type to 'issue'
               window.feedbackType = 'issue';
+              document.getElementById('feedback-modal')?.classList.remove('hidden');
             }}
             className="text-blue-600 dark:text-blue-400 hover:underline"
           >
             Report an Issue
+          </a>
+          <span>•</span>
+          <a
+            href="#feature"
+            onClick={(e) => {
+              e.preventDefault();
+              window.feedbackType = 'feature';
+              document.getElementById('feedback-modal')?.classList.remove('hidden');
+            }}
+            className="text-blue-600 dark:text-blue-400 hover:underline"
+          >
+            Suggest a Feature
           </a>
           <span>•</span>
           <a
@@ -758,7 +768,11 @@ export default function App() {
       >
         <div className="relative w-full max-w-md">
           <button
-            onClick={() => document.getElementById('feedback-modal')?.classList.add('hidden')}
+            onClick={() => {
+              document.getElementById('feedback-modal')?.classList.add('hidden');
+              // Reset the feedback type when closing
+              setTimeout(() => { window.feedbackType = 'general'; }, 300);
+            }}
             className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             aria-label="Close"
           >
@@ -766,7 +780,9 @@ export default function App() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
+          {/* Force re-render the FeedbackForm when window.feedbackType changes by using a key */}
           <FeedbackForm
+            key={window.feedbackType} // This ensures the component fully re-renders when type changes
             initialType={window.feedbackType}
             onClose={() => document.getElementById('feedback-modal')?.classList.add('hidden')}
           />

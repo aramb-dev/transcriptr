@@ -70,6 +70,50 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
     }
   }, [browser, operatingSystem]);
 
+  // Add a more immediate way to handle initialType changes
+  useEffect(() => {
+    // Force immediate update when initialType changes
+    setFeedbackType(initialType);
+
+    // Reset form fields that are specific to certain feedback types
+    if (initialType === 'general' || initialType === 'feature' || initialType === 'other') {
+      // Clear fields that are only relevant for issue reports
+      setBrowser('');
+      setOperatingSystem('');
+    } else if (initialType === 'issue') {
+      // Re-detect device info when switching to issue reporting
+      const detectDeviceInfo = () => {
+        try {
+          const deviceDetector = new DeviceDetector();
+          const userAgent = navigator.userAgent;
+          const device = deviceDetector.parse(userAgent);
+
+          // Set browser info with version if available
+          if (device.client && device.client.name) {
+            const browserWithVersion = device.client.version
+              ? `${device.client.name} ${device.client.version}`
+              : device.client.name;
+            setBrowser(browserWithVersion);
+          }
+
+          // Set OS info with version if available
+          if (device.os && device.os.name) {
+            const osWithVersion = device.os.version
+              ? `${device.os.name} ${device.os.version}`
+              : device.os.name;
+            setOperatingSystem(osWithVersion);
+          }
+        } catch (error) {
+          console.error("Error detecting device info:", error);
+          setBrowser(navigator.userAgent);
+          setOperatingSystem(navigator.platform || "Unknown");
+        }
+      };
+
+      detectDeviceInfo();
+    }
+  }, [initialType]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -77,27 +121,33 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
     setErrorMessage('');
 
     try {
-      // This form will be processed by Netlify's form handling system
-      const formData = new FormData();
-      formData.append('form-name', 'feedback');
-      formData.append('name', name);
-      formData.append('email', email);
-      formData.append('feedbackType', feedbackType);
-      formData.append('feedback', feedback);
+      // Create a URLSearchParams object directly
+      const params = new URLSearchParams();
+      params.append('form-name', 'feedback');
+      params.append('name', name);
+      params.append('email', email);
+      params.append('feedbackType', feedbackType);
+      params.append('feedback', feedback);
 
       // Add additional fields for issues
       if (feedbackType === 'issue') {
-        formData.append('browser', browser);
-        formData.append('operatingSystem', operatingSystem);
+        params.append('browser', browser);
+        params.append('operatingSystem', operatingSystem);
       }
+
+      // Log submission for debugging
+      console.log('Submitting form with data:', Object.fromEntries(params.entries()));
 
       const response = await fetch('/', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams(formData as any).toString()
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: params.toString()
       });
 
       if (response.ok) {
+        console.log('Form submitted successfully');
         setSubmitStatus('success');
         // Reset form
         setName('');
@@ -106,7 +156,8 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
         setBrowser('');
         setOperatingSystem('');
       } else {
-        throw new Error(`Form submission failed: ${response.statusText}`);
+        console.error('Form submission failed:', response.status, response.statusText);
+        throw new Error(`Form submission failed: ${response.status} ${response.statusText}`);
       }
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -170,10 +221,12 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
         <form
           onSubmit={handleSubmit}
           name="feedback"
+          method="post"
           data-netlify="true"
-          netlify-honeypot="bot-field"
+          data-netlify-honeypot="bot-field"
           className="space-y-4"
         >
+          {/* These hidden fields are crucial for Netlify form handling */}
           <input type="hidden" name="form-name" value="feedback" />
           <input type="hidden" name="feedbackType" value={feedbackType} />
           <div className="hidden">
