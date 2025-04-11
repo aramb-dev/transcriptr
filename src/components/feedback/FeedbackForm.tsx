@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
-import { Label } from './ui/label';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
+import { Label } from '../ui/label';
 import { AlertCircle, CheckCircle2 } from 'lucide-react';
 import DeviceDetector from 'device-detector-js';
 import {
@@ -11,7 +11,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
+} from "../ui/select";
 
 type FeedbackType = 'general' | 'issue' | 'feature' | 'other';
 

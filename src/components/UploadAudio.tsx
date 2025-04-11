@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { useFileInput } from '@/hooks/use-file-input';
-import { TranscriptionOptions } from './TranscriptionOptions';
+import { TranscriptionOptions } from './transcription/TranscriptionOptions';
 
 interface UploadAudioProps {
   onUpload: (formData: FormData, options: { language: string; diarize: boolean }) => void;

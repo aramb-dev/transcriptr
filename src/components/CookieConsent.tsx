@@ -6,10 +6,11 @@ import { Link } from 'react-router-dom';
 interface CookieConsentProps {
   onAccept: () => void;
   onDecline: () => void;
+  onEssentialOnly?: () => void;
 }
 
 // Check for ad blocker and handle the acceptance
-const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, toastId: string) => {
+const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, onEssentialOnly: (() => void) | undefined, toastId: string) => {
   // Simple ad blocker detection - create a bait element
   const testElement = document.createElement('div');
   testElement.className = 'adsbox';
@@ -41,7 +42,7 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, toastId:
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     We use cookies to analyze site traffic and improve your experience.
                     By accepting, you consent to our use of analytics tools including Google Analytics and Microsoft Clarity
-                    as described in our <Link to="/privacy" className="underline">Privacy Policy</Link>.
+                    as described in our <Link to="/privacy" onClick={(e) => {e.stopPropagation();}} className="underline hover:text-blue-500 transition-colors">Privacy Policy</Link>.
                   </p>
                 </div>
               </div>
@@ -53,11 +54,11 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, toastId:
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 mt-3">
+              <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1"
+                  className="w-full sm:flex-1"
                   onClick={() => {
                     onDecline();
                     toast.dismiss(t);
@@ -66,15 +67,26 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, toastId:
                   Decline
                 </Button>
                 <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full sm:flex-1"
+                  onClick={() => {
+                    if (onEssentialOnly) onEssentialOnly();
+                    toast.dismiss(t);
+                  }}
+                >
+                  Essential Only
+                </Button>
+                <Button
                   variant="default"
                   size="sm"
-                  className="flex-1"
+                  className="w-full sm:flex-1"
                   onClick={() => {
                     onAccept();
                     toast.dismiss(t);
                   }}
                 >
-                  Accept Anyway
+                  Accept All
                 </Button>
               </div>
             </div>
@@ -95,7 +107,7 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, toastId:
   }, 100);
 };
 
-export function showCookieConsent({ onAccept, onDecline }: CookieConsentProps) {
+export function showCookieConsent({ onAccept, onDecline, onEssentialOnly }: CookieConsentProps) {
   // Generate a unique ID for the toast
   const toastId = 'cookie-consent-' + Math.random().toString(36).substring(2, 9);
 
@@ -111,16 +123,16 @@ export function showCookieConsent({ onAccept, onDecline }: CookieConsentProps) {
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                 We use cookies to analyze site traffic and improve your experience.
                 By accepting, you consent to our use of analytics tools including Google Analytics and Microsoft Clarity
-                as described in our <Link to="/privacy" className="underline">Privacy Policy</Link>.
+                as described in our <Link to="/privacy" onClick={(e) => {e.stopPropagation(); toast.dismiss(t);}} className="underline hover:text-blue-500 transition-colors">Privacy Policy</Link>.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 mt-4">
+          <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
             <Button
               variant="outline"
               size="sm"
-              className="flex-1"
+              className="w-full sm:flex-1"
               onClick={() => {
                 onDecline();
                 toast.dismiss(t);
@@ -129,15 +141,26 @@ export function showCookieConsent({ onAccept, onDecline }: CookieConsentProps) {
               Decline
             </Button>
             <Button
-              variant="default"
+              variant="outline"
               size="sm"
-              className="flex-1"
+              className="w-full sm:flex-1"
               onClick={() => {
-                // When accepting, check for ad blocker
-                checkForAdBlocker(onAccept, onDecline, toastId);
+                if (onEssentialOnly) onEssentialOnly();
+                toast.dismiss(t);
               }}
             >
-              Accept
+              Essential Only
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              className="w-full sm:flex-1"
+              onClick={() => {
+                // When accepting, check for ad blocker
+                checkForAdBlocker(onAccept, onDecline, onEssentialOnly, toastId);
+              }}
+            >
+              Accept All
             </Button>
           </div>
         </div>

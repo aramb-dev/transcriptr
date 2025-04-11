@@ -9,11 +9,13 @@
     "start": "NODE_ENV=production node dist/server/index.js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "download-ffmpeg": "node scripts/download-ffmpeg.js"
+    "download-ffmpeg": "node scripts/download-ffmpeg.js",
+    "setup-firebase-cors": "node scripts/setup-firebase-cors.js"
   },
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.6",
     "@ffmpeg/util": "^0.12.1",
+    "@google-cloud/storage": "^7.16.0",
     "@microsoft/clarity": "1",
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-select": "^2.1.7",

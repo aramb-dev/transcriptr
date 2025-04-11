@@ -1,5 +1,5 @@
 import express, { Request, Response, RequestHandler } from 'express';
-import cors from 'cors';
+// Remove the cors import
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -12,15 +12,22 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3001;
 
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production'
-    ? ['https://your-production-domain.com']
-    : ['http://localhost:5173'],
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
 
 app.use(express.json({ limit: '50mb' }));
+
+// Add manual CORS headers to all responses instead
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(204).send();
+  }
+
+  next();
+});
 
 app.post('/api/transcribe', (async (req: Request, res: Response) => {
   try {
@@ -125,6 +132,8 @@ app.get('/api/prediction/:id', (async (req: Request, res: Response) => {
   }
 }) as RequestHandler);
 
+// Update the Printerz render endpoint handler
+
 app.post('/api/printerz/render', (async (req: Request, res: Response) => {
   try {
     const { templateId, printerzData } = req.body;
@@ -142,6 +151,7 @@ app.post('/api/printerz/render', (async (req: Request, res: Response) => {
     }
 
     console.log(`Proxying request to Printerz template: ${templateId}`);
+    console.log('With data:', JSON.stringify(printerzData).substring(0, 200) + '...');
 
     const response = await fetch(`https://api.printerz.dev/templates/${templateId}/render`, {
       method: 'POST',
@@ -161,19 +171,59 @@ app.post('/api/printerz/render', (async (req: Request, res: Response) => {
       });
     }
 
-    // Get the PDF data directly
+    // Get the PDF data as buffer
     const pdfBuffer = await response.arrayBuffer();
+
+    if (!pdfBuffer || pdfBuffer.byteLength === 0) {
+      console.error('Received empty PDF buffer from Printerz API');
+      return res.status(500).json({ error: 'Received empty PDF from Printerz' });
+    }
+
+    console.log(`Received PDF buffer of size: ${pdfBuffer.byteLength} bytes`);
 
     // Set appropriate headers for PDF
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'attachment; filename="transcription.pdf"');
 
-    // Send the PDF data
+    // Send the PDF data and end the response
     res.status(200).send(Buffer.from(pdfBuffer));
   } catch (error) {
     console.error('Error proxying to Printerz:', error);
     res.status(500).json({
       error: error instanceof Error ? error.message : 'Failed to communicate with Printerz API'
+    });
+  }
+}) as RequestHandler);
+
+app.post('/api/firebase-proxy', (async (req: Request, res: Response) => {
+  try {
+    const { url } = req.body;
+
+    if (!url || !url.includes('firebasestorage.googleapis.com')) {
+      return res.status(400).json({ error: 'Invalid or missing Firebase Storage URL' });
+    }
+
+    console.log(`Proxying request to Firebase Storage: ${url}`);
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      return res.status(response.status).json({
+        error: `Firebase Storage error: ${response.status}`,
+        message: await response.text()
+      });
+    }
+
+    // Stream the response directly to the client
+    const contentType = response.headers.get('content-type');
+    res.setHeader('Content-Type', contentType || 'application/octet-stream');
+
+    const arrayBuffer = await response.arrayBuffer();
+    res.status(200).send(Buffer.from(arrayBuffer));
+  } catch (error) {
+    console.error('Error proxying Firebase Storage request:', error);
+    res.status(500).json({
+      error: error instanceof Error ? error.message : 'Failed to proxy Firebase Storage request'
     });
   }
 }) as RequestHandler);
