@@ -1,16 +1,30 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '../ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
-import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
-import { marked } from 'marked';
-import { Document as DocxDocument, Paragraph, Packer } from 'docx';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { storage } from '../../lib/firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
+import { marked } from 'marked';
+
+// Removed the heavy imports:
+// import JSZip from 'jszip';
+// import { saveAs } from 'file-saver';
+// import { Document as DocxDocument, Paragraph, Packer } from 'docx';
+
+// Create a helper function for dynamic imports
+const dynamicImports = {
+  // Load JSZip only when needed
+  getJsZip: () => import('jszip').then(module => module.default),
+
+  // Load FileSaver only when needed
+  getFileSaver: () => import('file-saver').then(module => module.saveAs),
+
+  // Load Docx only when needed
+  getDocx: () => import('docx').then(module => module),
+};
 
 // Helper function to determine if we're running on Netlify
 const isNetlify = typeof window !== 'undefined' &&
@@ -346,9 +360,14 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
     }
   };
 
+  // Also update the generateDocx function to use dynamic imports
   const generateDocx = async () => {
     setIsGeneratingDocx(true);
     try {
+      // Dynamically import docx when needed
+      const docx = await dynamicImports.getDocx();
+      const { Document, Paragraph, Packer } = docx;
+
       const paragraphs = transcription
         .split('\n')
         .map(line => new Paragraph({
@@ -358,7 +377,7 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
           }
         }));
 
-      const doc = new DocxDocument({
+      const doc = new Document({
         sections: [{
           properties: {},
           children: paragraphs
@@ -366,12 +385,12 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
       });
 
       const blob = await Packer.toBlob(doc);
-      setIsGeneratingDocx(false);
       return blob;
     } catch (error) {
       console.error('Error generating DOCX:', error);
-      setIsGeneratingDocx(false);
       return null;
+    } finally {
+      setIsGeneratingDocx(false);
     }
   };
 
@@ -431,10 +450,17 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
     }
   };
 
+  // Then update the handleDownloadAll function
   const handleDownloadAll = async () => {
     setIsDownloading(true);
 
     try {
+      // Dynamically import required libraries
+      const [JSZip, saveAs] = await Promise.all([
+        dynamicImports.getJsZip(),
+        dynamicImports.getFileSaver()
+      ]);
+
       const zip = new JSZip();
 
       // Add txt and md directly
@@ -442,9 +468,9 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
       zip.file("transcription.md", transcription);
 
       // For PDF, use the existing blob or generate new one
-      let pdfBlob: Blob;
-      if (hasPdf) {
-        pdfBlob = pdfBlob!;
+      let pdfBlob;
+      if (hasPdf && pdfBlob) {
+        pdfBlob = pdfBlob;
       } else {
         // Generate a new PDF
         pdfBlob = await generateTranscriptionPdf(transcription, pdfTitle, false);
@@ -487,6 +513,17 @@ export function TranscriptionResult({ transcription }: TranscriptionResultProps)
       initialPdfTitleRef.current = pdfTitle;
     } catch (error) {
       console.error("Error regenerating PDF:", error);
+    }
+  };
+
+  // In TranscriptionResult.tsx
+  const handleGeneratePdf = async () => {
+    try {
+      const { generatePdf } = await import('../../lib/pdf-generation');
+      const pdfBlob = await generatePdf(templateId, printerzData);
+      // Handle the PDF...
+    } catch (error) {
+      // Handle error...
     }
   };
 

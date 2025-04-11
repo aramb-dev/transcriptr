@@ -1,17 +1,12 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { TranscriptionForm } from './components/transcription/TranscriptionForm';
-import { TermsOfService } from './components/TermsOfService';
-import { PrivacyPolicy } from './components/PrivacyPolicy';
-import { Changelog } from './components/Changelog';
-import { Feedback } from './components/feedback/Feedback';
 import { Card, CardContent } from './components/ui/card';
-import { FeedbackModals } from './components/feedback/FeedbackModals';
 import { ChangelogModal } from './components/ChangelogModal';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { Toaster } from './components/ui/sonner';
 import { useConsentManager } from './components/analytics/ConsentManager';
+import { TermsOfService, PrivacyPolicy, Changelog, Feedback } from './components/routes/LazyRoutes';
 
 // Default to general feedback
 window.feedbackType = 'general';
@@ -21,6 +16,13 @@ declare global {
     feedbackType: 'general' | 'issue' | 'feature' | 'other';
   }
 }
+
+const TranscriptionForm = lazy(() => import('./components/transcription/TranscriptionForm').then(
+  module => ({ default: module.TranscriptionForm })
+));
+const FeedbackModals = lazy(() => import('./components/feedback/FeedbackModals').then(
+  module => ({ default: module.FeedbackModals })
+));
 
 function MainApp() {
   const [showSuccess, setShowSuccess] = useState(false);
@@ -77,14 +79,37 @@ function MainApp() {
   );
 }
 
+// Add loading indicator for lazy-loaded routes
+const LoadingFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
+
 export default function App() {
   return (
     <Routes>
       <Route path="/" element={<MainApp />} />
-      <Route path="/terms" element={<TermsOfService />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/changelog" element={<Changelog />} />
-      <Route path="/feedback" element={<Feedback />} />
+      <Route path="/terms" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <TermsOfService />
+        </Suspense>
+      } />
+      <Route path="/privacy" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <PrivacyPolicy />
+        </Suspense>
+      } />
+      <Route path="/changelog" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <Changelog />
+        </Suspense>
+      } />
+      <Route path="/feedback" element={
+        <Suspense fallback={<LoadingFallback />}>
+          <Feedback />
+        </Suspense>
+      } />
     </Routes>
   );
 }
