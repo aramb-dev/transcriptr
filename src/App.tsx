@@ -3,8 +3,11 @@ import { Routes, Route } from 'react-router-dom';
 import { TranscriptionForm } from './components/transcription/TranscriptionForm';
 import { TermsOfService } from './components/TermsOfService';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { Changelog } from './components/Changelog';
+import { Feedback } from './components/feedback/Feedback';
 import { Card, CardContent } from './components/ui/card';
 import { FeedbackModals } from './components/feedback/FeedbackModals';
+import { ChangelogModal } from './components/ChangelogModal';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { Toaster } from './components/ui/sonner';
@@ -29,6 +32,14 @@ function MainApp() {
     document.getElementById(`${type}-feedback-modal`)?.classList.remove('hidden');
   };
 
+  const openChangelogModal = () => {
+    document.getElementById('changelog-modal')?.classList.remove('hidden');
+  };
+
+  const closeChangelogModal = () => {
+    document.getElementById('changelog-modal')?.classList.add('hidden');
+  };
+
   const handleShowSuccess = () => {
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 3000);
@@ -37,7 +48,7 @@ function MainApp() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 text-gray-900 dark:text-gray-100">
       <div className="container mx-auto px-4 max-w-4xl">
-        <Header />
+        <Header onOpenChangelog={openChangelogModal} />
 
         <Card className="w-full overflow-hidden border-0 shadow-lg rounded-xl dark:bg-gray-800/60 dark:backdrop-blur-sm">
           <CardContent className="p-0">
@@ -56,9 +67,10 @@ function MainApp() {
         </div>
       )}
 
-      <Footer onOpenFeedbackModal={openFeedbackModal} />
+      <Footer onOpenFeedbackModal={openFeedbackModal} onOpenChangelog={openChangelogModal} />
 
       <FeedbackModals />
+      <ChangelogModal onClose={closeChangelogModal} />
 
       <Toaster />
     </div>
@@ -71,6 +83,8 @@ export default function App() {
       <Route path="/" element={<MainApp />} />
       <Route path="/terms" element={<TermsOfService />} />
       <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/changelog" element={<Changelog />} />
+      <Route path="/feedback" element={<Feedback />} />
     </Routes>
   );
 }

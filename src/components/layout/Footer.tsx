@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 
 interface FooterProps {
   onOpenFeedbackModal: (type: 'general' | 'issue' | 'feature') => void;
+  onOpenChangelog: () => void;
 }
 
-export function Footer({ onOpenFeedbackModal }: FooterProps) {
+export function Footer({ onOpenFeedbackModal, onOpenChangelog }: FooterProps) {
   return (
     <footer className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
       <div className="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-4">
@@ -40,6 +41,17 @@ export function Footer({ onOpenFeedbackModal }: FooterProps) {
           className="text-blue-600 dark:text-blue-400 hover:underline"
         >
           Suggest a Feature
+        </a>
+        <span>•</span>
+        <a
+          href="#changelog"
+          onClick={(e) => {
+            e.preventDefault();
+            onOpenChangelog();
+          }}
+          className="text-blue-600 dark:text-blue-400 hover:underline"
+        >
+          Changelog
         </a>
         <span>•</span>
         <a
