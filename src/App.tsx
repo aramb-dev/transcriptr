@@ -23,9 +23,13 @@ const TranscriptionForm = lazy(() => import('./components/transcription/Transcri
 const FeedbackModals = lazy(() => import('./components/feedback/FeedbackModals').then(
   module => ({ default: module.FeedbackModals })
 ));
+const TranscriptionResult = lazy(() => import('./components/transcription/TranscriptionResult'));
+const TranscriptionError = lazy(() => import('./components/transcription/TranscriptionError'));
 
 function MainApp() {
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   // Initialize analytics consent
   useConsentManager();
@@ -73,6 +77,11 @@ function MainApp() {
 
       <FeedbackModals />
       <ChangelogModal onClose={closeChangelogModal} />
+
+      <Suspense fallback={<div>Loading...</div>}>
+        {showResult && <TranscriptionResult />}
+        {showError && <TranscriptionError />}
+      </Suspense>
 
       <Toaster />
     </div>

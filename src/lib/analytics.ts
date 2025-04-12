@@ -3,14 +3,10 @@ let analyticsLoaded = false;
 export const loadAnalytics = async () => {
   if (analyticsLoaded) return;
 
-  const [ReactGA, Clarity] = await Promise.all([
-    import('react-ga4').then(module => module.default),
-    import('@microsoft/clarity').then(module => module.default)
-  ]);
+  // Load analytics libraries only when needed
+  // We're already importing ReactGA directly, so no need to dynamically import it again
 
-  // Initialize analytics with these modules
-  // ...
-
+  // Initialize when loaded
   analyticsLoaded = true;
 };
 

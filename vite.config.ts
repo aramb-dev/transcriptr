@@ -22,10 +22,26 @@ export default defineConfig({
     outDir: 'dist/client',
     rollupOptions: {
       output: {
-        manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
-          'ui-components': ['./components/ui'],
-          'pdf-utils': ['jspdf', 'docx', 'jszip', 'file-saver']
+        manualChunks: (id) => {
+          // React and related libraries
+          if (id.includes('node_modules/react/') ||
+              id.includes('node_modules/react-dom/') ||
+              id.includes('node_modules/react-router-dom/')) {
+            return 'react-vendor';
+          }
+
+          // UI components
+          if (id.includes('/components/ui/')) {
+            return 'ui-components';
+          }
+
+          // PDF utilities
+          if (id.includes('node_modules/jspdf') ||
+              id.includes('node_modules/docx') ||
+              id.includes('node_modules/jszip') ||
+              id.includes('node_modules/file-saver')) {
+            return 'pdf-utils';
+          }
         }
       }
     },

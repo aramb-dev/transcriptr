@@ -23,16 +23,19 @@
   </form>
   <script type="module" src="/src/main.tsx"></script>
   <script>
+    // Defer tag manager loading until after critical content loads
     window.addEventListener('load', function () {
-      const script = document.createElement('script');
-      script.src = 'https://www.googletagmanager.com/gtag/js?id=G-PZJLV82QQ6';
-      script.async = true;
-      document.head.appendChild(script);
+      setTimeout(function () {
+        const script = document.createElement('script');
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-PZJLV82QQ6';
+        script.async = true;
+        document.head.appendChild(script);
 
-      window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
-      gtag('js', new Date());
-      gtag('config', 'G-PZJLV82QQ6');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-PZJLV82QQ6');
+      }, 1000);  // 1 second delay after page load
     });
   </script>
 </body>
