@@ -22,6 +22,26 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
     {
+      date: '2023-10-15', // Update with your actual release date
+      version: '1.3.0',
+      changes: {
+        new: [
+          'Added support for OGG audio format',
+          'Implemented code splitting for better performance'
+        ],
+        improved: [
+          'Reduced JavaScript bundle size by optimizing imports',
+          'Decreased initial load time with deferred script loading',
+          'Optimized Google Tag Manager loading process'
+        ],
+        fixed: [
+          'Fixed build process issues with manual chunks',
+          'Resolved issues with large JavaScript bundle sizes',
+          'Fixed performance bottlenecks identified in PageSpeed Insights'
+        ]
+      }
+    },
+    {
       date: '2023-07-25',
       version: '1.2.0',
       changes: {
