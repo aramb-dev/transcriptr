@@ -21,15 +21,21 @@ interface ChangeItem {
 export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
+
     {
-      date: 'Tue, 15 Apr 2025', // Assuming today's date or the release date
-      version: '1.4.0', // Incrementing the version
+      date: 'Sun, 13 Apr 2025',
+      version: '1.4.0',
       changes: {
         new: [
+          'Implemented audio upload and transcription functionality with URL support',
+          'Added SEO and social meta tags',
+          'Integrated branding assets (favicon, social image)',
           'Introduced LoadingFallback component for lazy-loaded routes.',
           'Created cleanup service for managing temporary files in Firebase.',
         ],
         improved: [
+          'Enhanced polling mechanism to fix timing issues',
+          'Refactored polling logic into custom hook `useTranscriptionPolling`',
           'Replaced MainApp component with MainLayout for better organization.',
           'Refactored UploadAudio component to utilize new FileUploadInput and UrlInput components.',
           'Added cleanup functionality for temporary files in Firebase after transcription.',
@@ -37,38 +43,6 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
           'Enhanced URL validation logic in UploadAudio component.',
           'Updated Firebase upload utility to handle base64 data uploads.',
           'Improved error handling and logging in Replicate API interactions.',
-        ],
-        fixed: [] // Add any fixes if applicable, otherwise leave empty or omit
-      }
-    },
-    {
-      date: 'Mon, 14 Apr 2025',
-      version: '1.3.2',
-      changes: {
-        new: [
-          'Added ad blocker detection to consent flow',
-        ],
-        improved: [
-          'Improved performance of the consent flow',
-          'Enhanced consent management logic to prevent duplicate prompts',
-        ],
-        fixed: [
-          'Resolved issue causing duplicate cookie consent notices',
-        ]
-      }
-    },
-    {
-      date: 'Sun, 13 Apr 2025',
-      version: '1.3.1',
-      changes: {
-        new: [
-          'Implemented audio upload and transcription functionality with URL support',
-          'Added SEO and social meta tags',
-          'Integrated branding assets (favicon, social image)',
-        ],
-        improved: [
-          'Enhanced polling mechanism to fix timing issues',
-          'Refactored polling logic into custom hook `useTranscriptionPolling`',
         ],
         fixed: [
           'Resolved issue where polling stopped prematurely due to state update timing',
