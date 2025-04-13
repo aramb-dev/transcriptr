@@ -44,11 +44,8 @@ export const initializeAnalytics = (consent: boolean | string = false) => {
 
   // Only initialize Clarity with full consent
   if (clarityId && fullConsent) {
-    Clarity.init({
-      projectId: clarityId,
-      upload: 'always',
-      delay: 500, // Small delay to ensure the page is loaded
-    });
+    // Pass only the project ID string to Clarity.init
+    Clarity.init(clarityId);
   }
 };
 
@@ -59,10 +56,8 @@ export const enableAnalytics = () => {
 
   if (clarityId) {
     // For Clarity, we need to reinitialize with consent
-    Clarity.init({
-      projectId: clarityId,
-      upload: 'always',
-    });
+    // Pass only the project ID string to Clarity.init
+    Clarity.init(clarityId);
   }
 
   if (googleAnalyticsId && ReactGA.isInitialized) {

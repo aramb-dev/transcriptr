@@ -22,6 +22,22 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
     {
+      date: 'Mon, 14 Apr 2025',
+      version: '1.3.2',
+      changes: {
+        new: [
+          'Added ad blocker detection to consent flow',
+        ],
+        improved: [
+          'Improved performance of the consent flow',
+          'Enhanced consent management logic to prevent duplicate prompts',
+        ],
+        fixed: [
+          'Resolved issue causing duplicate cookie consent notices',
+        ]
+      }
+    },
+    {
       date: 'Sun, 13 Apr 2025',
       version: '1.3.1',
       changes: {
@@ -201,28 +217,28 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
     <div className={`bg-white dark:bg-gray-800 ${isModal ? 'rounded-lg shadow-xl' : 'rounded-xl shadow-lg'} overflow-hidden`}>
       <div className="p-6 sm:p-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Changelog</h1>
+          <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Changelog</h2>
           {isModal && onClose && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onClose}
-              className="h-8 w-8 rounded-full"
-              aria-label="Close changelog"
-            >
+            <Button variant="ghost" size="icon" onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
               <X className="h-5 w-5" />
             </Button>
           )}
         </div>
 
-        <div className="space-y-10">
+        {/* Timeline */}
+        <div className="relative space-y-8">
           {changelogItems.map((item, index) => (
-            <div key={index} className="relative">
-              <div className="flex items-baseline mb-3">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">v{item.version}</h2>
-                <span className="ml-3 text-sm text-gray-500 dark:text-gray-400">{item.date}</span>
+            <div key={index} className="relative flex items-start sm:space-x-4">
+              {/* Date and Version */}
+              <div className="flex-shrink-0 w-24 sm:w-32 text-right sm:text-left pr-4 sm:pr-0">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{item.date}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">v{item.version}</p>
               </div>
 
+              {/* Dot */}
+              <div className="absolute left-0 sm:left-[calc(8rem+1rem-4px)] top-1 w-2 h-2 bg-blue-500 rounded-full mt-1 hidden sm:block" />
+
+              {/* Changes */}
               <div className="space-y-4 pl-0 sm:pl-4">
                 {item.changes.new && item.changes.new.length > 0 && (
                   <div>
