@@ -22,6 +22,24 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
     {
+      date: 'Sun, 13 Apr 2025',
+      version: '1.3.1',
+      changes: {
+        new: [
+          'Implemented audio upload and transcription functionality with URL support',
+          'Added SEO and social meta tags',
+          'Integrated branding assets (favicon, social image)',
+        ],
+        improved: [
+          'Enhanced polling mechanism to fix timing issues',
+          'Refactored polling logic into custom hook `useTranscriptionPolling`',
+        ],
+        fixed: [
+          'Resolved issue where polling stopped prematurely due to state update timing',
+        ]
+      }
+    },
+    {
       date: 'Sat, 12 Apr 2025',
       version: '1.3.0',
       changes: {
