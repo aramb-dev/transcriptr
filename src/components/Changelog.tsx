@@ -22,6 +22,26 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
     {
+      date: 'Tue, 15 Apr 2025', // Assuming today's date or the release date
+      version: '1.4.0', // Incrementing the version
+      changes: {
+        new: [
+          'Introduced LoadingFallback component for lazy-loaded routes.',
+          'Created cleanup service for managing temporary files in Firebase.',
+        ],
+        improved: [
+          'Replaced MainApp component with MainLayout for better organization.',
+          'Refactored UploadAudio component to utilize new FileUploadInput and UrlInput components.',
+          'Added cleanup functionality for temporary files in Firebase after transcription.',
+          'Implemented lazy loading for transcription-related components in MainLayout.',
+          'Enhanced URL validation logic in UploadAudio component.',
+          'Updated Firebase upload utility to handle base64 data uploads.',
+          'Improved error handling and logging in Replicate API interactions.',
+        ],
+        fixed: [] // Add any fixes if applicable, otherwise leave empty or omit
+      }
+    },
+    {
       date: 'Mon, 14 Apr 2025',
       version: '1.3.2',
       changes: {

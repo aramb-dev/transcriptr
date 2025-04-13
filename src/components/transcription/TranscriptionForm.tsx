@@ -14,6 +14,7 @@ import {
 import { trackEvent } from '../../lib/analytics';
 import { isLargeFile, uploadLargeFile } from '../../lib/storage-service';
 import { isFormatSupportedByReplicate } from '../../lib/audio-conversion';
+import { cleanupFirebaseFile } from '../../lib/cleanup-service';
 import { Button } from '../ui/button';
 
 // Constants are defined in environment variables
@@ -27,6 +28,7 @@ export function TranscriptionForm() {
   const [progress, setProgress] = useState(0);
   const [copySuccess, setCopySuccess] = useState(false);
   const [currentPredictionId, setCurrentPredictionId] = useState<string | null>(null);
+  const [firebaseFilePath, setFirebaseFilePath] = useState<string | null>(null);
 
   // Use the polling hook with callbacks
   const { stopPolling } = useTranscriptionPolling({
@@ -51,6 +53,17 @@ export function TranscriptionForm() {
         }
       }
       setTranscription(finalTranscription);
+
+      // Cleanup Firebase file if exists when transcription is complete
+      if (firebaseFilePath) {
+        cleanupFirebaseFile(firebaseFilePath)
+          .then(success => {
+            if (success) {
+              console.log('Temporary file cleaned up successfully');
+              setFirebaseFilePath(null);
+            }
+          });
+      }
     },
     onError: (errorMsg) => {
       setError(errorMsg);
@@ -106,6 +119,7 @@ export function TranscriptionForm() {
     setCurrentPredictionId(null); // Clear previous prediction ID
     setTransStatus('starting'); // <--- SET STATUS TO STARTING HERE
     setProgress(5);
+    setFirebaseFilePath(null); // Reset Firebase file path
 
     const requestBody: {
       options: {
@@ -149,7 +163,7 @@ export function TranscriptionForm() {
           try {
             const uploadResult = await uploadLargeFile(file);
             requestBody.audioUrl = uploadResult.url; // Use Firebase URL
-            firebaseFilePath = uploadResult.path;
+            setFirebaseFilePath(uploadResult.path); // Store the path for cleanup later
             setProgress(20);
             setApiResponses(prev => [...prev, { timestamp: new Date(), data: { message: 'File uploaded to temporary storage.', url: uploadResult.url } }]);
           } catch (uploadError) {
@@ -268,7 +282,32 @@ export function TranscriptionForm() {
     setProgress(0);
     setApiResponses([]);
     setShowApiDetails(false);
+
+    // Cleanup Firebase file if exists when resetting
+    if (firebaseFilePath) {
+      cleanupFirebaseFile(firebaseFilePath)
+        .then(success => {
+          if (success) {
+            console.log('Temporary file cleaned up on reset');
+            setFirebaseFilePath(null);
+          }
+        });
+    }
   };
+
+  // Use effect to ensure we cleanup files when component unmounts
+  useEffect(() => {
+    return () => {
+      if (firebaseFilePath) {
+        cleanupFirebaseFile(firebaseFilePath)
+          .then(success => {
+            if (success) {
+              console.log('Temporary file cleaned up on component unmount');
+            }
+          });
+      }
+    };
+  }, [firebaseFilePath]);
 
   return (
     <>
