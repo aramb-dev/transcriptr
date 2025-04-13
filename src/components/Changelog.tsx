@@ -22,77 +22,162 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
     {
-      date: '2023-10-15', // Update with your actual release date
+      date: 'Sat, 12 Apr 2025',
       version: '1.3.0',
       changes: {
         new: [
-          'Added support for OGG audio format',
-          'Implemented code splitting for better performance'
+          'Added OGG support',
+          'Optimized analytics loading',
+          'Enhanced chunking strategy for improved performance'
         ],
         improved: [
-          'Reduced JavaScript bundle size by optimizing imports',
-          'Decreased initial load time with deferred script loading',
-          'Optimized Google Tag Manager loading process'
+          'Performance optimizations across the application'
         ],
-        fixed: [
-          'Fixed build process issues with manual chunks',
-          'Resolved issues with large JavaScript bundle sizes',
-          'Fixed performance bottlenecks identified in PageSpeed Insights'
-        ]
+        fixed: []
       }
     },
     {
-      date: '2023-07-25',
-      version: '1.2.0',
-      changes: {
-        new: [
-          'Added PDF generation using Printerz templates',
-          'Added support for speaker diarization',
-          'Added this changelog to track updates'
-        ],
-        improved: [
-          'Enhanced transcription accuracy with new Whisper models',
-          'Improved error handling during file uploads'
-        ],
-        fixed: [
-          'Fixed CORS issues with Firebase Storage',
-          'Fixed UI glitches in dark mode',
-          'Fixed PDF preview functionality'
-        ]
-      }
-    },
-    {
-      date: '2023-06-10',
-      version: '1.1.0',
-      changes: {
-        new: [
-          'Added DOCX document export format',
-          'Added feedback submission system',
-          'Implemented Google Analytics and Microsoft Clarity (opt-in)'
-        ],
-        improved: [
-          'Better mobile responsiveness across all screens',
-          'Faster audio processing with optimized file handling'
-        ],
-        fixed: [
-          'Fixed bug where large files would fail to upload',
-          'Resolved issues with Markdown formatting in the export'
-        ]
-      }
-    },
-    {
-      date: '2023-05-01',
+      date: 'Fri, 11 Apr 2025',
       version: '1.0.0',
       changes: {
         new: [
-          'Initial release of Transcriptr',
-          'Support for MP3, WAV, and FLAC audio formats',
-          'Multiple export formats: TXT, MD',
-          'Language detection and selection'
+          'Added changelog and feedback components',
+          'Added Google site verification HTML file',
+          'Implemented dynamic imports for performance optimization',
+          'Added Google Analytics integration',
+          'Added TranscriptionProcessing and TranscriptionResult components',
+          'Added PDF and DOCX generation capabilities'
+        ],
+        improved: [
+          'Enhanced header and footer for changelog access'
+        ],
+        fixed: []
+      }
+    },
+    {
+      date: 'Wed, 9 Apr 2025',
+      version: '0.5.0',
+      changes: {
+        new: [
+          'Integrated cookie consent management with analytics tracking',
+          'Added ad blocker detection',
+          'Added Terms of Service and Privacy Policy components'
+        ],
+        improved: [
+          'Analytics initialization to use new Clarity library'
+        ],
+        fixed: []
+      }
+    },
+    {
+      date: 'Tue, 8 Apr 2025',
+      version: '0.4.0',
+      changes: {
+        new: [
+          'Added feedback form and modal for user feedback collection',
+          'Added Firebase configuration files',
+          'Added HTML template and instructions for template generation',
+          'Added .hintrc configuration file',
+          'Enhanced PDF generation with Firebase upload'
+        ],
+        improved: [
+          'Updated feedback modals to use specific IDs',
+          'Enhanced feedback form handling with device info detection',
+          'Updated README with environment variables section'
+        ],
+        fixed: []
+      }
+    },
+    {
+      date: 'Mon, 7 Apr 2025',
+      version: '0.3.0',
+      changes: {
+        new: [
+          'Added PDF generation support with pdfMake',
+          'Integrated Printerz API for PDF generation',
+          'Added customizable title input for PDFs'
+        ],
+        improved: [
+          'Refactored code structure for improved readability'
+        ],
+        fixed: [
+          'Refactored PDF generation to remove unused code'
         ]
+      }
+    },
+    {
+      date: 'Mon, 31 Mar 2025',
+      version: '0.2.0',
+      changes: {
+        new: [
+          'Added Firebase integration for file storage',
+          'Implemented FFmpeg download script',
+          'Added audio conversion functionality',
+          'Added CloudConvert function for audio conversion',
+          'Implemented cookie consent management'
+        ],
+        improved: [
+          'Enhanced dark mode support with improved text colors',
+          'Updated audio format support and user guidance',
+          'Refactored download-ffmpeg script to use ESM imports'
+        ],
+        fixed: [
+          'Firebase file upload handling and cleanup process',
+          'Implemented alternative FFmpeg download script',
+          'Updated Netlify configuration',
+          'Added debug environment function and enhanced file conversion error handling'
+        ]
+      }
+    },
+    {
+      date: 'Tue, 18 Mar 2025',
+      version: '0.1.1',
+      changes: {
+        new: [
+          'Added Netlify deployment support with API functions'
+        ],
+        improved: [
+          'Updated .gitignore to include .env and .netlify folders'
+        ],
+        fixed: [
+          'Disabled dark mode by changing Tailwind configuration',
+          'Updated Netlify build command and TypeScript configuration'
+        ]
+      }
+    },
+    {
+      date: 'Mon, 17 Mar 2025',
+      version: '0.1.0',
+      changes: {
+        new: [
+          'Implemented custom file input hook',
+          'Added audio upload component with improved error handling',
+          'Enhanced Tailwind CSS configuration with backdrop filter and typography plugin',
+          'Added Prettier configuration',
+          'Updated README with project overview and setup instructions'
+        ],
+        improved: [
+          'Audio transcription handling with improved error management',
+          'Audio upload component layout',
+          'TypeScript settings for module interoperability'
+        ],
+        fixed: []
+      }
+    },
+    {
+      date: 'Sun, 16 Mar 2025',
+      version: '0.0.1',
+      changes: {
+        new: [
+          'Initial project setup with Vite, React, and TypeScript',
+          'Added environment configuration, PostCSS, and ESLint'
+        ],
+        improved: [],
+        fixed: []
       }
     }
   ];
+
 
   const content = (
     <div className={`bg-white dark:bg-gray-800 ${isModal ? 'rounded-lg shadow-xl' : 'rounded-xl shadow-lg'} overflow-hidden`}>
