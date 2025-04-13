@@ -1,0 +1,13 @@
+
+
+# Allow all web crawlers to index the site
+User-agent: *
+Allow: /
+
+# Disallow access to sensitive directories (if any)
+Disallow: /api/
+Disallow: /scripts/
+Disallow: /netlify/
+
+# Sitemap location
+Sitemap: https://transcriptr.aramb.dev/sitemap.xml
