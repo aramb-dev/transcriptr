@@ -3,7 +3,7 @@ import { useTranscriptionPolling } from '@/hooks/useTranscriptionPolling';
 import { UploadAudio } from '../UploadAudio';
 import { TranscriptionProcessing } from './TranscriptionProcessing';
 import { TranscriptionError } from './TranscriptionError';
-import { TranscriptionResult } from './TranscriptionResult';
+import TranscriptionResult from './TranscriptionResult';
 import {
   TranscriptionStatus,
   statusMessages,
@@ -16,10 +16,10 @@ import { isLargeFile, uploadLargeFile } from '../../lib/storage-service';
 import { isFormatSupportedByReplicate } from '../../lib/audio-conversion';
 import { cleanupFirebaseFile } from '../../lib/cleanup-service';
 import { Button } from '../ui/button';
+import { motion } from 'framer-motion';
+import { fadeInUp, springTransition } from '../../lib/animations';
 
-// Constants are defined in environment variables
-
-export function TranscriptionForm() {
+export function TranscriptionForm({ onShowSuccess }) {
   const [transcription, setTranscription] = useState<string | null>(null);
   const [transStatus, setTransStatus] = useState<TranscriptionStatus>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +29,7 @@ export function TranscriptionForm() {
   const [copySuccess, setCopySuccess] = useState(false);
   const [currentPredictionId, setCurrentPredictionId] = useState<string | null>(null);
   const [firebaseFilePath, setFirebaseFilePath] = useState<string | null>(null);
+  const [isLoadingState, setIsLoadingState] = useState(false);
 
   // Use the polling hook with callbacks
   const { stopPolling } = useTranscriptionPolling({
@@ -310,31 +311,38 @@ export function TranscriptionForm() {
   }, [firebaseFilePath]);
 
   return (
-    <>
-      {isLoading ? (
-        <TranscriptionProcessing
-          progress={progress}
-          transStatus={transStatus as 'starting' | 'processing'}
-          getProgressColor={getProgressColor}
-          statusMessages={statusMessages}
-          showApiDetails={showApiDetails}
-          setShowApiDetails={setShowApiDetails}
-          apiResponses={apiResponses}
-          formatTimestamp={formatTimestamp}
-          onCancel={handleReset}
-        />
-      ) : transStatus === 'failed' || transStatus === 'canceled' ? (
-        <TranscriptionError
-          status={transStatus as 'failed' | 'canceled'}
-          error={error}
-          onReset={handleReset}
-          apiResponses={apiResponses}
-          showApiDetails={showApiDetails}
-          setShowApiDetails={setShowApiDetails}
-          formatTimestamp={formatTimestamp}
-        />
-      ) : transcription !== null && transStatus === 'succeeded' ? ( // Check for transcription text and succeeded status
-         <div className="p-8">
+    <motion.div
+      variants={fadeInUp}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={springTransition}
+    >
+      <div className="p-6">
+        {isLoading ? (
+          <TranscriptionProcessing
+            progress={progress}
+            transStatus={transStatus as 'starting' | 'processing'}
+            getProgressColor={getProgressColor}
+            statusMessages={statusMessages}
+            showApiDetails={showApiDetails}
+            setShowApiDetails={setShowApiDetails}
+            apiResponses={apiResponses}
+            formatTimestamp={formatTimestamp}
+            onCancel={handleReset}
+          />
+        ) : transStatus === 'failed' || transStatus === 'canceled' ? (
+          <TranscriptionError
+            status={transStatus as 'failed' | 'canceled'}
+            error={error}
+            onReset={handleReset}
+            apiResponses={apiResponses}
+            showApiDetails={showApiDetails}
+            setShowApiDetails={setShowApiDetails}
+            formatTimestamp={formatTimestamp}
+          />
+        ) : transcription !== null && transStatus === 'succeeded' ? ( // Check for transcription text and succeeded status
+          <div className="p-8">
             <TranscriptionResult transcription={transcription} />
             {/* Buttons moved outside TranscriptionResult */}
             <div className="px-8 py-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-100 dark:border-gray-700 flex justify-center gap-4 mt-4">
@@ -365,11 +373,12 @@ export function TranscriptionForm() {
               </Button>
             </div>
           </div>
-      ) : ( // Default: show upload form when idle or if something unexpected happened
-        <div className="p-8">
-          <UploadAudio onUpload={handleUpload} />
-        </div>
-      )}
-    </>
+        ) : ( // Default: show upload form when idle or if something unexpected happened
+          <div className="p-8">
+            <UploadAudio onUpload={handleUpload} />
+          </div>
+        )}
+      </div>
+    </motion.div>
   );
 }

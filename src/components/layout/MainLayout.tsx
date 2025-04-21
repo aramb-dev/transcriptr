@@ -1,46 +1,41 @@
-import { useState, lazy, Suspense } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { ChangelogModal } from '@/components/ChangelogModal';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
-import { Toaster } from '@/components/ui/sonner';
-import { useConsentManager } from '@/components/analytics/ConsentManager';
+import { Suspense, useState, useEffect, lazy } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Card, CardContent } from '../ui/card';
+import { Header } from './Header';
+import { Footer } from './Footer';
+import { TranscriptionForm } from '../transcription/TranscriptionForm';
+import { Toaster } from 'sonner';
+import { FeedbackModals } from '../feedback/FeedbackModals';
+import { ChangelogModal } from '../ChangelogModal';
+import { fadeInUp, slideInRight, expandCenter, fadeOutDown, exitTransition } from '../../lib/animations';
 
-// Lazy load components used within MainLayout
-const TranscriptionForm = lazy(() => import('@/components/transcription/TranscriptionForm').then(
-  module => ({ default: module.TranscriptionForm })
-));
-const FeedbackModals = lazy(() => import('@/components/feedback/FeedbackModals').then(
-  module => ({ default: module.FeedbackModals })
-));
-const TranscriptionResult = lazy(() => import('@/components/transcription/TranscriptionResult'));
-const TranscriptionError = lazy(() => import('@/components/transcription/TranscriptionError'));
-
+const TranscriptionResult = lazy(() => import('../transcription/TranscriptionResult'));
+const TranscriptionError = lazy(() => import('../transcription/TranscriptionError'));
 
 export function MainLayout() {
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showResult, setShowResult] = useState(false); // Assuming these might be needed later or managed differently
-  const [showError, setShowError] = useState(false);   // Assuming these might be needed later or managed differently
+  const [showResult, setShowResult] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [showChangelogModal, setShowChangelogModal] = useState(false);
 
-  // Initialize analytics consent
-  useConsentManager();
-
+  // Updated to use the new window method instead of direct DOM manipulation
   const openFeedbackModal = (type: 'general' | 'issue' | 'feature') => {
-    // Consider using a more React-idiomatic way to show/hide modals if possible (e.g., state)
-    document.getElementById(`${type}-feedback-modal`)?.classList.remove('hidden');
+    if (window.openFeedbackModal) {
+      window.openFeedbackModal(type);
+    }
   };
 
   const openChangelogModal = () => {
-    document.getElementById('changelog-modal')?.classList.remove('hidden');
+    setShowChangelogModal(true);
   };
 
   const closeChangelogModal = () => {
-    document.getElementById('changelog-modal')?.classList.add('hidden');
+    setShowChangelogModal(false);
   };
 
   const handleShowSuccess = () => {
     setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000); // Consider using toast notifications via Toaster
+    setTimeout(() => setShowSuccess(false), 3000);
   };
 
   return (
@@ -48,39 +43,86 @@ export function MainLayout() {
       <div className="container mx-auto px-4 max-w-4xl">
         <Header onOpenChangelog={openChangelogModal} />
 
-        <Card className="w-full overflow-hidden border-0 shadow-lg rounded-xl dark:bg-gray-800/60 dark:backdrop-blur-sm">
-          <CardContent className="p-0">
-             <Suspense fallback={<div className="p-8 text-center">Loading form...</div>}>
-                <TranscriptionForm onShowSuccess={handleShowSuccess} />
-             </Suspense>
-          </CardContent>
-        </Card>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key="card"
+            variants={expandCenter}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={exitTransition}
+          >
+            <Card className="w-full overflow-hidden border-0 shadow-lg rounded-xl dark:bg-gray-800/60 dark:backdrop-blur-sm">
+              <CardContent className="p-0">
+                <Suspense fallback={<div className="p-8 text-center">Loading form...</div>}>
+                  <TranscriptionForm onShowSuccess={handleShowSuccess} />
+                </Suspense>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </AnimatePresence>
       </div>
 
-      {/* Consider replacing this custom success message with a toast notification */}
-      {showSuccess && (
-        <div className="fixed top-4 right-4 bg-green-100 dark:bg-green-900/70 p-4 rounded-lg shadow-lg flex items-center gap-3 animate-in slide-in-from-top">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600 dark:text-green-400">
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-            <polyline points="22 4 12 14.01 9 11.01"></polyline>
-          </svg>
-          <span className="text-green-800 dark:text-green-200 font-medium">Transcription complete!</span>
-        </div>
-      )}
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            className="fixed top-4 right-4 bg-green-100 dark:bg-green-900/70 p-4 rounded-lg shadow-lg flex items-center gap-3"
+            variants={slideInRight}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={exitTransition}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600 dark:text-green-400">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span className="text-green-800 dark:text-green-200 font-medium">Transcription complete!</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <Footer onOpenFeedbackModal={openFeedbackModal} onOpenChangelog={openChangelogModal} />
 
-      {/* Lazy load modals */}
       <Suspense fallback={null}>
         <FeedbackModals />
       </Suspense>
-      <ChangelogModal onClose={closeChangelogModal} />
 
-      {/* Result/Error display might need context or state lifting */}
-      <Suspense fallback={<div>Loading result...</div>}>
-        {showResult && <TranscriptionResult />}
-        {showError && <TranscriptionError />}
-      </Suspense>
+      <AnimatePresence>
+        {showChangelogModal && <ChangelogModal onClose={closeChangelogModal} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showResult && (
+          <Suspense fallback={<div>Loading result...</div>}>
+            <motion.div
+              variants={fadeInUp}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={exitTransition}
+            >
+              <TranscriptionResult />
+            </motion.div>
+          </Suspense>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showError && (
+          <Suspense fallback={<div>Loading error details...</div>}>
+            <motion.div
+              variants={fadeInUp}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={exitTransition}
+            >
+              <TranscriptionError />
+            </motion.div>
+          </Suspense>
+        )}
+      </AnimatePresence>
 
       <Toaster />
     </div>

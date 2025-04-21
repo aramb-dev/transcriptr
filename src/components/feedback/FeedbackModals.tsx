@@ -1,74 +1,78 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { FeedbackForm } from './FeedbackForm';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X } from 'lucide-react';
+import { AnimatedBackdrop } from '../ui/animated-backdrop';
+
+type FeedbackType = 'general' | 'issue' | 'feature';
 
 export function FeedbackModals() {
+  const [activeModal, setActiveModal] = useState<FeedbackType | null>(null);
+
+  // Replace the global window.feedbackType with a proper state management approach
+  React.useEffect(() => {
+    // Create a global access point for other components to open the modal
+    window.openFeedbackModal = (type: FeedbackType) => {
+      setActiveModal(type);
+    };
+
+    return () => {
+      window.openFeedbackModal = undefined;
+    };
+  }, []);
+
+  // For modal titles
+  const modalTitles = {
+    general: "Provide Feedback",
+    issue: "Report an Issue",
+    feature: "Suggest a Feature"
+  };
+
   return (
-    <>
-      {/* General Feedback Modal */}
-      <div
-        id="general-feedback-modal"
-        className="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-      >
-        <div className="relative w-full max-w-md">
-          <button
-            onClick={() => document.getElementById('general-feedback-modal')?.classList.add('hidden')}
-            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            aria-label="Close"
+    <AnimatePresence>
+      {activeModal && (
+        <AnimatedBackdrop onClick={() => setActiveModal(null)}>
+          <motion.div
+            className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
+            transition={{
+              type: "spring",
+              damping: 25,
+              stiffness: 300
+            }}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          <FeedbackForm
-            initialType="general"
-            onClose={() => document.getElementById('general-feedback-modal')?.classList.add('hidden')}
-          />
-        </div>
-      </div>
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+                  {modalTitles[activeModal]}
+                </h2>
+                <button
+                  onClick={() => setActiveModal(null)}
+                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
-      {/* Issue Report Modal */}
-      <div
-        id="issue-feedback-modal"
-        className="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-      >
-        <div className="relative w-full max-w-md">
-          <button
-            onClick={() => document.getElementById('issue-feedback-modal')?.classList.add('hidden')}
-            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            aria-label="Close"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          <FeedbackForm
-            initialType="issue"
-            onClose={() => document.getElementById('issue-feedback-modal')?.classList.add('hidden')}
-          />
-        </div>
-      </div>
-
-      {/* Feature Request Modal */}
-      <div
-        id="feature-feedback-modal"
-        className="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-      >
-        <div className="relative w-full max-w-md">
-          <button
-            onClick={() => document.getElementById('feature-feedback-modal')?.classList.add('hidden')}
-            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-            aria-label="Close"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          <FeedbackForm
-            initialType="feature"
-            onClose={() => document.getElementById('feature-feedback-modal')?.classList.add('hidden')}
-          />
-        </div>
-      </div>
-    </>
+              <FeedbackForm
+                initialType={activeModal}
+                onClose={() => setActiveModal(null)}
+              />
+            </div>
+          </motion.div>
+        </AnimatedBackdrop>
+      )}
+    </AnimatePresence>
   );
+}
+
+// Add a proper TypeScript interface for the window object
+declare global {
+  interface Window {
+    openFeedbackModal?: (type: 'general' | 'issue' | 'feature') => void;
+    feedbackType: 'general' | 'issue' | 'feature' | 'other';
+  }
 }

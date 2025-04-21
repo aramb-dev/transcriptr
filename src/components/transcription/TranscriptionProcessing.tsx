@@ -34,13 +34,13 @@ export function TranscriptionProcessing({
               : transStatus.charAt(0).toUpperCase() + transStatus.slice(1)}
           </span>
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {progress}%
+            {Math.floor(progress)}%
           </span>
         </div>
         <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
           <div
             className={`h-2.5 rounded-full transition-all duration-500 ${getProgressColor()}`}
-            style={{ width: `${progress}%` }}
+            style={{ width: `${Math.floor(progress)}%` }}
           ></div>
         </div>
       </div>

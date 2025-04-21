@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { staggerContainer, staggerItem } from '../../lib/animations';
+import { motion } from 'framer-motion';
 
 type FeedbackType = 'general' | 'issue' | 'feature' | 'other';
 
@@ -218,7 +220,10 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
           </div>
         </div>
       ) : (
-        <form
+        <motion.form
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
           onSubmit={handleSubmit}
           name="feedback"
           method="post"
@@ -255,89 +260,97 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
             </Select>
           </div>
 
-          <div>
-            <Label htmlFor="name" className="block text-sm font-medium mb-1">
-              Name
-            </Label>
-            <Input
-              id="name"
-              name="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Your name"
-              required
-              className="w-full"
-            />
-          </div>
+          <motion.div variants={staggerItem}>
+            <div>
+              <Label htmlFor="name" className="block text-sm font-medium mb-1">
+                Name
+              </Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name"
+                required
+                className="w-full"
+              />
+            </div>
+          </motion.div>
 
-          <div>
-            <Label htmlFor="email" className="block text-sm font-medium mb-1">
-              Email <span className="text-gray-500 dark:text-gray-400 font-normal">(optional)</span>
-            </Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your email address"
-              className="w-full"
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              We only use your email if we need to contact you about your {feedbackType === 'issue' ? 'issue' : 'feedback'}.
-            </p>
-          </div>
+          <motion.div variants={staggerItem}>
+            <div>
+              <Label htmlFor="email" className="block text-sm font-medium mb-1">
+                Email <span className="text-gray-500 dark:text-gray-400 font-normal">(optional)</span>
+              </Label>
+              <Input
+                id="email"
+                name="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Your email address"
+                className="w-full"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                We only use your email if we need to contact you about your {feedbackType === 'issue' ? 'issue' : 'feedback'}.
+              </p>
+            </div>
+          </motion.div>
 
           {feedbackType === 'issue' && (
             <>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="browser" className="block text-sm font-medium mb-1">
-                    Browser <span className="text-gray-500 dark:text-gray-400 font-normal text-xs">(auto-detected)</span>
-                  </Label>
-                  <Input
-                    id="browser"
-                    name="browser"
-                    type="text"
-                    value={browser}
-                    onChange={(e) => setBrowser(e.target.value)}
-                    placeholder="Chrome, Firefox, etc."
-                    className="w-full"
-                  />
+              <motion.div variants={staggerItem}>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="browser" className="block text-sm font-medium mb-1">
+                      Browser <span className="text-gray-500 dark:text-gray-400 font-normal text-xs">(auto-detected)</span>
+                    </Label>
+                    <Input
+                      id="browser"
+                      name="browser"
+                      type="text"
+                      value={browser}
+                      onChange={(e) => setBrowser(e.target.value)}
+                      placeholder="Chrome, Firefox, etc."
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="operating-system" className="block text-sm font-medium mb-1">
+                      Operating System <span className="text-gray-500 dark:text-gray-400 font-normal text-xs">(auto-detected)</span>
+                    </Label>
+                    <Input
+                      id="operating-system"
+                      name="operatingSystem"
+                      type="text"
+                      value={operatingSystem}
+                      onChange={(e) => setOperatingSystem(e.target.value)}
+                      placeholder="Windows, macOS, etc."
+                      className="w-full"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="operating-system" className="block text-sm font-medium mb-1">
-                    Operating System <span className="text-gray-500 dark:text-gray-400 font-normal text-xs">(auto-detected)</span>
-                  </Label>
-                  <Input
-                    id="operating-system"
-                    name="operatingSystem"
-                    type="text"
-                    value={operatingSystem}
-                    onChange={(e) => setOperatingSystem(e.target.value)}
-                    placeholder="Windows, macOS, etc."
-                    className="w-full"
-                  />
-                </div>
-              </div>
+              </motion.div>
             </>
           )}
 
-          <div>
-            <Label htmlFor="feedback" className="block text-sm font-medium mb-1">
-              {feedbackType === 'issue' ? 'Issue Details' : feedbackType === 'feature' ? 'Feature Suggestion' : 'Feedback'}
-            </Label>
-            <Textarea
-              id="feedback"
-              name="feedback"
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              placeholder={getPlaceholderText()}
-              required
-              className="w-full min-h-[120px]"
-            />
-          </div>
+          <motion.div variants={staggerItem}>
+            <div>
+              <Label htmlFor="feedback" className="block text-sm font-medium mb-1">
+                {feedbackType === 'issue' ? 'Issue Details' : feedbackType === 'feature' ? 'Feature Suggestion' : 'Feedback'}
+              </Label>
+              <Textarea
+                id="feedback"
+                name="feedback"
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+                placeholder={getPlaceholderText()}
+                required
+                className="w-full min-h-[120px]"
+              />
+            </div>
+          </motion.div>
 
           {submitStatus === 'error' && (
             <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-md p-3 flex items-start">
@@ -368,7 +381,7 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
               {isSubmitting ? 'Submitting...' : 'Submit'}
             </Button>
           </div>
-        </form>
+        </motion.form>
       )}
     </div>
   );

@@ -1,10 +1,18 @@
-import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { MainLayout } from './components/layout/MainLayout'; // Import the new layout
-import { LoadingFallback } from './components/ui/LoadingFallback'; // Import the new loading component
+import { Suspense } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { MainLayout } from './components/layout/MainLayout';
+import { LoadingFallback } from './components/ui/LoadingFallback';
 import { TermsOfService, PrivacyPolicy, Changelog, Feedback } from './components/routes/LazyRoutes';
 
-// Default to general feedback
+// Page Transitions
+const pageVariants = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 }
+};
+
+// Default: General Feedback
 window.feedbackType = 'general';
 
 declare global {
@@ -13,36 +21,79 @@ declare global {
   }
 }
 
-// Keep lazy loading for routes
-// const TranscriptionResult = lazy(() => import('./components/transcription/TranscriptionResult')); // No longer needed here
-// const TranscriptionError = lazy(() => import('./components/transcription/TranscriptionError')); // No longer needed here
-
 export default function App() {
+  const location = useLocation();
+
   return (
-    <Routes>
-      {/* Use MainLayout for the main application route */}
-      <Route path="/" element={<MainLayout />} />
-      {/* Keep lazy loading for other routes */}
-      <Route path="/terms" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <TermsOfService />
-        </Suspense>
-      } />
-      <Route path="/privacy" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <PrivacyPolicy />
-        </Suspense>
-      } />
-      <Route path="/changelog" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <Changelog />
-        </Suspense>
-      } />
-      <Route path="/feedback" element={
-        <Suspense fallback={<LoadingFallback />}>
-          <Feedback />
-        </Suspense>
-      } />
-    </Routes>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
+        <Route
+          path="/"
+          element={
+            <motion.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <MainLayout />
+            </motion.div>
+          }
+        />
+        <Route path="/terms" element={
+          <Suspense fallback={<LoadingFallback />}>
+            <motion.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <TermsOfService />
+            </motion.div>
+          </Suspense>
+        } />
+        <Route path="/privacy" element={
+          <Suspense fallback={<LoadingFallback />}>
+            <motion.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <PrivacyPolicy />
+            </motion.div>
+          </Suspense>
+        } />
+        <Route path="/changelog" element={
+          <Suspense fallback={<LoadingFallback />}>
+            <motion.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <Changelog />
+            </motion.div>
+          </Suspense>
+        } />
+        <Route path="/feedback" element={
+          <Suspense fallback={<LoadingFallback />}>
+            <motion.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <Feedback />
+            </motion.div>
+          </Suspense>
+        } />
+      </Routes>
+    </AnimatePresence>
   );
 }

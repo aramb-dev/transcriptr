@@ -1,5 +1,8 @@
 import React from 'react';
 import { Changelog } from './Changelog';
+import { motion } from 'framer-motion';
+import { scaleDown } from '../lib/animations';
+import { AnimatedBackdrop } from './ui/animated-backdrop';
 
 interface ChangelogModalProps {
   onClose: () => void;
@@ -7,13 +10,18 @@ interface ChangelogModalProps {
 
 export function ChangelogModal({ onClose }: ChangelogModalProps) {
   return (
-    <div
-      id="changelog-modal"
-      className="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-    >
-      <div className="relative w-full max-w-3xl max-h-[90vh] overflow-auto">
+    <AnimatedBackdrop onClick={onClose}>
+      <motion.div
+        className="relative w-full max-w-3xl max-h-[90vh] overflow-auto"
+        onClick={(e) => e.stopPropagation()} // Prevent clicks from closing the modal
+        variants={scaleDown}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={{ type: "spring", damping: 20, stiffness: 300 }}
+      >
         <Changelog isModal={true} onClose={onClose} />
-      </div>
-    </div>
+      </motion.div>
+    </AnimatedBackdrop>
   );
 }

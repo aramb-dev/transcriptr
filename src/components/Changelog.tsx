@@ -23,6 +23,21 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   const changelogItems: ChangeItem[] = [
 
     {
+      date: 'Mon, 21 Apr 2025',
+      version: '1.4.1',
+      changes: {
+        new: [],
+        improved: [
+          'Refractoring and cleaning up code',
+          'Enhanced transcription progress tracking with cleaner percentage ranges',
+        ],
+        fixed: [
+          'Resolved typo where meta tag had placeholder information',
+          'Fixed decimal values in progress percentages for a cleaner UI experience',
+        ]
+      }
+    },
+    {
       date: 'Sun, 13 Apr 2025',
       version: '1.4.0',
       changes: {

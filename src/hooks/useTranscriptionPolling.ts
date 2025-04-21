@@ -51,9 +51,8 @@ export function useTranscriptionPolling({
 
     let attempts = 0;
     const maxAttempts = 335; // About 5 minutes with a 900ms interval
-    const pollIntervalMs = 900;
-    const progressIncrement = (100 - 50) / maxAttempts;
-
+    const pollIntervalMs = 1500;
+    
     console.log(`Polling: Starting for prediction ID: ${id}`);
 
     // Create poll function that uses the closure over id
@@ -72,14 +71,29 @@ export function useTranscriptionPolling({
           console.log(`Prediction status (attempt ${attempts}):`, data);
           onApiResponse({ timestamp: new Date(), data });
 
-          // Update progress more gradually
-          onProgress(Math.min(50 + (attempts * progressIncrement), 98));
-
+          // Update progress based on status
+          let newProgress = 50; // Default starting point for polling
+          
           if (data.status === 'starting') {
+            // 25%-50% range for starting status
             onStatusChange('starting');
+            // Calculate progress within the 25-50% range based on attempts
+            const startingProgressMax = 25; // Max progress to add during starting phase
+            const startingProgress = Math.min(attempts, 20) / 20 * startingProgressMax;
+            newProgress = 25 + Math.floor(startingProgress);
+            // Update progress with the calculated value
+            onProgress(newProgress);
           } else if (data.status === 'processing') {
+            // 50%-100% range for processing status
             onStatusChange('processing');
+            // Calculate progress within the 50-98% range based on attempts
+            const processingProgressMax = 48; // Max progress to add during processing (50 to 98)
+            const processingProgress = Math.min(attempts, 30) / 30 * processingProgressMax;
+            newProgress = 50 + Math.floor(processingProgress);
+            // Update progress with the calculated value
+            onProgress(newProgress);
           } else if (data.status === 'succeeded') {
+            onProgress(100);
             console.log('Transcription succeeded, handling output:', data.output);
             stopPolling();
             onSuccess(data.output);

@@ -7,6 +7,9 @@ export default {
   darkMode: 'class', // Change this from 'media' to 'class'
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['"Space Grotesk"', 'sans-serif'], // Set Space Grotesk as the default sans font
+      },
       colors: {
         border: "var(--border)",
         input: "var(--input)",

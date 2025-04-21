@@ -2,6 +2,8 @@ import { Button } from './ui/button';
 import { AlertCircle, Cookie } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { slideInRight, springTransition } from '../lib/animations';
 
 interface CookieConsentProps {
   onAccept: () => void;
@@ -33,7 +35,14 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, onEssent
       // Show a new toast with ad blocker warning and choice options
       toast.custom(
         (t) => (
-          <div className="w-full max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md overflow-hidden">
+          <motion.div
+            className="font-sans w-full max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md overflow-hidden"
+            variants={slideInRight}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={springTransition}
+          >
             <div className="p-4">
               <div className="flex items-start gap-3">
                 <Cookie className="h-5 w-5 text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0" />
@@ -90,7 +99,7 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, onEssent
                 </Button>
               </div>
             </div>
-          </div>
+          </motion.div>
         ),
         {
           duration: Infinity,
@@ -114,7 +123,14 @@ export function showCookieConsent({ onAccept, onDecline, onEssentialOnly }: Cook
   // Show the initial cookie consent toast
   toast.custom(
     (t) => (
-      <div className="w-full max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md overflow-hidden">
+      <motion.div
+        className="font-sans w-full max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md overflow-hidden"
+        variants={slideInRight}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        transition={springTransition}
+      >
         <div className="p-4">
           <div className="flex items-start gap-3">
             <Cookie className="h-5 w-5 text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0" />
@@ -164,7 +180,7 @@ export function showCookieConsent({ onAccept, onDecline, onEssentialOnly }: Cook
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
     ),
     {
       duration: Infinity,

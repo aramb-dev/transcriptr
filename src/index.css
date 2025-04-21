@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap");
 @import "tailwindcss";
 @import "tailwindcss/utilities";
 
@@ -5,6 +6,8 @@
   --dark-text-primary: #f3f4f6;
   --dark-text-secondary: #d1d5db;
   --dark-text-muted: #9ca3af;
+  --font-sans: "Space Grotesk", sans-serif;
+  font-family: "Space Grotesk", sans-serif;
 }
 
 /* Dark mode text fixes for specific elements */
