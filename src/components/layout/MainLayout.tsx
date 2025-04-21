@@ -7,7 +7,9 @@ import { TranscriptionForm } from '../transcription/TranscriptionForm';
 import { Toaster } from 'sonner';
 import { FeedbackModals } from '../feedback/FeedbackModals';
 import { ChangelogModal } from '../ChangelogModal';
+import TranscriptionHistory from '../transcription/TranscriptionHistory';
 import { fadeInUp, slideInRight, expandCenter, fadeOutDown, exitTransition } from '../../lib/animations';
+import { TranscriptionSession } from '@/lib/persistence-service';
 
 const TranscriptionResult = lazy(() => import('../transcription/TranscriptionResult'));
 const TranscriptionError = lazy(() => import('../transcription/TranscriptionError'));
@@ -17,6 +19,11 @@ export function MainLayout() {
   const [showResult, setShowResult] = useState(false);
   const [showError, setShowError] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [formKey, setFormKey] = useState(Date.now()); // Key to force re-render TranscriptionForm when needed
+  
+  // For handling session selection from history
+  const [selectedSession, setSelectedSession] = useState<TranscriptionSession | null>(null);
 
   // Updated to use the new window method instead of direct DOM manipulation
   const openFeedbackModal = (type: 'general' | 'issue' | 'feature') => {
@@ -32,6 +39,31 @@ export function MainLayout() {
   const closeChangelogModal = () => {
     setShowChangelogModal(false);
   };
+  
+  const openHistoryModal = () => {
+    setShowHistoryModal(true);
+  };
+  
+  const closeHistoryModal = () => {
+    setShowHistoryModal(false);
+  };
+  
+  const handleDeleteSession = async (sessionId: string) => {
+    try {
+      // Import dynamically to prevent circular dependencies
+      const { deleteSession } = await import('@/lib/persistence-service');
+      await deleteSession(sessionId);
+    } catch (error) {
+      console.error('Failed to delete session:', error);
+    }
+  };
+  
+  const handleSelectSession = (session: TranscriptionSession) => {
+    setSelectedSession(session);
+    closeHistoryModal();
+    // Force re-render the TranscriptionForm component to pick up the selected session
+    setFormKey(Date.now());
+  };
 
   const handleShowSuccess = () => {
     setShowSuccess(true);
@@ -41,7 +73,7 @@ export function MainLayout() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 text-gray-900 dark:text-gray-100">
       <div className="container mx-auto px-4 max-w-4xl">
-        <Header onOpenChangelog={openChangelogModal} />
+        <Header onOpenChangelog={openChangelogModal} onShowHistory={openHistoryModal} />
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -55,7 +87,11 @@ export function MainLayout() {
             <Card className="w-full overflow-hidden border-0 shadow-lg rounded-xl dark:bg-gray-800/60 dark:backdrop-blur-sm">
               <CardContent className="p-0">
                 <Suspense fallback={<div className="p-8 text-center">Loading form...</div>}>
-                  <TranscriptionForm onShowSuccess={handleShowSuccess} />
+                  <TranscriptionForm 
+                    key={formKey}
+                    onShowSuccess={handleShowSuccess} 
+                    initialSession={selectedSession}
+                  />
                 </Suspense>
               </CardContent>
             </Card>
@@ -90,6 +126,17 @@ export function MainLayout() {
 
       <AnimatePresence>
         {showChangelogModal && <ChangelogModal onClose={closeChangelogModal} />}
+      </AnimatePresence>
+      
+      <AnimatePresence>
+        {showHistoryModal && (
+          <TranscriptionHistory 
+            open={showHistoryModal}
+            onOpenChange={setShowHistoryModal}
+            onSelectSession={handleSelectSession}
+            onDeleteSession={handleDeleteSession}
+          />
+        )}
       </AnimatePresence>
 
       <AnimatePresence>

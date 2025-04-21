@@ -26,10 +26,15 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
       date: 'Mon, 21 Apr 2025',
       version: '1.4.1',
       changes: {
-        new: [],
+        new: [
+          'Added dialog component for improved user interactions',
+          'Implemented session persistence for transcriptions',
+          'Added transcription history feature'
+        ],
         improved: [
           'Refractoring and cleaning up code',
           'Enhanced transcription progress tracking with cleaner percentage ranges',
+          'Redesigned layout components for better user experience'
         ],
         fixed: [
           'Resolved typo where meta tag had placeholder information',
