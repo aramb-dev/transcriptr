@@ -11,16 +11,7 @@ export async function handler(event, context) {
 
   try {
     // Parse the URL from the request body
-    let body;
-    try {
-      body = JSON.parse(event.body);
-    } catch (e) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ error: 'Invalid JSON in request body' })
-      };
-    }
-
+    const body = JSON.parse(event.body);
     const { url } = body;
 
     if (!url || !url.includes('firebasestorage.googleapis.com')) {

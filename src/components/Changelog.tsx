@@ -21,7 +21,22 @@ interface ChangeItem {
 export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
-
+    {
+      date: 'Mon, 22 Apr 2025',
+      version: '1.4.2',
+      changes: {
+        improved: [
+          'Refactored code to reduce cognitive complexity in transcription processing',
+          'Enhanced exception handling in Firebase proxy service',
+          'Optimized Replicate client by removing unused variables'
+        ],
+        fixed: [
+          'Fixed ignored exceptions in Firebase proxy service',
+          'Removed useless variable assignment in Replicate client',
+          'Reduced complexity in transcribe function for better maintainability'
+        ]
+      }
+    },
     {
       date: 'Mon, 21 Apr 2025',
       version: '1.4.1',

@@ -23,7 +23,7 @@ export async function startReplicateTranscription(inputParams, modelId) {
     throw new Error("Replicate model ID is missing.");
   }
 
-  const [ownerAndModel, versionHash] = modelId.split(':');
+  const [, versionHash] = modelId.split(':');
   if (!versionHash) {
      throw new Error(`Invalid Replicate model ID format: ${modelId}. Expected 'owner/model:version'.`);
   }
