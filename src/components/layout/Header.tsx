@@ -3,14 +3,25 @@ import { Link } from 'react-router-dom';
 
 interface HeaderProps {
   onOpenChangelog: () => void;
+  onShowHistory?: () => void;
 }
 
-export function Header({ onOpenChangelog }: HeaderProps) {
+export function Header({ onOpenChangelog, onShowHistory }: HeaderProps) {
   return (
     <header className="mb-8 text-center">
       <div className="flex justify-between items-center">
-        <div className="flex-1">
-          {/* Empty div for flex layout balance */}
+        <div className="flex-1 flex justify-start">
+          {onShowHistory && (
+            <button
+              onClick={onShowHistory}
+              className="text-blue-600 dark:text-blue-400 hover:underline text-sm flex items-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              History
+            </button>
+          )}
         </div>
 
         <div className="flex-1">

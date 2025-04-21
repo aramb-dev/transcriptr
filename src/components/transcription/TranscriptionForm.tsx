@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranscriptionPolling } from '@/hooks/useTranscriptionPolling';
+import { useSessionPersistence, UseSessionPersistenceResult } from '@/hooks/useSessionPersistence';
 import { UploadAudio } from '../UploadAudio';
 import { TranscriptionProcessing } from './TranscriptionProcessing';
 import { TranscriptionError } from './TranscriptionError';
 import TranscriptionResult from './TranscriptionResult';
+import SessionRecoveryPrompt from './SessionRecoveryPrompt';
 import {
   TranscriptionStatus,
   statusMessages,
@@ -18,8 +20,14 @@ import { cleanupFirebaseFile } from '../../lib/cleanup-service';
 import { Button } from '../ui/button';
 import { motion } from 'framer-motion';
 import { fadeInUp, springTransition } from '../../lib/animations';
+import { TranscriptionSession } from '@/lib/persistence-service';
 
-export function TranscriptionForm({ onShowSuccess }) {
+interface TranscriptionFormProps {
+  onShowSuccess: () => void;
+  initialSession?: TranscriptionSession | null;
+}
+
+export function TranscriptionForm({ onShowSuccess, initialSession }: TranscriptionFormProps) {
   const [transcription, setTranscription] = useState<string | null>(null);
   const [transStatus, setTransStatus] = useState<TranscriptionStatus>('idle');
   const [error, setError] = useState<string | null>(null);
@@ -30,6 +38,62 @@ export function TranscriptionForm({ onShowSuccess }) {
   const [currentPredictionId, setCurrentPredictionId] = useState<string | null>(null);
   const [firebaseFilePath, setFirebaseFilePath] = useState<string | null>(null);
   const [isLoadingState, setIsLoadingState] = useState(false);
+  
+  // Add session persistence hook
+  const {
+    activeSession,
+    hasRecoverableSession,
+    isLoading: isLoadingSession,
+    createNewSession,
+    updateSessionData,
+    recoverSession,
+    discardSession
+  } = useSessionPersistence({
+    onSessionRecovered: (session) => {
+      console.log('Recovering session:', session);
+      // Restore state from recovered session
+      setTransStatus(session.status);
+      setProgress(session.progress);
+      setFirebaseFilePath(session.firebaseFilePath);
+      setCurrentPredictionId(session.predictionId);
+      
+      if (session.apiResponses) {
+        setApiResponses(session.apiResponses);
+      }
+      
+      // If the session has a result already
+      if (session.result) {
+        setTranscription(session.result);
+      }
+    }
+  });
+  
+  // Handle initialSession from props (from history)
+  useEffect(() => {
+    if (initialSession) {
+      console.log('Loading session from history:', initialSession);
+      
+      // Set the correct state based on the session
+      setTransStatus(initialSession.status);
+      setProgress(initialSession.progress);
+      setFirebaseFilePath(initialSession.firebaseFilePath);
+      setCurrentPredictionId(initialSession.predictionId);
+      
+      if (initialSession.apiResponses) {
+        setApiResponses(initialSession.apiResponses);
+      }
+      
+      // If the session has a completed result
+      if (initialSession.result) {
+        setTranscription(initialSession.result);
+      }
+      
+      // If the transcription is still in progress, resume polling
+      if (initialSession.status === 'processing' && initialSession.predictionId) {
+        // The polling hook will automatically start since we set currentPredictionId
+      }
+    }
+  }, [initialSession]);
 
   // Use the polling hook with callbacks
   const { stopPolling } = useTranscriptionPolling({
@@ -55,6 +119,15 @@ export function TranscriptionForm({ onShowSuccess }) {
       }
       setTranscription(finalTranscription);
 
+      // Update session with completed result
+      if (activeSession) {
+        updateSessionData({
+          status: 'succeeded',
+          progress: 100,
+          result: finalTranscription
+        });
+      }
+
       // Cleanup Firebase file if exists when transcription is complete
       if (firebaseFilePath) {
         cleanupFirebaseFile(firebaseFilePath)
@@ -62,21 +135,50 @@ export function TranscriptionForm({ onShowSuccess }) {
             if (success) {
               console.log('Temporary file cleaned up successfully');
               setFirebaseFilePath(null);
+              
+              // Update session to clear firebase path
+              if (activeSession) {
+                updateSessionData({ firebaseFilePath: null });
+              }
             }
           });
       }
     },
     onError: (errorMsg) => {
       setError(errorMsg);
+      
+      // Update session with error state
+      if (activeSession) {
+        updateSessionData({
+          status: 'failed',
+          error: errorMsg
+        });
+      }
     },
     onProgress: (value) => {
       setProgress(value);
+      
+      // Update session progress
+      if (activeSession) {
+        updateSessionData({ progress: value });
+      }
     },
     onStatusChange: (status) => {
       setTransStatus(status);
+      
+      // Update session status
+      if (activeSession) {
+        updateSessionData({ status });
+      }
     },
     onApiResponse: (response) => {
       setApiResponses(prev => [...prev, response]);
+      
+      // Update session API responses
+      if (activeSession) {
+        const updatedResponses = [...(activeSession.apiResponses || []), response];
+        updateSessionData({ apiResponses: updatedResponses });
+      }
     }
   });
 
@@ -121,6 +223,32 @@ export function TranscriptionForm({ onShowSuccess }) {
     setTransStatus('starting'); // <--- SET STATUS TO STARTING HERE
     setProgress(5);
     setFirebaseFilePath(null); // Reset Firebase file path
+    
+    // Create new session
+    let audioSource = {
+      type: 'url' as const,
+      url: ''
+    };
+    
+    // Determine audio source type
+    if (data instanceof FormData) {
+      const file = data.get('file') as File;
+      if (file) {
+        audioSource = {
+          type: 'file' as const,
+          name: file.name,
+          size: file.size
+        };
+      }
+    } else if ('audioUrl' in data) {
+      audioSource = {
+        type: 'url' as const,
+        url: data.audioUrl
+      };
+    }
+    
+    // Create new session and store in state
+    createNewSession(options, audioSource);
 
     const requestBody: {
       options: {
@@ -284,6 +412,11 @@ export function TranscriptionForm({ onShowSuccess }) {
     setApiResponses([]);
     setShowApiDetails(false);
 
+    // Clear any active session
+    if (activeSession) {
+      discardSession();
+    }
+
     // Cleanup Firebase file if exists when resetting
     if (firebaseFilePath) {
       cleanupFirebaseFile(firebaseFilePath)
@@ -299,7 +432,8 @@ export function TranscriptionForm({ onShowSuccess }) {
   // Use effect to ensure we cleanup files when component unmounts
   useEffect(() => {
     return () => {
-      if (firebaseFilePath) {
+      // Don't cleanup Firebase file automatically on unmount if we have an active session
+      if (firebaseFilePath && (!activeSession || activeSession.status === 'succeeded' || activeSession.status === 'failed')) {
         cleanupFirebaseFile(firebaseFilePath)
           .then(success => {
             if (success) {
@@ -308,7 +442,25 @@ export function TranscriptionForm({ onShowSuccess }) {
           });
       }
     };
-  }, [firebaseFilePath]);
+  }, [firebaseFilePath, activeSession]);
+  
+  // Run cleanup of expired sessions once on component mount
+  useEffect(() => {
+    const cleanupExpired = async () => {
+      try {
+        // Import dynamically to prevent circular dependencies
+        const { cleanupExpiredSessions } = await import('@/lib/persistence-service');
+        const count = await cleanupExpiredSessions();
+        if (count > 0) {
+          console.log(`Cleaned up ${count} expired sessions`);
+        }
+      } catch (error) {
+        console.error('Failed to clean up expired sessions:', error);
+      }
+    };
+    
+    cleanupExpired();
+  }, []);
 
   return (
     <motion.div
@@ -319,7 +471,19 @@ export function TranscriptionForm({ onShowSuccess }) {
       transition={springTransition}
     >
       <div className="p-6">
-        {isLoading ? (
+        {isLoadingSession ? (
+          <div className="flex justify-center items-center h-40">
+            <div className="animate-pulse text-gray-500 dark:text-gray-400">
+              Checking for saved progress...
+            </div>
+          </div>
+        ) : hasRecoverableSession && activeSession ? (
+          <SessionRecoveryPrompt 
+            session={activeSession}
+            onRecover={recoverSession}
+            onDiscard={discardSession}
+          />
+        ) : isLoading ? (
           <TranscriptionProcessing
             progress={progress}
             transStatus={transStatus as 'starting' | 'processing'}
