@@ -23,3 +23,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Hooks: `/src/hooks/`
   - Utilities: `/src/lib/`
   - Services: `/src/services/`
+
+## Git Guidelines
+- Do not add 🤖 Generated with [Claude Code](https://claude.ai/code)
+
+      Co-Authored-By: Claude <noreply@anthropic.com>")
+to the commit messages
