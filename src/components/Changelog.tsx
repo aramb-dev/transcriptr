@@ -26,16 +26,19 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
       version: '1.4.2',
       changes: {
         new: [
-          'Added improved multilingual document generation for better international language support'
+          'Added improved multilingual document generation for better international language support',
+          'Implemented true PDF generation with proper multilingual text support'
         ],
         improved: [
           'Enhanced document export to properly handle Arabic, Hebrew, and other non-Latin scripts',
-          'Upgraded download format for multilingual content from PDF to HTML for better character support',
-          'Optimized document styling with RTL text direction detection'
+          'Optimized PDF generation with automatic RTL text direction detection',
+          'Added automatic fallback to HTML format when PDF generation fails',
+          'Implemented proper page layout with headers, footers, and multi-page support'
         ],
         fixed: [
           'Fixed issue with Arabic and other non-Latin text displaying as gibberish in exported documents',
-          'Fixed document generation issues when Printerz API is unavailable'
+          'Fixed document generation issues when Printerz API is unavailable',
+          'Fixed inconsistent file extensions in document downloads'
         ]
       }
     },

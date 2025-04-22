@@ -184,32 +184,35 @@ const usePdfGeneration = () => {
     return blob; // Return blob for chaining if needed
   };
 
-  // --- HTML Document Generation for better multilingual support ---
+  // --- PDF Generation using our library function ---
   const generatePrimaryPdf = async (transcription: string, title: string): Promise<Blob> => {
     setIsGeneratingPdf(true);
     setPdfError(null);
     setPrimaryPdfFailed(false); // Reset failure flag
 
     try {
-      console.log('Generating HTML document for better multilingual support');
+      console.log('Generating PDF document using jsPDF');
       
-      // Generate HTML document using our helper
-      const blob = dynamicImports.generateHTML(title, transcription);
+      // Import the function only when needed
+      const { generatePdf } = await import('../../lib/pdf-generation');
+      
+      // Generate PDF using our library function
+      const blob = await generatePdf('', { title, content: transcription });
       
       setPdfBlob(blob); // Store the generated blob
       
-      // Create preview if possible (some browsers can preview HTML)
+      // Create preview if possible
       try {
         createPdfPreview(blob);
       } catch (previewError) {
-        console.warn("Could not create preview for HTML document", previewError);
+        console.warn("Could not create preview for PDF document", previewError);
       }
       
-      toast.success("Document generated successfully!");
+      toast.success("PDF generated successfully!");
       return blob; // Return the blob for the download handler
     } catch (error) {
-      console.error("Error generating document:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to generate document";
+      console.error("Error generating PDF document:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF";
       setPdfError(errorMessage);
       setPrimaryPdfFailed(true); // Set failure flag
       throw new Error(errorMessage); // Re-throw error to be caught by caller
@@ -426,8 +429,8 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
 
     try {
       const timestamp = new Date().toLocaleDateString().replace(/\//g, '-');
-      // For PDF format, we're actually creating an HTML file for better multilingual support
-      const fileExtension = format === 'pdf' ? 'html' : format;
+      // Use the correct file extension for the format
+      const fileExtension = format;
       downloadFilename = `Transcription_${pdfTitle.replace(/[^a-z0-9]/gi, '_')}_${timestamp}.${fileExtension}`;
 
       if (format === 'txt') {
@@ -499,14 +502,15 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
       const mdContent = `# ${pdfTitle}\n\n${transcription}`;
       zip.file("transcription.md", mdContent);
 
-      // Add HTML document instead of PDF for better multilingual support
+      // Add PDF document
       try {
-        // Use our HTML generator directly 
-        const htmlBlob = dynamicImports.generateHTML(pdfTitle, transcription);
-        zip.file("transcription.html", htmlBlob);
+        // Import the generatePdf function only when needed
+        const { generatePdf } = await import('../../lib/pdf-generation');
+        const pdfBlob = await generatePdf('', { title: pdfTitle, content: transcription });
+        zip.file("transcription.pdf", pdfBlob);
       } catch (error) {
-        console.error("HTML document generation failed for ZIP:", error);
-        toast.error("Failed to generate HTML document for ZIP file.");
+        console.error("PDF generation failed for ZIP:", error);
+        toast.error("Failed to generate PDF for ZIP file.");
       }
 
       // Add DOCX
@@ -546,16 +550,7 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
     }
   };
 
-  // In TranscriptionResult.tsx
-  const handleGeneratePdf = async () => {
-    try {
-      const { generatePdf } = await import('../../lib/pdf-generation');
-      const pdfBlob = await generatePdf(templateId, printerzData);
-      // Handle the PDF...
-    } catch (error) {
-      // Handle error...
-    }
-  };
+  // Removed unused function
 
   // Define variants for list items
   const container = {
@@ -717,7 +712,7 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
                   <path d="M5 16h14"></path>
                   <path d="M9 20h6"></path>
                 </svg>
-                {isGeneratingPdf ? 'Creating Document...' : (isDownloading ? 'Downloading...' : 'Download as HTML (for multilingual support)')}
+                {isGeneratingPdf ? 'Creating PDF...' : (isDownloading ? 'Downloading...' : 'Download as PDF')}
               </Button>
 
               <Button
@@ -738,12 +733,12 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
 
             {pdfObjectUrl && (
               <div className="mt-6">
-                <h4 className="text-md font-medium mb-2">PDF Preview</h4>
+                <h4 className="text-md font-medium mb-2">Document Preview</h4>
                 <div className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden h-96">
                   <iframe
                     src={pdfObjectUrl}
                     className="w-full h-full"
-                    title="PDF Preview"
+                    title="Document Preview"
                   />
                 </div>
               </div>
