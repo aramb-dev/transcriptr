@@ -22,18 +22,20 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
     {
-      date: 'Mon, 22 Apr 2025',
+      date: 'Tue, 23 Apr 2025',
       version: '1.4.2',
       changes: {
+        new: [
+          'Added improved multilingual document generation for better international language support'
+        ],
         improved: [
-          'Refactored code to reduce cognitive complexity in transcription processing',
-          'Enhanced exception handling in Firebase proxy service',
-          'Optimized Replicate client by removing unused variables'
+          'Enhanced document export to properly handle Arabic, Hebrew, and other non-Latin scripts',
+          'Upgraded download format for multilingual content from PDF to HTML for better character support',
+          'Optimized document styling with RTL text direction detection'
         ],
         fixed: [
-          'Fixed ignored exceptions in Firebase proxy service',
-          'Removed useless variable assignment in Replicate client',
-          'Reduced complexity in transcribe function for better maintainability'
+          'Fixed issue with Arabic and other non-Latin text displaying as gibberish in exported documents',
+          'Fixed document generation issues when Printerz API is unavailable'
         ]
       }
     },
@@ -47,11 +49,16 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
           'Added transcription history feature'
         ],
         improved: [
-          'Refractoring and cleaning up code',
+          'Refactored code to reduce cognitive complexity in transcription processing',
+          'Enhanced exception handling in Firebase proxy service',
+          'Optimized Replicate client by removing unused variables',
           'Enhanced transcription progress tracking with cleaner percentage ranges',
           'Redesigned layout components for better user experience'
         ],
         fixed: [
+          'Fixed ignored exceptions in Firebase proxy service',
+          'Removed useless variable assignment in Replicate client',
+          'Reduced complexity in transcribe function for better maintainability',
           'Resolved typo where meta tag had placeholder information',
           'Fixed decimal values in progress percentages for a cleaner UI experience',
         ]

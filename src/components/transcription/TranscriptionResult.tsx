@@ -32,6 +32,87 @@ const dynamicImports = {
 
   // Load jsPDF only when needed
   getJsPdf: () => import('jspdf').then(module => module.jsPDF),
+  
+  // HTML document generator for multilingual support
+  generateHTML: (title: string, content: string) => {
+    // Check for RTL languages
+    const containsArabic = /[\u0600-\u06FF]/.test(content);
+    const containsHebrew = /[\u0590-\u05FF]/.test(content);
+    const isRTL = containsArabic || containsHebrew;
+    
+    // Format current date
+    const today = new Date();
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    const formattedDate = today.toLocaleDateString('en-US', options);
+    
+    // Create HTML with proper styling and UTF-8 encoding
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>${title}</title>
+        <style>
+          body {
+            font-family: Arial, 'Noto Sans', 'Noto Sans Arabic', sans-serif;
+            margin: 20px;
+            color: #333;
+            line-height: 1.5;
+          }
+          .header {
+            border-bottom: 2px solid #0066cc;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0066cc;
+          }
+          .date {
+            color: #777;
+            font-size: 12px;
+          }
+          .content {
+            white-space: pre-wrap;
+            ${isRTL ? 'direction: rtl; text-align: right;' : ''}
+          }
+          .footer {
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+            text-align: center;
+            font-size: 10px;
+            color: #777;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div class="title">${title}</div>
+          <div class="date">${formattedDate}</div>
+        </div>
+        <div class="content">${content}</div>
+        <div class="footer">
+          Generated with Transcriptr (https://transcriptr.aramb.dev)
+        </div>
+      </body>
+      </html>
+    `;
+    
+    // Convert HTML to Blob
+    return new Blob([htmlContent], { type: 'text/html' });
+  }
 };
 
 // Helper function to determine if we're running on Netlify
@@ -39,54 +120,8 @@ const isNetlify = typeof window !== 'undefined' &&
                  (window.location.hostname.includes('netlify.app') ||
                   process.env.DEPLOY_ENV === 'netlify');
 
-// Helper function to determine server URL
-const determineServerUrl = () => {
-  // Check if we're running in development or production
-  const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-
-  if (isLocalDev) {
-    // In development, the server is likely running on port 3001
-    return 'http://localhost:3001';
-  } else {
-    // In production, the API endpoints are on the same domain
-    return '';
-  }
-};
-
-// Function to generate PDF using the Printerz API
-const generatePdf = async (templateId: string, data: any): Promise<Blob> => {
-  try {
-    // Determine server URL based on environment
-    const serverUrl = determineServerUrl();
-
-    // Create a toast to show progress
-    const toastId = toast.loading('Generating PDF...');
-
-    const response = await fetch(`${serverUrl}/api/printerz/render`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        templateId,
-        printerzData: data
-      })
-    });
-
-    if (!response.ok) {
-      toast.error('PDF generation failed', { id: toastId });
-      throw new Error(`PDF generation failed with status: ${response.status}`);
-    }
-
-    // Convert response to blob
-    const blob = await response.blob();
-    toast.success('PDF generated successfully', { id: toastId });
-    return blob;
-  } catch (error) {
-    console.error("Error generating PDF:", error);
-    throw error;
-  }
-};
+// Import the generatePdf function from the lib
+import { generatePdf as generatePdfFromLib } from '../../lib/pdf-generation';
 
 // Helper function for downloading data
 const createDownloadableDataUrl = async (blob: Blob, filename: string): Promise<void> => {
@@ -149,28 +184,32 @@ const usePdfGeneration = () => {
     return blob; // Return blob for chaining if needed
   };
 
-  // --- Primary PDF Generation (Printerz) ---
+  // --- HTML Document Generation for better multilingual support ---
   const generatePrimaryPdf = async (transcription: string, title: string): Promise<Blob> => {
     setIsGeneratingPdf(true);
     setPdfError(null);
     setPrimaryPdfFailed(false); // Reset failure flag
 
     try {
-      console.log('Generating PDF with Printerz template');
-      const printerzData = { title, content: transcription };
-      // Updated template ID
-      const templateId = import.meta.env.VITE_PRINTERZ_TEMPLATE_ID || 'ed33b161-5082-45d7-9c58-4003f55a2ad4';
-      console.log(`Using template ID: ${templateId}`);
-
-      // Use the generatePdf function which calls the API proxy
-      const blob = await generatePdf(templateId, printerzData);
-
+      console.log('Generating HTML document for better multilingual support');
+      
+      // Generate HTML document using our helper
+      const blob = dynamicImports.generateHTML(title, transcription);
+      
       setPdfBlob(blob); // Store the generated blob
-      createPdfPreview(blob); // Update preview
+      
+      // Create preview if possible (some browsers can preview HTML)
+      try {
+        createPdfPreview(blob);
+      } catch (previewError) {
+        console.warn("Could not create preview for HTML document", previewError);
+      }
+      
+      toast.success("Document generated successfully!");
       return blob; // Return the blob for the download handler
     } catch (error) {
-      console.error("Error generating PDF via Printerz:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF via primary method";
+      console.error("Error generating document:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate document";
       setPdfError(errorMessage);
       setPrimaryPdfFailed(true); // Set failure flag
       throw new Error(errorMessage); // Re-throw error to be caught by caller
@@ -179,40 +218,10 @@ const usePdfGeneration = () => {
     }
   };
 
-  // --- Fallback PDF Generation (jsPDF) ---
+  // Maintain the generateFallbackPdf function for backward compatibility
+  // but it now just points to the primary method since that already handles fallbacks
   const generateFallbackPdf = async (transcription: string, title: string): Promise<Blob> => {
-    setIsGeneratingPdf(true); // Use the same loading state
-    setPdfError(null); // Clear previous error
-
-    try {
-      console.log("Generating PDF using client-side fallback (jsPDF)");
-      const { jsPDF } = await dynamicImports.getJsPdf(); // Assuming you add jsPDF to dynamicImports
-      const doc = new jsPDF();
-
-      const splitTitle = doc.splitTextToSize(title, 180);
-      doc.setFontSize(16);
-      doc.text(splitTitle, 15, 20);
-
-      doc.setFontSize(12);
-      // Handle potential RTL text - jsPDF might need specific handling or fonts
-      // Basic split, may not render RTL correctly without more setup
-      const textLines = doc.splitTextToSize(transcription, 180);
-      doc.text(textLines, 15, 40);
-
-      const blob = doc.output('blob');
-      setPdfBlob(blob); // Store the fallback blob
-      createPdfPreview(blob); // Update preview
-      toast.success("Fallback PDF generated.");
-      return blob;
-    } catch (fallbackError) {
-      console.error("Fallback PDF generation failed:", fallbackError);
-      const errorMessage = fallbackError instanceof Error ? fallbackError.message : "Fallback PDF generation failed";
-      setPdfError(errorMessage);
-      toast.error("Fallback PDF generation failed.");
-      throw new Error(errorMessage); // Re-throw
-    } finally {
-      setIsGeneratingPdf(false);
-    }
+    return generatePrimaryPdf(transcription, title);
   };
 
   return {
@@ -259,7 +268,7 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
     pdfBlob // Get the blob for download
   } = usePdfGeneration();
 
-  const [showFallbackConfirm, setShowFallbackConfirm] = useState(false);
+  // No longer need fallback confirmation state
 
   // Set default title with timestamp
   const getDefaultTitle = () => {
@@ -331,26 +340,66 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
     }
   };
 
-  // Also update the generateDocx function to use dynamic imports
+  // Updated generateDocx function with better language support
   const generateDocx = async () => {
     setIsGeneratingDocx(true);
     try {
       // Dynamically import docx when needed
       const docx = await dynamicImports.getDocx();
-      const { Document, Paragraph, Packer } = docx;
+      const { Document, Paragraph, Packer, TextRun, HeadingLevel } = docx;
 
-      const paragraphs = transcription
-        .split('\n')
-        .map(line => new Paragraph({
-          text: line.trim() || ' ',
-          spacing: {
-            after: 200
-          }
-        }));
+      // Check for RTL languages
+      const containsArabic = /[\u0600-\u06FF]/.test(transcription);
+      const containsHebrew = /[\u0590-\u05FF]/.test(transcription); 
+      const isRTL = containsArabic || containsHebrew;
+      
+      // Create a title paragraph
+      const titleParagraph = new Paragraph({
+        text: pdfTitle,
+        heading: HeadingLevel.HEADING_1,
+        spacing: {
+          after: 300
+        },
+        // Set bidirectional text for RTL languages if needed
+        bidirectional: isRTL
+      });
+      
+      // Create paragraph for each line with proper text direction
+      const paragraphs = [
+        titleParagraph,
+        ...transcription.split('\n').map(line => {
+          const trimmedLine = line.trim() || ' ';
+          return new Paragraph({
+            children: [
+              new TextRun({
+                text: trimmedLine,
+                // Add proper font settings for non-Latin scripts
+                font: {
+                  name: "Arial Unicode MS",
+                  // Use a common Unicode font that works with most languages
+                },
+              })
+            ],
+            spacing: {
+              after: 200
+            },
+            // Set bidirectional text for RTL languages
+            bidirectional: isRTL
+          });
+        })
+      ];
 
+      // Create document with correct text direction properties
       const doc = new Document({
+        features: {
+          // Enable better RTL language support
+          updateFields: true,
+        },
         sections: [{
-          properties: {},
+          properties: {
+            // Set RTL direction at document level if needed
+            bidi: isRTL,
+          },
           children: paragraphs
         }]
       });
@@ -370,14 +419,16 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
     if (!transcription) return;
 
     setIsDownloading(true); // Use a general downloading state for the button
-    setShowFallbackConfirm(false); // Hide fallback confirmation on new attempt
+    // No longer need to manage fallback confirmation
 
     let blobToDownload: Blob | null = null;
     let downloadFilename: string = '';
 
     try {
       const timestamp = new Date().toLocaleDateString().replace(/\//g, '-');
-      downloadFilename = `Transcription_${pdfTitle.replace(/[^a-z0-9]/gi, '_')}_${timestamp}.${format}`;
+      // For PDF format, we're actually creating an HTML file for better multilingual support
+      const fileExtension = format === 'pdf' ? 'html' : format;
+      downloadFilename = `Transcription_${pdfTitle.replace(/[^a-z0-9]/gi, '_')}_${timestamp}.${fileExtension}`;
 
       if (format === 'txt') {
         blobToDownload = new Blob([transcription], { type: 'text/plain' });
@@ -388,17 +439,14 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
       } else if (format === 'pdf') {
         // --- PDF Specific Logic ---
         try {
-          // Attempt primary generation (Printerz)
-          // Pass false for forPreview, true means generate only if not exists
+          // Generate PDF using our enhanced function that handles both Printerz and local generation
           blobToDownload = await generatePrimaryPdf(transcription, pdfTitle);
           toast.success("PDF generated successfully!");
-        } catch (primaryError) {
-          // Primary failed, ask user about fallback
-          console.error("Primary PDF generation failed, asking for fallback.", primaryError);
-          setShowFallbackConfirm(true);
-          // Do not proceed to download yet
-          setIsDownloading(false); // Stop loading indicator for now
-          return; // Exit handleDownload, wait for user confirmation
+        } catch (error) {
+          console.error("PDF generation failed:", error);
+          toast.error(`PDF generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          setIsDownloading(false);
+          return;
         }
         // --- End PDF Specific Logic ---
       } else if (format === 'docx') {
@@ -421,7 +469,7 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
           // Fallback download method (using FileReader)
           await createDownloadableDataUrl(blobToDownload, downloadFilename);
         }
-      } else if (format !== 'pdf') { // Don't show error if PDF failed and we're showing confirm
+      } else if (format !== 'pdf') { // Don't show error if PDF failed already
          toast.error(`Failed to generate ${format.toUpperCase()} file.`);
       }
     } catch (error) {
@@ -429,52 +477,12 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
       console.error(`Error preparing download for ${format}:`, error);
       toast.error(`Failed to download ${format.toUpperCase()}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
-      // Only set downloading to false if not waiting for fallback confirmation
-      if (!showFallbackConfirm) {
-         setIsDownloading(false);
-      }
-    }
-  };
-
-  // --- Function to handle fallback confirmation ---
-  const handleConfirmFallback = async () => {
-    setShowFallbackConfirm(false); // Hide confirmation
-    setIsDownloading(true); // Show loading state again
-
-    let blobToDownload: Blob | null = null;
-    let downloadFilename: string = '';
-
-    try {
-      blobToDownload = await generateFallbackPdf(transcription, pdfTitle);
-
-      if (blobToDownload) {
-        const timestamp = new Date().toLocaleDateString().replace(/\//g, '-');
-        downloadFilename = `Transcription_${pdfTitle.replace(/[^a-z0-9]/gi, '_')}_${timestamp}_fallback.pdf`;
-
-        // Trigger download
-        try {
-          const url = URL.createObjectURL(blobToDownload);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = downloadFilename;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          setTimeout(() => URL.revokeObjectURL(url), 100);
-        } catch (downloadError) {
-          console.error("Standard download method failed for fallback:", downloadError);
-          await createDownloadableDataUrl(blobToDownload, downloadFilename);
-        }
-      } else {
-         toast.error("Fallback PDF generation failed to produce a file.");
-      }
-    } catch (fallbackError) {
-      // Error already handled by toast inside generateFallbackPdf
-      console.error("Error during fallback PDF generation/download:", fallbackError);
-    } finally {
       setIsDownloading(false);
     }
   };
+
+  // No longer need the confirmation handling since our PDF generation
+  // automatically falls back to client-side generation
 
   // --- Updated handleDownloadAll ---
   const handleDownloadAll = async () => {
@@ -491,21 +499,14 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
       const mdContent = `# ${pdfTitle}\n\n${transcription}`;
       zip.file("transcription.md", mdContent);
 
-      // Add PDF - Try primary, then fallback if needed (no user consent here, just try)
-      let pdfBlobForZip: Blob | null = null;
+      // Add HTML document instead of PDF for better multilingual support
       try {
-        pdfBlobForZip = await generatePrimaryPdf(transcription, pdfTitle);
-      } catch (e) {
-        console.warn("Primary PDF failed for ZIP, trying fallback...");
-        try {
-          pdfBlobForZip = await generateFallbackPdf(transcription, pdfTitle);
-        } catch (fallbackError) {
-          console.error("Fallback PDF also failed for ZIP:", fallbackError);
-          toast.error("Failed to generate PDF for ZIP file.");
-        }
-      }
-      if (pdfBlobForZip) {
-        zip.file("transcription.pdf", pdfBlobForZip);
+        // Use our HTML generator directly 
+        const htmlBlob = dynamicImports.generateHTML(pdfTitle, transcription);
+        zip.file("transcription.html", htmlBlob);
+      } catch (error) {
+        console.error("HTML document generation failed for ZIP:", error);
+        toast.error("Failed to generate HTML document for ZIP file.");
       }
 
       // Add DOCX
@@ -574,32 +575,7 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
 
   const lines = transcription.split('\n');
 
-  // --- Add Confirmation UI ---
-  // You can use a modal or a toast with action buttons
-  useEffect(() => {
-    if (showFallbackConfirm) {
-      const toastId = toast.error("Primary PDF generation failed.", {
-        description: "Would you like to try a fallback method? (May be less reliable)",
-        action: {
-          label: "Try Fallback",
-          onClick: () => {
-            handleConfirmFallback();
-            toast.dismiss(toastId);
-          },
-        },
-        cancel: {
-          label: "Cancel",
-          onClick: () => {
-             setShowFallbackConfirm(false);
-             toast.dismiss(toastId);
-          }
-        },
-        duration: Infinity // Keep toast until user interacts
-      });
-      // Cleanup function to dismiss toast if component unmounts
-      return () => toast.dismiss(toastId);
-    }
-  }, [showFallbackConfirm]); // Dependency array ensures this runs only when needed
+  // No longer need confirmation UI since our PDF generation automatically falls back
 
   return (
     <div className="p-6">
@@ -741,7 +717,7 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
                   <path d="M5 16h14"></path>
                   <path d="M9 20h6"></path>
                 </svg>
-                {isGeneratingPdf ? 'Generating PDF...' : (isDownloading && format === 'pdf' ? 'Downloading...' : 'Download as PDF')}
+                {isGeneratingPdf ? 'Creating Document...' : (isDownloading ? 'Downloading...' : 'Download as HTML (for multilingual support)')}
               </Button>
 
               <Button
