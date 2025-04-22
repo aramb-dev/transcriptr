@@ -7,6 +7,8 @@ export async function handler(event, context) {
     VITE_FIREBASE_PROJECT_ID: process.env.VITE_FIREBASE_PROJECT_ID ? "Present" : "Missing",
     VITE_FIREBASE_STORAGE_BUCKET: process.env.VITE_FIREBASE_STORAGE_BUCKET ? "Present" : "Missing",
     VITE_REPLICATE_API_TOKEN: process.env.VITE_REPLICATE_API_TOKEN ? "Present (masked)" : "Missing",
+    VITE_PRINTERZ_API_KEY: process.env.VITE_PRINTERZ_API_KEY ? "Present (masked)" : "Missing",
+    VITE_PRINTERZ_TEMPLATE_ID: process.env.VITE_PRINTERZ_TEMPLATE_ID || "Not set",
     NODE_ENV: process.env.NODE_ENV || "Not set",
   };
 
