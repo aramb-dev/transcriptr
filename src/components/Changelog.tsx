@@ -22,6 +22,21 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
     {
+      date: 'Wed, 23 Apr 2025',
+      version: '1.4.3',
+      changes: {
+        new: [],
+        improved: [
+          'Enhanced transcription reliability with automatic batch size reduction',
+          'Added smart retry logic for handling GPU memory limitations'
+        ],
+        fixed: [
+          'Fixed "CUDA out of memory" errors by automatically reducing batch size and retrying',
+          'Resolved transcription failures on larger audio files with dynamic resource allocation'
+        ]
+      }
+    },
+    {
       date: 'Tue, 23 Apr 2025',
       version: '1.4.2',
       changes: {
