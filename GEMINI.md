@@ -28,4 +28,4 @@ This file provides guidance to Gemini when working with code in this repository.
 - Follow conventional commit message standards.
 - Match the style of recent commits.
 - After editing code (if it is substantial), add a changelog entry and commit.
-- Add a new changelog entry for every new change, even if on the same day.
+- **Changelog Entries**: Always add a *new* entry to the `changelogItems` array in `src/components/Changelog.tsx` for every distinct change, even if multiple changes occur on the same day. Do not modify or overwrite existing entries.

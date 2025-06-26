@@ -72,6 +72,63 @@ const generatePdfWithPrinterz = async (templateId: string, data: any): Promise<B
   }
 };
 
+// Helper to add header and date
+const addHeaderAndDate = (doc: jsPDF, title: string, formattedDate: string, margin: number, pageWidth: number) => {
+  doc.setFontSize(24);
+  doc.setTextColor(0, 102, 204); // #0066cc
+  doc.text(title, margin, margin + 10);
+
+  doc.setFontSize(10);
+  doc.setTextColor(119, 119, 119); // #777777
+  const dateWidth = doc.getTextWidth(formattedDate);
+  doc.text(formattedDate, pageWidth - margin - dateWidth, margin + 10);
+
+  doc.setDrawColor(0, 102, 204); // #0066cc
+  doc.setLineWidth(1);
+  doc.line(margin, margin + 20, pageWidth - margin, margin + 20);
+};
+
+// Helper to add footer
+const addFooter = (doc: jsPDF, pageHeight: number, margin: number, pageWidth: number, footerText: string) => {
+  doc.setFontSize(8);
+  doc.setTextColor(119, 119, 119); // #777777
+
+  doc.setDrawColor(221, 221, 221); // #dddddd
+  doc.setLineWidth(0.5);
+  doc.line(margin, pageHeight - margin - 20, pageWidth - margin, pageHeight - margin - 20);
+
+  const footerWidth = doc.getTextWidth(footerText);
+  const footerX = (pageWidth - footerWidth) / 2;
+
+  doc.text(footerText, footerX, pageHeight - margin - 5);
+};
+
+// Helper to render content with page breaks
+const renderContent = (doc: jsPDF, contentText: string, isRTL: boolean, margin: number, usableWidth: number, pageHeight: number, lineHeight: number) => {
+  let verticalPosition = margin + 40;
+  let currentPage = 1;
+
+  const lines = doc.splitTextToSize(contentText, usableWidth);
+
+  for (let i = 0; i < lines.length; i++) {
+    if (verticalPosition > pageHeight - margin) {
+      doc.addPage();
+      currentPage++;
+      verticalPosition = margin + 40;
+    }
+
+    let xPosition = margin;
+    if (isRTL) {
+      const lineWidth = doc.getTextWidth(lines[i]);
+      xPosition = doc.internal.pageSize.getWidth() - margin - lineWidth;
+    }
+
+    doc.text(lines[i], xPosition, verticalPosition);
+    verticalPosition += lineHeight;
+  }
+  return currentPage; // Return the total number of pages
+};
+
 // Client-side PDF generation using jsPDF with proper font handling
 const generatePdfLocally = async (data: any): Promise<Blob> => {
   const toastId = toast.loading('Generating PDF...');
@@ -114,88 +171,21 @@ const generatePdfLocally = async (data: any): Promise<Blob> => {
     const margin = 40;
     const usableWidth = pageWidth - 2 * margin;
     
-    // Add title
-    doc.setFontSize(24);
-    doc.setTextColor(0, 102, 204); // #0066cc
-    doc.text(title, margin, margin + 10);
-    
-    // Add date
-    doc.setFontSize(10);
-    doc.setTextColor(119, 119, 119); // #777777
-    const dateWidth = doc.getTextWidth(formattedDate);
-    doc.text(formattedDate, pageWidth - margin - dateWidth, margin + 10);
-    
-    // Add horizontal line
-    doc.setDrawColor(0, 102, 204); // #0066cc
-    doc.setLineWidth(1);
-    doc.line(margin, margin + 20, pageWidth - margin, margin + 20);
-    
+    // Add initial header and date
+    addHeaderAndDate(doc, title, formattedDate, margin, pageWidth);
+
     // Add content (with proper line breaks and page handling)
     doc.setTextColor(51, 51, 51); // #333333
     doc.setFontSize(12);
-    
-    let verticalPosition = margin + 40;
     const lineHeight = 14;
-    let currentPage = 1;
     
-    // Split the text to fit within the page width and handle RTL
-    // For RTL support we need to reverse the lines on each page
-    // but keep the original text direction
-    // This is a workaround for the limitations of jsPDF with RTL text
-    
-    if (isRTL) {
-      // For RTL languages, we'll actually use splitTextToSize for line breaking,
-      // but we'll need to handle the text direction separately
-      const lines = doc.splitTextToSize(contentText, usableWidth);
-      
-      for (let i = 0; i < lines.length; i++) {
-        if (verticalPosition > pageHeight - margin) {
-          doc.addPage();
-          currentPage++;
-          verticalPosition = margin + 40;
-        }
-        
-        // Align RTL text to the right
-        const lineWidth = doc.getTextWidth(lines[i]);
-        const xPosition = pageWidth - margin - lineWidth;
-        
-        doc.text(lines[i], xPosition, verticalPosition);
-        verticalPosition += lineHeight;
-      }
-    } else {
-      // For LTR languages, we can use the standard text handling
-      const lines = doc.splitTextToSize(contentText, usableWidth);
-      
-      for (let i = 0; i < lines.length; i++) {
-        if (verticalPosition > pageHeight - margin) {
-          doc.addPage();
-          currentPage++;
-          verticalPosition = margin + 40;
-        }
-        
-        doc.text(lines[i], margin, verticalPosition);
-        verticalPosition += lineHeight;
-      }
-    }
+    const totalPages = renderContent(doc, contentText, isRTL, margin, usableWidth, pageHeight, lineHeight);
     
     // Add footer to each page
     const footerText = "Generated with Transcriptr (https://transcriptr.aramb.dev)";
-    doc.setFontSize(8);
-    doc.setTextColor(119, 119, 119); // #777777
-    
-    for (let i = 1; i <= currentPage; i++) {
+    for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
-      
-      // Add separator line
-      doc.setDrawColor(221, 221, 221); // #dddddd
-      doc.setLineWidth(0.5);
-      doc.line(margin, pageHeight - margin - 20, pageWidth - margin, pageHeight - margin - 20);
-      
-      // Calculate center position for footer text
-      const footerWidth = doc.getTextWidth(footerText);
-      const footerX = (pageWidth - footerWidth) / 2;
-      
-      doc.text(footerText, footerX, pageHeight - margin - 5);
+      addFooter(doc, pageHeight, margin, pageWidth, footerText);
     }
     
     // Convert jsPDF document to blob

@@ -23,6 +23,19 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   const changelogItems: ChangeItem[] = [
     {
       date: 'Thu, 26 Jun 2025',
+      version: '1.4.7',
+      changes: {
+        new: [],
+        improved: [
+          'Refactored `generatePdfLocally` function to reduce cognitive complexity.'
+        ],
+        fixed: [
+          'Addressed cognitive complexity issue in PDF generation logic.'
+        ]
+      }
+    },
+    {
+      date: 'Thu, 26 Jun 2025',
       version: '1.4.6',
       changes: {
         new: [
