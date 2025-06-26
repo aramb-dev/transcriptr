@@ -16,7 +16,7 @@ const port = process.env.PORT || 3001;
 app.use(express.json({ limit: '50mb' }));
 
 // Add manual CORS headers to all responses instead
-app.use((req, res, next) => {
+app.use(((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
@@ -27,7 +27,7 @@ app.use((req, res, next) => {
   }
 
   next();
-});
+}) as RequestHandler);
 
 app.post('/api/transcribe', (async (req: Request, res: Response) => {
   try {
