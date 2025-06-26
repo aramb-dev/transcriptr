@@ -23,15 +23,14 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   const changelogItems: ChangeItem[] = [
     {
       date: 'Thu, 26 Jun 2025',
-      version: '1.4.5',
+      version: '1.4.6',
       changes: {
-        new: [],
-        improved: [
-          'Ensured new transcription sessions are properly persisted to IndexedDB.'
+        new: [
+          'Added basic content to the Documentation page.',
+          'Added a "Back to Home" button on the Documentation page.'
         ],
-        fixed: [
-          'Fixed an issue where new transcription sessions were not being saved, causing history to not work correctly.'
-        ]
+        improved: [],
+        fixed: []
       }
     },
     {
