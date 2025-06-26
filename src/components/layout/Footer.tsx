@@ -70,6 +70,10 @@ export function Footer({ onOpenFeedbackModal, onOpenChangelog }: FooterProps) {
         <Link to="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
           Privacy Policy
         </Link>
+        <span>•</span>
+        <Link to="/docs" className="text-blue-600 dark:text-blue-400 hover:underline">
+          Documentation
+        </Link>
       </div>
       <p className="mt-4">© {new Date().getFullYear()} Transcriptr. All rights reserved.</p>
     </footer>

@@ -16,3 +16,7 @@ export const Changelog = lazy(() =>
 export const Feedback = lazy(() =>
   import('../feedback/Feedback').then(module => ({ default: module.Feedback }))
 );
+
+export const Documentation = lazy(() =>
+  import('../Documentation').then(module => ({ default: module.Documentation }))
+);

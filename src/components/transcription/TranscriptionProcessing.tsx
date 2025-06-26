@@ -37,9 +37,9 @@ export function TranscriptionProcessing({
             {Math.floor(progress)}%
           </span>
         </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden">
           <div
-            className={`h-2.5 rounded-full transition-all duration-500 ${getProgressColor()}`}
+            className={`h-2.5 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 transition-all duration-500 animate-pulse`}
             style={{ width: `${Math.floor(progress)}%` }}
           ></div>
         </div>

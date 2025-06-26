@@ -3,7 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MainLayout } from './components/layout/MainLayout';
 import { LoadingFallback } from './components/ui/LoadingFallback';
-import { TermsOfService, PrivacyPolicy, Changelog, Feedback } from './components/routes/LazyRoutes';
+import { TermsOfService, PrivacyPolicy, Changelog, Feedback, Documentation } from './components/routes/LazyRoutes';
 
 // Page Transitions
 const pageVariants = {
@@ -90,6 +90,19 @@ export default function App() {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               <Feedback />
+            </motion.div>
+          </Suspense>
+        } />
+        <Route path="/docs" element={
+          <Suspense fallback={<LoadingFallback />}>
+            <motion.div
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            >
+              <Documentation />
             </motion.div>
           </Suspense>
         } />
