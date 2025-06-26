@@ -36,6 +36,18 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
     },
     {
       date: 'Thu, 26 Jun 2025',
+      version: '1.4.6',
+      changes: {
+        new: [
+          'Added basic content to the Documentation page.',
+          'Added a "Back to Home" button on the Documentation page.'
+        ],
+        improved: [],
+        fixed: []
+      }
+    },
+    {
+      date: 'Thu, 26 Jun 2025',
       version: '1.4.4',
       changes: {
         new: [],
