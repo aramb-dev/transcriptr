@@ -23,14 +23,15 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   const changelogItems: ChangeItem[] = [
     {
       date: 'Thu, 26 Jun 2025',
-      version: '1.4.6',
+      version: '1.4.7',
       changes: {
-        new: [
-          'Added basic content to the Documentation page.',
-          'Added a "Back to Home" button on the Documentation page.'
+        new: [],
+        improved: [
+          'Refactored `generatePdfLocally` function to reduce cognitive complexity.'
         ],
-        improved: [],
-        fixed: []
+        fixed: [
+          'Addressed cognitive complexity issue in PDF generation logic.'
+        ]
       }
     },
     {
