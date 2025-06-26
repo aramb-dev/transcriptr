@@ -22,6 +22,19 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
     {
+      date: 'Thu, 26 Jun 2025',
+      version: '1.4.4',
+      changes: {
+        new: [],
+        improved: [
+          'Removed FFmpeg dependency and all related audio conversion logic.'
+        ],
+        fixed: [
+          'Fixed build errors caused by FFmpeg dependency issues.'
+        ]
+      }
+    },
+    {
       date: 'Wed, 23 Apr 2025',
       version: '1.4.3',
       changes: {

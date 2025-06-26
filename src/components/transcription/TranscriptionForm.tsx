@@ -15,7 +15,7 @@ import {
 } from '../../services/transcription';
 import { trackEvent } from '../../lib/analytics';
 import { isLargeFile, uploadLargeFile } from '../../lib/storage-service';
-import { isFormatSupportedByReplicate } from '../../lib/audio-conversion';
+
 import { cleanupFirebaseFile } from '../../lib/cleanup-service';
 import { Button } from '../ui/button';
 import { motion } from 'framer-motion';
@@ -278,13 +278,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
         }
         sourceDescription = `file: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB, Type: ${file.type}`;
 
-        // --- File processing logic (format check, large file upload) ---
-        if (!isFormatSupportedByReplicate(file)) {
-          // Handle unsupported format (similar to existing logic)
-          const errorMsg = `Unsupported file format: ${file.type || file.name.split('.').pop()}. Please convert to MP3, WAV, FLAC, or OGG.`;
-           setApiResponses(prev => [...prev, { timestamp: new Date(), data: { error: errorMsg } }]);
-           throw new Error(errorMsg);
-        }
+        
 
         if (isLargeFile(file)) {
           setProgress(10);
