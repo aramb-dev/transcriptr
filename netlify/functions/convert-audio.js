@@ -2,7 +2,6 @@ import * as dotenv from 'dotenv';
 import { initializeApp } from 'firebase/app';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirebaseConfig } from './firebase-config.js';
-import { spawn } from 'child_process';
 import fs from 'fs/promises';
 import os from 'os';
 import path from 'path';
@@ -32,35 +31,6 @@ async function downloadFile(url, outputPath) {
   const buffer = await response.arrayBuffer();
   await fs.writeFile(outputPath, Buffer.from(buffer));
   return outputPath;
-}
-
-// Convert audio file to MP3 using ffmpeg (requires ffmpeg to be installed)
-async function convertToMp3(inputPath, outputPath) {
-  return new Promise((resolve, reject) => {
-    // Check if we're running on Netlify Functions (which has ffmpeg installed)
-    const ffmpegProcess = spawn('ffmpeg', [
-      '-i', inputPath,
-      '-vn',
-      '-ar', '44100',
-      '-ac', '2',
-      '-b:a', '192k',
-      '-f', 'mp3',
-      outputPath
-    ]);
-
-    let errorOutput = '';
-    ffmpegProcess.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
-
-    ffmpegProcess.on('close', (code) => {
-      if (code === 0) {
-        resolve(outputPath);
-      } else {
-        reject(new Error(`FFmpeg exited with code ${code}: ${errorOutput}`));
-      }
-    });
-  });
 }
 
 // Upload a file to Firebase Storage

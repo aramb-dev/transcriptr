@@ -4,17 +4,14 @@
   "type": "module",
   "scripts": {
     "dev": "concurrently \"vite\" \"npx tsx watch src/server/index.ts\"",
-    "build": "node scripts/download-ffmpeg-alt.js && vite build && tsc -p tsconfig.server.json",
-    "build:netlify": "node scripts/download-ffmpeg-alt.js && DEPLOY_ENV=netlify vite build",
+    "build": "vite build && tsc -p tsconfig.server.json",
+    "build:netlify": "DEPLOY_ENV=netlify vite build",
     "start": "NODE_ENV=production node dist/server/index.js",
     "lint": "eslint .",
     "preview": "vite preview",
-    "download-ffmpeg": "node scripts/download-ffmpeg.js",
     "setup-firebase-cors": "node scripts/setup-firebase-cors.js"
   },
   "dependencies": {
-    "@ffmpeg/ffmpeg": "^0.12.15",
-    "@ffmpeg/util": "^0.12.2",
     "@google-cloud/storage": "^7.16.0",
     "@microsoft/clarity": "1",
     "@radix-ui/react-dialog": "^1.1.14",
