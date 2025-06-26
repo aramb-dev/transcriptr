@@ -14,7 +14,7 @@ const LARGE_FILE_THRESHOLD_MB = 1; // Define threshold for direct base64 vs uplo
 async function prepareAudioInput(audioData, audioUrl) {
   const inputParams = {};
   let firebaseFilePath = null;
-  
+
   if (audioUrl) {
     console.log("Using provided audio URL for Replicate input.");
     inputParams.audio = audioUrl;
@@ -34,7 +34,7 @@ async function prepareAudioInput(audioData, audioUrl) {
       inputParams.audio = audioData;
     }
   }
-  
+
   return { inputParams, firebaseFilePath };
 }
 
@@ -72,15 +72,15 @@ export async function handler(event, context) {
     // Set up base parameters
     const transcriptionParams = {
       task: options.task || 'transcribe',
-      batch_size: options.batch_size || 64,
+      batch_size: options.batch_size || 8,
       return_timestamps: options.return_timestamps !== undefined ? options.return_timestamps : true,
       diarize: options.diarize || false,
     };
-    
+
     // Process audio input
     const { inputParams, firebaseFilePath } = await prepareAudioInput(audioData, audioUrl);
     Object.assign(transcriptionParams, inputParams);
-    
+
     // Add language if specified and not "None"
     if (options.language && options.language !== "None") {
       transcriptionParams.language = options.language;

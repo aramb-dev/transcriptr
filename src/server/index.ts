@@ -52,7 +52,7 @@ app.post('/api/transcribe', (async (req: Request, res: Response) => {
 
     const inputParams: InputParams = {
       task: options.task || 'transcribe',
-      batch_size: options.batch_size || 64,
+      batch_size: options.batch_size || 8,
       return_timestamps: options.return_timestamps || true,
       diarize: options.diarize || false,
       audio: '',

@@ -28,8 +28,8 @@ export async function startReplicateTranscription(inputParams, modelId) {
      throw new Error(`Invalid Replicate model ID format: ${modelId}. Expected 'owner/model:version'.`);
   }
 
-  // Start with the provided batch size or default to 24 if not specified
-  const initialBatchSize = inputParams.batch_size || 24;
+  // Start with the provided batch size or default to 8 if not specified
+  const initialBatchSize = inputParams.batch_size || 8;
   let currentBatchSize = initialBatchSize;
   let maxRetries = 3; // Maximum number of retries with reduced batch size
   let retryCount = 0;
