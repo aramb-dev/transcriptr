@@ -19,6 +19,7 @@ export default defineConfig({
     }
   },
   build: {
+    target: 'es2020', // Add this line
     outDir: 'dist/client',
     rollupOptions: {
       output: {
