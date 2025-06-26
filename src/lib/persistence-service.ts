@@ -145,7 +145,7 @@ export const saveSession = async (session: TranscriptionSession): Promise<void> 
 /**
  * Create a new transcription session
  */
-export const createSession = (
+export const createSession = async (
   options: {
     language: string;
     diarize: boolean;
@@ -156,7 +156,7 @@ export const createSession = (
     size?: number;
     url?: string;
   }
-): TranscriptionSession => {
+): Promise<TranscriptionSession> => {
   // Create a new session ID or use existing one from cookie
   const sessionId = getSessionId() || createSessionId();
   
@@ -177,6 +177,7 @@ export const createSession = (
     apiResponses: []
   };
   
+  await saveSession(session); // Save the new session immediately
   return session;
 };
 

@@ -27,3 +27,4 @@ This file provides guidance to Gemini when working with code in this repository.
 ## Git Guidelines
 - Follow conventional commit message standards.
 - Match the style of recent commits.
+- After editing code (if it is substantial), add a changelog entry and commit.

@@ -19,7 +19,7 @@ export interface UseSessionPersistenceResult {
   createNewSession: (
     options: { language: string; diarize: boolean },
     audioSource: { type: 'file' | 'url'; name?: string; size?: number; url?: string }
-  ) => TranscriptionSession;
+  ) => Promise<TranscriptionSession>;
   updateSessionData: (updates: Partial<TranscriptionSession>) => Promise<void>;
   recoverSession: () => Promise<void>;
   discardSession: () => Promise<void>;
@@ -65,11 +65,11 @@ export const useSessionPersistence = ({
   }, []);
 
   // Create a new session
-  const createNewSession = useCallback((
+  const createNewSession = useCallback(async (
     options: { language: string; diarize: boolean },
     audioSource: { type: 'file' | 'url'; name?: string; size?: number; url?: string }
-  ): TranscriptionSession => {
-    const newSession = createSession(options, audioSource);
+  ): Promise<TranscriptionSession> => {
+    const newSession = await createSession(options, audioSource);
     setActiveSession(newSession);
     return newSession;
   }, []);

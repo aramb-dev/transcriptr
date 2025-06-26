@@ -23,14 +23,14 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   const changelogItems: ChangeItem[] = [
     {
       date: 'Thu, 26 Jun 2025',
-      version: '1.4.4',
+      version: '1.4.5',
       changes: {
         new: [],
         improved: [
-          'Removed FFmpeg dependency and all related audio conversion logic.'
+          'Ensured new transcription sessions are properly persisted to IndexedDB.'
         ],
         fixed: [
-          'Fixed build errors caused by FFmpeg dependency issues.'
+          'Fixed an issue where new transcription sessions were not being saved, causing history to not work correctly.'
         ]
       }
     },
