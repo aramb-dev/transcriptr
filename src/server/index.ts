@@ -71,7 +71,7 @@ app.post('/api/transcribe', (async (req: Request, res: Response) => {
     const response = await fetch('https://api.replicate.com/v1/predictions', {
       method: 'POST',
       headers: {
-        'Authorization': `Token ${process.env.VITE_REPLICATE_API_TOKEN}`,
+        'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -108,7 +108,7 @@ app.get('/api/prediction/:id', (async (req: Request, res: Response) => {
 
     const response = await fetch(`https://api.replicate.com/v1/predictions/${id}`, {
       headers: {
-        'Authorization': `Token ${process.env.VITE_REPLICATE_API_TOKEN}`,
+        'Authorization': `Token ${process.env.REPLICATE_API_TOKEN}`,
       },
     });
 
@@ -145,7 +145,7 @@ app.post('/api/printerz/render', (async (req: Request, res: Response) => {
     }
 
     // Get API key from environment variables
-    const apiKey = process.env.VITE_PRINTERZ_API_KEY;
+    const apiKey = process.env.PRINTERZ_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: 'Printerz API key not configured' });
     }

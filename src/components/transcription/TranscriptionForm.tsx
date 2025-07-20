@@ -38,7 +38,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
   const [currentPredictionId, setCurrentPredictionId] = useState<string | null>(null);
   const [firebaseFilePath, setFirebaseFilePath] = useState<string | null>(null);
   const [isLoadingState, setIsLoadingState] = useState(false);
-  
+
   // Add session persistence hook
   const {
     activeSession,
@@ -56,38 +56,38 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
       setProgress(session.progress);
       setFirebaseFilePath(session.firebaseFilePath);
       setCurrentPredictionId(session.predictionId);
-      
+
       if (session.apiResponses) {
         setApiResponses(session.apiResponses);
       }
-      
+
       // If the session has a result already
       if (session.result) {
         setTranscription(session.result);
       }
     }
   });
-  
+
   // Handle initialSession from props (from history)
   useEffect(() => {
     if (initialSession) {
       console.log('Loading session from history:', initialSession);
-      
+
       // Set the correct state based on the session
       setTransStatus(initialSession.status);
       setProgress(initialSession.progress);
       setFirebaseFilePath(initialSession.firebaseFilePath);
       setCurrentPredictionId(initialSession.predictionId);
-      
+
       if (initialSession.apiResponses) {
         setApiResponses(initialSession.apiResponses);
       }
-      
+
       // If the session has a completed result
       if (initialSession.result) {
         setTranscription(initialSession.result);
       }
-      
+
       // If the transcription is still in progress, resume polling
       if (initialSession.status === 'processing' && initialSession.predictionId) {
         // The polling hook will automatically start since we set currentPredictionId
@@ -135,7 +135,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
             if (success) {
               console.log('Temporary file cleaned up successfully');
               setFirebaseFilePath(null);
-              
+
               // Update session to clear firebase path
               if (activeSession) {
                 updateSessionData({ firebaseFilePath: null });
@@ -146,7 +146,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
     },
     onError: (errorMsg) => {
       setError(errorMsg);
-      
+
       // Update session with error state
       if (activeSession) {
         updateSessionData({
@@ -157,7 +157,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
     },
     onProgress: (value) => {
       setProgress(value);
-      
+
       // Update session progress
       if (activeSession) {
         updateSessionData({ progress: value });
@@ -165,7 +165,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
     },
     onStatusChange: (status) => {
       setTransStatus(status);
-      
+
       // Update session status
       if (activeSession) {
         updateSessionData({ status });
@@ -173,7 +173,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
     },
     onApiResponse: (response) => {
       setApiResponses(prev => [...prev, response]);
-      
+
       // Update session API responses
       if (activeSession) {
         const updatedResponses = [...(activeSession.apiResponses || []), response];
@@ -223,13 +223,13 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
     setTransStatus('starting'); // <--- SET STATUS TO STARTING HERE
     setProgress(5);
     setFirebaseFilePath(null); // Reset Firebase file path
-    
+
     // Create new session
     let audioSource = {
       type: 'url' as const,
       url: ''
     };
-    
+
     // Determine audio source type
     if (data instanceof FormData) {
       const file = data.get('file') as File;
@@ -246,7 +246,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
         url: data.audioUrl
       };
     }
-    
+
     // Create new session and store in state
     createNewSession(options, audioSource);
 
@@ -278,7 +278,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
         }
         sourceDescription = `file: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB, Type: ${file.type}`;
 
-        
+
 
         if (isLargeFile(file)) {
           setProgress(10);
@@ -317,7 +317,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
 
       // Set common API options
       const apiOptions = {
-        modelId: import.meta.env.VITE_REPLICATE_MODEL_ID || 'vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c',
+        modelId: process.env.NEXT_PUBLIC_REPLICATE_MODEL_ID || 'vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c',
         task: 'transcribe',
         batch_size: 64,
         return_timestamps: true,
@@ -437,7 +437,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
       }
     };
   }, [firebaseFilePath, activeSession]);
-  
+
   // Run cleanup of expired sessions once on component mount
   useEffect(() => {
     const cleanupExpired = async () => {
@@ -452,7 +452,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
         console.error('Failed to clean up expired sessions:', error);
       }
     };
-    
+
     cleanupExpired();
   }, []);
 
@@ -472,7 +472,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
             </div>
           </div>
         ) : hasRecoverableSession && activeSession ? (
-          <SessionRecoveryPrompt 
+          <SessionRecoveryPrompt
             session={activeSession}
             onRecover={recoverSession}
             onDiscard={discardSession}

@@ -15,8 +15,8 @@ import ReactGA from 'react-ga4';
 
 // Initialize analytics services
 export const initializeAnalytics = (consent: boolean | string = false) => {
-  const clarityId = import.meta.env.VITE_MICROSOFT_CLARITY_ID;
-  const googleAnalyticsId = import.meta.env.VITE_GOOGLE_ANALYTICS_ID;
+  const clarityId = process.env.NEXT_PUBLIC_MICROSOFT_CLARITY_ID;
+  const googleAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
 
   // Handle different consent levels
   const fullConsent = consent === true || consent === 'true';
@@ -51,8 +51,8 @@ export const initializeAnalytics = (consent: boolean | string = false) => {
 
 // Enable analytics tracking when consent is granted
 export const enableAnalytics = () => {
-  const clarityId = import.meta.env.VITE_MICROSOFT_CLARITY_ID;
-  const googleAnalyticsId = import.meta.env.VITE_GOOGLE_ANALYTICS_ID;
+  const clarityId = process.env.NEXT_PUBLIC_MICROSOFT_CLARITY_ID;
+  const googleAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
 
   if (clarityId) {
     // For Clarity, we need to reinitialize with consent
@@ -74,7 +74,7 @@ export const enableAnalytics = () => {
 
 // Disable analytics tracking when consent is withdrawn
 export const disableAnalytics = () => {
-  const googleAnalyticsId = import.meta.env.VITE_GOOGLE_ANALYTICS_ID;
+  const googleAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
 
   if (googleAnalyticsId && ReactGA.isInitialized) {
     // Update consent status

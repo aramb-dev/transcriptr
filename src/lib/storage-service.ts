@@ -2,7 +2,7 @@ import { storage } from './firebase';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 // Size threshold for using Firebase Storage (in MB)
-const LARGE_FILE_THRESHOLD = parseInt(import.meta.env.VITE_LARGE_FILE_THRESHOLD || '1', 10);
+const LARGE_FILE_THRESHOLD = parseInt(process.env.NEXT_PUBLIC_LARGE_FILE_THRESHOLD || '1', 10);
 
 // Generate a unique filename with timestamp and random string
 const generateUniqueFilename = (originalName: string) => {
