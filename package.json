@@ -47,7 +47,6 @@
     "react-dropzone": "^14.3.8",
     "react-ga4": "^2.1.0",
     "react-pdf": "^10.0.1",
-    "react-router-dom": "^7.6.2",
     "replicate": "^1.0.1",
     "shadcn-ui": "^0.9.5",
     "sonner": "^2.0.5",

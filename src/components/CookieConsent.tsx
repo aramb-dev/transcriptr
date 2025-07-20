@@ -1,7 +1,7 @@
 import { Button } from './ui/button';
 import { AlertCircle, Cookie } from 'lucide-react';
 import { toast } from 'sonner';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { slideInRight, springTransition } from '../lib/animations';
 
@@ -51,7 +51,7 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, onEssent
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                     We use cookies to analyze site traffic and improve your experience.
                     By accepting, you consent to our use of analytics tools including Google Analytics and Microsoft Clarity
-                    as described in our <Link to="/privacy" onClick={(e) => {e.stopPropagation();}} className="underline hover:text-blue-500 transition-colors">Privacy Policy</Link>.
+                    as described in our <Link href="/privacy" onClick={(e) => {e.stopPropagation();}} className="underline hover:text-blue-500 transition-colors">Privacy Policy</Link>.
                   </p>
                 </div>
               </div>
@@ -139,7 +139,7 @@ export function showCookieConsent({ onAccept, onDecline, onEssentialOnly }: Cook
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                 We use cookies to analyze site traffic and improve your experience.
                 By accepting, you consent to our use of analytics tools including Google Analytics and Microsoft Clarity
-                as described in our <Link to="/privacy" onClick={(e) => {e.stopPropagation(); toast.dismiss(t);}} className="underline hover:text-blue-500 transition-colors">Privacy Policy</Link>.
+                as described in our <Link href="/privacy" onClick={(e) => {e.stopPropagation(); toast.dismiss(t);}} className="underline hover:text-blue-500 transition-colors">Privacy Policy</Link>.
               </p>
             </div>
           </div>

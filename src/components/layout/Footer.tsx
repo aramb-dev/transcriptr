@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 
 interface FooterProps {
   onOpenFeedbackModal: (type: 'general' | 'issue' | 'feature') => void;
@@ -63,15 +63,15 @@ export function Footer({ onOpenFeedbackModal, onOpenChangelog }: FooterProps) {
           Star on GitHub
         </a>
         <span>•</span>
-        <Link to="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
+        <Link href="/terms" className="text-blue-600 dark:text-blue-400 hover:underline">
           Terms of Service
         </Link>
         <span>•</span>
-        <Link to="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
+        <Link href="/privacy" className="text-blue-600 dark:text-blue-400 hover:underline">
           Privacy Policy
         </Link>
         <span>•</span>
-        <Link to="/docs" className="text-blue-600 dark:text-blue-400 hover:underline">
+        <Link href="/docs" className="text-blue-600 dark:text-blue-400 hover:underline">
           Documentation
         </Link>
       </div>

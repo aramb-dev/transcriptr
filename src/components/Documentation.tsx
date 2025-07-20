@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Button } from './ui/button';
 
 export function Documentation() {
@@ -9,7 +9,7 @@ export function Documentation() {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
           <div className="p-6 sm:p-8">
             <h1 className="text-3xl font-bold mb-6">Documentation</h1>
-            
+
             <section className="mb-8">
               <h2 className="text-2xl font-semibold mb-4">Getting Started</h2>
               <p className="text-gray-700 dark:text-gray-300 mb-4">
@@ -51,7 +51,7 @@ export function Documentation() {
             </section>
 
             <div className="border-t border-gray-200 dark:border-gray-700 p-4 flex justify-center">
-              <Link to="/">
+              <Link href="/">
                 <Button variant="outline" className="gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M19 12H5M12 19l-7-7 7-7"/>

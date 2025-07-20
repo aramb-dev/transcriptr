@@ -41,7 +41,7 @@ export const staggerItem: Variants = {
 
 // Spring transition presets
 export const springTransition = {
-  type: "spring",
+  type: "spring" as const,
   stiffness: 300,
   damping: 25
 };
