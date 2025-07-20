@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
+import '../index.css'
 
 export const metadata: Metadata = {
   title: 'Transcriptr | AI Audio Transcription',
