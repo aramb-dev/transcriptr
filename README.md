@@ -17,9 +17,9 @@ Transcriptr is a modern web application that converts audio files to text using 
 
 ## Technology Stack
 
-- **Frontend**: React with TypeScript, powered by Vite for fast development
+- **Frontend**: React with TypeScript, powered by Next.js for server-side rendering and static site generation
 - **UI**: Tailwind CSS with shadcn/ui components for a modern interface
-- **Backend**: Express.js server for handling API requests
+- **Backend**: Next.js API Routes for handling API requests
 - **AI Integration**: Replicate API for accessing the Incredibly Fast Whisper model
 - **Document Handling**:
   - Printerz for high-quality PDF template rendering
@@ -30,7 +30,7 @@ Transcriptr is a modern web application that converts audio files to text using 
 
 ### Prerequisites
 
-- Node.js (v16 or later)
+- Node.js (v18 or later)
 - npm or yarn
 - Replicate API token (for AI transcription)
 
@@ -49,10 +49,10 @@ Transcriptr is a modern web application that converts audio files to text using 
    npm install
    ```
 
-3. Create a .env file in the root directory with your Replicate API token:
+3. Create a .env.local file in the root directory with your Replicate API token:
 
    ```
-   VITE_REPLICATE_API_TOKEN=your_replicate_api_token_here
+   NEXT_PUBLIC_REPLICATE_API_TOKEN=your_replicate_api_token_here
    ```
 
 4. Start the development server:
@@ -61,51 +61,47 @@ Transcriptr is a modern web application that converts audio files to text using 
    npm run dev
    ```
 
-5. Open your browser to `http://localhost:5173` to see the application.
-
-Collecting workspace information# Adding Environment Variables Section to README.md
-
-Based on your .env file and existing documentation, I'll create an environment variables section for your README.md that explains all the required environment variables for Transcriptr:
+5. Open your browser to `http://localhost:3000` to see the application.
 
 ## Environment Variables
 
-Transcriptr requires several environment variables to function properly. Create a `.env` file in the project root with the following variables:
+Transcriptr requires several environment variables to function properly. Create a `.env.local` file in the project root with the following variables:
 
 ### Required Environment Variables
 
-| Variable                            | Description                                                              |
-| ----------------------------------- | ------------------------------------------------------------------------ |
-| `VITE_REPLICATE_API_TOKEN`          | Your Replicate API token for accessing the Incredibly Fast Whisper model |
-| `VITE_FIREBASE_API_KEY`             | Firebase API key for storage services                                    |
-| `VITE_FIREBASE_AUTH_DOMAIN`         | Firebase auth domain                                                     |
-| `VITE_FIREBASE_PROJECT_ID`          | Firebase project ID                                                      |
-| `VITE_FIREBASE_STORAGE_BUCKET`      | Firebase storage bucket for storing transcriptions and PDFs              |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID                                             |
-| `VITE_FIREBASE_APP_ID`              | Firebase application ID                                                  |
-| `VITE_PRINTERZ_API_KEY`             | API key for Printerz PDF generation services                             |
-| `VITE_LARGE_FILE_THRESHOLD`         | Threshold in MB for large file warnings                                  |
+| Variable                                   | Description                                                              |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| `NEXT_PUBLIC_REPLICATE_API_TOKEN`          | Your Replicate API token for accessing the Incredibly Fast Whisper model |
+| `NEXT_PUBLIC_FIREBASE_API_KEY`             | Firebase API key for storage services                                    |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`         | Firebase auth domain                                                     |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID`          | Firebase project ID                                                      |
+| `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`      | Firebase storage bucket for storing transcriptions and PDFs              |
+| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID                                             |
+| `NEXT_PUBLIC_FIREBASE_APP_ID`              | Firebase application ID                                                  |
+| `NEXT_PUBLIC_PRINTERZ_API_KEY`             | API key for Printerz PDF generation services                             |
+| `NEXT_PUBLIC_LARGE_FILE_THRESHOLD`         | Threshold in MB for large file warnings                                  |
 
 ### Optional Environment Variables
 
-| Variable                    | Description                                                            | Default       |
-| --------------------------- | ---------------------------------------------------------------------- | ------------- |
-| `VITE_CLOUDCONVERT_API_KEY` | API key for CloudConvert services (for additional file format support) | None          |
-| `PORT`                      | Port for the server to listen on                                       | `3001`        |
-| `NODE_ENV`                  | Environment mode (`development` or `production`)                       | `development` |
+| Variable                           | Description                                                            | Default       |
+| ---------------------------------- | ---------------------------------------------------------------------- | ------------- |
+| `NEXT_PUBLIC_CLOUDCONVERT_API_KEY` | API key for CloudConvert services (for additional file format support) | None          |
+| `PORT`                             | Port for the server to listen on                                       | `3000`        |
+| `NODE_ENV`                         | Environment mode (`development` or `production`)                       | `development` |
 
-### Example .env file
+### Example .env.local file
 
 ```
-VITE_REPLICATE_API_TOKEN=your_replicate_token_here
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your-project-id
-VITE_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-VITE_FIREBASE_MESSAGING_SENDER_ID=123456789012
-VITE_FIREBASE_APP_ID=1:123456789012:web:abcdef1234567890
-VITE_PRINTERZ_API_KEY=your_printerz_api_key
-VITE_LARGE_FILE_THRESHOLD=1
-VITE_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
+NEXT_PUBLIC_REPLICATE_API_TOKEN=your_replicate_token_here
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789012
+NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789012:web:abcdef1234567890
+NEXT_PUBLIC_PRINTERZ_API_KEY=your_printerz_api_key
+NEXT_PUBLIC_LARGE_FILE_THRESHOLD=1
+NEXT_PUBLIC_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
 ```
 
 ### Getting API Keys
@@ -115,12 +111,6 @@ VITE_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
 - **Printerz**: Create an account at [Printerz](https://printerz.dev/) and get your API key
 - **CloudConvert** (optional): Register at [CloudConvert](https://cloudconvert.com/) for additional file format conversion capabilities
 
-````
-
-This section provides clear documentation on all the environment variables needed for your application, where to get them, and which ones are optional versus required. The table format makes it easy to understand what each variable is for.
-
-You can place this section in your README.md after the "Getting Started" section and before the "Build and Deployment" section to maintain a logical flow of information.
-
 ## Build and Deployment
 
 ### Building for Production
@@ -129,12 +119,9 @@ To build the application for production:
 
 ```bash
 npm run build
-````
+```
 
-This command creates optimized production builds for both client and server:
-
-- Client files are generated in `dist/client`
-- Server files are generated in server
+This command creates an optimized production build in the `.next` directory.
 
 ### Deploying to Production
 
@@ -145,7 +132,7 @@ This command creates optimized production builds for both client and server:
    npm run start
    ```
 
-The server will run on port 3001 by default, but you can override this by setting the `PORT` environment variable.
+The server will run on port 3000 by default, but you can override this by setting the `PORT` environment variable.
 
 ### Docker Deployment (Optional)
 
@@ -163,9 +150,9 @@ COPY . .
 RUN npm run build
 
 ENV NODE_ENV=production
-ENV PORT=3001
+ENV PORT=3000
 
-EXPOSE 3001
+EXPOSE 3000
 
 CMD ["npm", "run", "start"]
 ```
@@ -174,17 +161,7 @@ Build and run the Docker container:
 
 ```bash
 docker build -t transcriptr .
-docker run -p 3001:3001 -e VITE_REPLICATE_API_TOKEN=your_token_here transcriptr
-```
-
-## Deployment Options
-
-### Local Development
-
-For local development, the app uses an Express.js server to handle API requests:
-
-```bash
-npm run dev
+docker run -p 3000:3000 -e NEXT_PUBLIC_REPLICATE_API_TOKEN=your_token_here transcriptr
 ```
 
 ## Project Structure
@@ -193,86 +170,24 @@ npm run dev
 transcriptr/
 ├── public/                # Static assets
 ├── src/                   # Source code
-│   ├── assets/            # Images and other assets
+│   ├── app/               # Next.js App Router
+│   │   ├── layout.tsx     # Main layout
+│   │   └── page.tsx       # Main page
 │   ├── components/        # React components
 │   │   ├── ui/            # UI components based on shadcn/ui
-│   │   ├── TranscriptionOptions.tsx  # Language and diarization options
-│   │   ├── TranscriptionResult.tsx   # Display and download results
-│   │   └── UploadAudio.tsx           # File upload component
+│   │   └── ...
 │   ├── hooks/             # Custom React hooks
 │   ├── lib/               # Utility functions
-│   ├── server/            # Express server for API handling
-│   ├── App.tsx            # Main application component
-│   ├── index.css          # Global CSS
-│   └── main.tsx           # Entry point
-├── index.html             # HTML template
+│   └── server/            # Server-side logic
+├── next.config.mjs        # Next.js configuration
 ├── tailwind.config.js     # Tailwind CSS configuration
 ├── tsconfig.json          # TypeScript configuration
-├── vite.config.ts         # Vite configuration
 └── package.json           # Dependencies and scripts
 ```
 
 ## API Documentation
 
-### `/api/transcribe`
-
-**Method**: POST
-
-**Description**: Upload an audio file for transcription
-
-**Request Body**:
-
-```json
-{
-  "audioData": "base64-encoded-audio-data",
-  "options": {
-    "modelId": "vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c",
-    "task": "transcribe",
-    "batch_size": 8,
-    "return_timestamps": true,
-    "language": "english",
-    "diarize": false
-  }
-}
-```
-
-**Response**: JSON object with prediction ID or immediate transcription
-
-### `/api/prediction/:id`
-
-**Method**: GET
-
-**Description**: Check the status of a transcription in progress
-
-**Parameters**:
-
-- `id`: The prediction ID returned from the transcribe endpoint
-
-**Response**: JSON object with prediction status and results (if complete)
-
-### `/api/printerz/render`
-
-**Method**: POST
-
-**Description**: Proxy endpoint for rendering PDFs with Printerz
-
-**Request Body**:
-
-```json
-{
-  "templateId": "your-printerz-template-id",
-  "printerzData": {
-    "variables": {
-      "title": "Document Title",
-      "content": "Document Content",
-      "timestamp": "Formatted Date"
-    },
-    "options": {
-      "printBackground": true
-    }
-  }
-}
-```
+Next.js API Routes are used for the backend. The API endpoints are located in the `src/app/api` directory.
 
 ## Audio Format Support
 
@@ -307,7 +222,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [shadcn/ui](https://ui.shadcn.com/) for the component library
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [React](https://reactjs.org/) for the UI framework
-- [Vite](https://vitejs.dev/) for the build tool
+- [Next.js](https://nextjs.org/) for the application framework
 - [Printerz](https://printerz.dev/) for PDF template rendering and generation
 
 ---
