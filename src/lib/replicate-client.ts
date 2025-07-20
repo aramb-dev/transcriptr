@@ -2,10 +2,10 @@ import * as dotenv from 'dotenv';
 dotenv.config(); // Ensure environment variables are loaded
 
 const REPLICATE_API_URL = 'https://api.replicate.com/v1/predictions';
-const REPLICATE_API_TOKEN = process.env.VITE_REPLICATE_API_TOKEN;
+const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
 
 if (!REPLICATE_API_TOKEN) {
-  console.error("FATAL: VITE_REPLICATE_API_TOKEN environment variable is not set.");
+  console.error("FATAL: REPLICATE_API_TOKEN environment variable is not set.");
 }
 
 /**
