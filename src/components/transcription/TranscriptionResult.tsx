@@ -3,14 +3,7 @@ import { Button } from '../ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { storage } from '../../lib/firebase';
-import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { v4 as uuidv4 } from 'uuid';
 import { toast } from 'sonner';
-import { marked } from 'marked';
-import { motion } from 'framer-motion';
-import { staggerContainer, staggerItem } from '../../lib/animations';
-import { AnimatedList } from '../ui/animated-list';
 import { SequentialRevealList } from '../ui/sequential-reveal-list';
 import { ScrollRevealSection } from '../ui/scroll-reveal-section';
 
@@ -115,9 +108,6 @@ const dynamicImports = {
   }
 };
 
-// Import the generatePdf function from the lib
-import { generatePdf as generatePdfFromLib } from '../../lib/pdf-generation';
-
 // Helper function for downloading data
 const createDownloadableDataUrl = async (blob: Blob, filename: string): Promise<void> => {
   return new Promise((resolve) => {
@@ -136,16 +126,6 @@ const createDownloadableDataUrl = async (blob: Blob, filename: string): Promise<
     };
     reader.readAsDataURL(blob);
   });
-};
-
-// Helper function to get a safe filename
-const getSafeFilename = (name: string): string => {
-  return name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-};
-
-// Helper function to get formatted date
-const getFormattedDate = (): string => {
-  return new Date().toISOString().split('T')[0];
 };
 
 interface TranscriptionResultProps {
@@ -247,8 +227,6 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
   }, [transcription]);
 
   // Firebase storage related state
-  const [firebasePdfUrl, setFirebasePdfUrl] = useState<string | null>(null);
-  const [pdfFirebasePath, setPdfFirebasePath] = useState<string | null>(null);
   const [isGeneratingDocx, setIsGeneratingDocx] = useState(false);
   const [pdfGenerated, setPdfGenerated] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -257,13 +235,9 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
   // Use the enhanced PDF generation hook
   const {
     generatePrimaryPdf,
-    generateFallbackPdf, // Get the new fallback function
     isGeneratingPdf,
     pdfError,
     pdfObjectUrl,
-    hasPdf,
-    primaryPdfFailed, // Get the failure status
-    pdfBlob // Get the blob for download
   } = usePdfGeneration();
 
   // No longer need fallback confirmation state
@@ -294,47 +268,6 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
       setPdfGenerated(true);
     } catch (error) {
       console.error("PDF preview generation failed:", error);
-    }
-  };
-
-  // Handle PDF download
-  const handleDownloadPdf = async () => {
-    try {
-      await generatePrimaryPdf(transcription, pdfTitle);
-      setPdfGenerated(true);
-    } catch (error) {
-      console.error("PDF download failed:", error);
-    }
-  };
-
-  // Upload PDF to Firebase Storage
-  const uploadPdfToFirebase = async (blob: Blob): Promise<{ url: string; path: string }> => {
-    try {
-      // Generate a unique filename with date and UUID
-      const safeTitle = getSafeFilename(pdfTitle);
-      const date = getFormattedDate();
-      const uuid = uuidv4().substring(0, 8);
-      const filename = `${safeTitle}-${date}-${uuid}.pdf`;
-      const filePath = `transcriptions/${filename}`;
-
-      console.log('Uploading PDF to Firebase:', filePath);
-
-      // Create a storage reference
-      const storageRef = ref(storage, filePath);
-
-      // Upload the blob
-      await uploadBytes(storageRef, blob, {
-        contentType: 'application/pdf'
-      });
-
-      // Get download URL
-      const downloadURL = await getDownloadURL(storageRef);
-      console.log('PDF uploaded to Firebase:', downloadURL);
-
-      return { url: downloadURL, path: filePath };
-    } catch (error) {
-      console.error('Error uploading PDF to Firebase:', error);
-      throw error;
     }
   };
 
@@ -394,10 +327,7 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
           updateFields: true,
         },
         sections: [{
-          properties: {
-            // Set RTL direction at document level if needed
-            bidi: isRTL,
-          },
+          properties: {},
           children: paragraphs
         }]
       });
@@ -528,10 +458,6 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
     }
   };
 
-  const renderMarkdown = () => {
-    return { __html: marked(transcription) };
-  };
-
   // Check if the title has changed since PDF generation
   const hasNameChanged = pdfGenerated && pdfTitle !== initialPdfTitleRef.current;
 
@@ -543,24 +469,6 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
     } catch (error) {
       console.error("Error regenerating PDF:", error);
     }
-  };
-
-  // Removed unused function
-
-  // Define variants for list items
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const item = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
   };
 
   const lines = transcription.split('\n');
@@ -615,7 +523,7 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
         <TabsContent value="segments" className="mt-4">
           {transcript && transcript.segments ? (
             <SequentialRevealList
-              items={transcript.segments.map((segment, idx) => (
+              items={transcript.segments.map((segment: any, idx: number) => (
                 <div key={idx} className="p-4 bg-gray-50 dark:bg-gray-800/50 rounded-md">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-500 dark:text-gray-400">
