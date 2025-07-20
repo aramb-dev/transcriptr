@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
@@ -7,7 +7,6 @@ export const metadata: Metadata = {
   keywords: 'audio transcription, ai transcription, speech to text, convert audio to text, replicate, whisper',
   authors: [{ name: 'Transcriptr' }],
   robots: 'index, follow',
-  themeColor: '#ffffff',
   openGraph: {
     type: 'website',
     url: 'https://transcriptr.aramb.dev/',
@@ -28,6 +27,10 @@ export const metadata: Metadata = {
     description: 'Convert audio to text with AI-powered transcription. Supports multiple formats and languages, providing fast and accurate results.',
     images: ['https://transcriptr.aramb.dev/social_preview.png'],
   },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#ffffff',
 }
 
 export default function RootLayout({

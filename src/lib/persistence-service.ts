@@ -65,11 +65,11 @@ const initDb = (): Promise<IDBDatabase> => {
 
     request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
-      
+
       // Create object store for sessions
       if (!db.objectStoreNames.contains(STORE_NAME)) {
         const store = db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-        
+
         // Create indexes for faster queries
         store.createIndex('status', 'status', { unique: false });
         store.createIndex('expiresAt', 'expiresAt', { unique: false });
@@ -86,10 +86,10 @@ export const createSessionId = (): string => {
   const timestamp = Date.now();
   const randomString = Math.random().toString(36).substring(2, 10);
   const sessionId = `${timestamp}-${randomString}`;
-  
+
   // Set session cookie
   document.cookie = `${SESSION_COOKIE_NAME}=${sessionId}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;
-  
+
   return sessionId;
 };
 
@@ -122,10 +122,10 @@ export const saveSession = async (session: TranscriptionSession): Promise<void> 
     const db = await initDb();
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
-    
+
     // Update timestamp
     session.lastUpdatedAt = Date.now();
-    
+
     // Save to store
     await new Promise<void>((resolve, reject) => {
       const request = store.put(session);
@@ -135,7 +135,7 @@ export const saveSession = async (session: TranscriptionSession): Promise<void> 
         reject(new Error("Failed to save session"));
       };
     });
-    
+
     console.log('Session saved successfully:', session.id);
   } catch (error) {
     console.error('Error in saveSession:', error);
@@ -159,10 +159,10 @@ export const createSession = async (
 ): Promise<TranscriptionSession> => {
   // Create a new session ID or use existing one from cookie
   const sessionId = getSessionId() || createSessionId();
-  
+
   const now = Date.now();
   const expiryHours = DEFAULT_SESSION_EXPIRY_HOURS;
-  
+
   const session: TranscriptionSession = {
     id: sessionId,
     status: 'starting',
@@ -176,7 +176,7 @@ export const createSession = async (
     options,
     apiResponses: []
   };
-  
+
   await saveSession(session); // Save the new session immediately
   return session;
 };
@@ -189,7 +189,7 @@ export const getSession = async (sessionId: string): Promise<TranscriptionSessio
     const db = await initDb();
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const store = transaction.objectStore(STORE_NAME);
-    
+
     const session = await new Promise<TranscriptionSession | null>((resolve, reject) => {
       const request = store.get(sessionId);
       request.onsuccess = () => resolve(request.result || null);
@@ -198,7 +198,7 @@ export const getSession = async (sessionId: string): Promise<TranscriptionSessio
         reject(new Error("Failed to read session"));
       };
     });
-    
+
     return session;
   } catch (error) {
     console.error('Error in getSession:', error);
@@ -214,7 +214,7 @@ export const getActiveSession = async (): Promise<TranscriptionSession | null> =
     const db = await initDb();
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const store = transaction.objectStore(STORE_NAME);
-    
+
     // Get all sessions
     const sessions = await new Promise<TranscriptionSession[]>((resolve, reject) => {
       const request = store.index('status').getAll(IDBKeyRange.bound('starting', 'processing'));
@@ -224,15 +224,15 @@ export const getActiveSession = async (): Promise<TranscriptionSession | null> =
         reject(new Error("Failed to read sessions"));
       };
     });
-    
+
     if (sessions.length === 0) {
       return null;
     }
-    
+
     // Find the most recent session
     const currentSessionId = getSessionId();
     const now = Date.now();
-    
+
     // First check if there's an active session matching the current session cookie
     if (currentSessionId) {
       const currentSession = sessions.find(s => s.id === currentSessionId);
@@ -240,13 +240,13 @@ export const getActiveSession = async (): Promise<TranscriptionSession | null> =
         return currentSession;
       }
     }
-    
+
     // Otherwise return the most recent active session
     const validSessions = sessions.filter(s => s.expiresAt > now);
     if (validSessions.length === 0) {
       return null;
     }
-    
+
     // Sort by last updated time (descending)
     validSessions.sort((a, b) => b.lastUpdatedAt - a.lastUpdatedAt);
     return validSessions[0];
@@ -260,7 +260,7 @@ export const getActiveSession = async (): Promise<TranscriptionSession | null> =
  * Update a session with new data
  */
 export const updateSession = async (
-  sessionId: string, 
+  sessionId: string,
   updates: Partial<TranscriptionSession>
 ): Promise<TranscriptionSession | null> => {
   try {
@@ -269,14 +269,14 @@ export const updateSession = async (
       console.error('Session not found:', sessionId);
       return null;
     }
-    
+
     // Apply updates
     const updatedSession: TranscriptionSession = {
       ...session,
       ...updates,
       lastUpdatedAt: Date.now()
     };
-    
+
     await saveSession(updatedSession);
     return updatedSession;
   } catch (error) {
@@ -293,7 +293,7 @@ export const deleteSession = async (sessionId: string): Promise<boolean> => {
     const db = await initDb();
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
-    
+
     await new Promise<void>((resolve, reject) => {
       const request = store.delete(sessionId);
       request.onsuccess = () => resolve();
@@ -302,12 +302,12 @@ export const deleteSession = async (sessionId: string): Promise<boolean> => {
         reject(new Error("Failed to delete session"));
       };
     });
-    
+
     // Clear session cookie if it matches
     if (getSessionId() === sessionId) {
       clearSessionId();
     }
-    
+
     return true;
   } catch (error) {
     console.error('Error in deleteSession:', error);
@@ -323,9 +323,9 @@ export const cleanupExpiredSessions = async (): Promise<number> => {
     const db = await initDb();
     const transaction = db.transaction([STORE_NAME], 'readwrite');
     const store = transaction.objectStore(STORE_NAME);
-    
+
     const now = Date.now();
-    
+
     // Get expired sessions
     const expiredSessions = await new Promise<TranscriptionSession[]>((resolve, reject) => {
       const request = store.index('expiresAt').getAll(IDBKeyRange.upperBound(now));
@@ -335,11 +335,11 @@ export const cleanupExpiredSessions = async (): Promise<number> => {
         reject(new Error("Failed to read expired sessions"));
       };
     });
-    
+
     if (expiredSessions.length === 0) {
       return 0;
     }
-    
+
     // Delete each expired session
     let deletedCount = 0;
     for (const session of expiredSessions) {
@@ -355,7 +355,7 @@ export const cleanupExpiredSessions = async (): Promise<number> => {
         };
       });
     }
-    
+
     console.log(`Cleaned up ${deletedCount} expired sessions`);
     return deletedCount;
   } catch (error) {
@@ -367,22 +367,33 @@ export const cleanupExpiredSessions = async (): Promise<number> => {
 /**
  * Get all sessions (for history view)
  */
-export const getAllSessions = async (): Promise<TranscriptionSession[]> => {
+export const getAllSessions = async (sessionId?: string, rangeEnd?: string): Promise<TranscriptionSession[]> => {
   try {
     const db = await initDb();
     const transaction = db.transaction([STORE_NAME], 'readonly');
     const store = transaction.objectStore(STORE_NAME);
-    
+
     // Get all sessions
     const sessions = await new Promise<TranscriptionSession[]>((resolve, reject) => {
-      const request = store.getAll();
+      let request: IDBRequest<TranscriptionSession[]>;
+
+      if (sessionId && rangeEnd) {
+        if (sessionId > rangeEnd) {
+          return reject(new Error("Invalid key range: lower bound is greater than upper bound."));
+        }
+        const range = IDBKeyRange.bound(sessionId, rangeEnd);
+        request = store.getAll(range);
+      } else {
+        request = store.getAll();
+      }
+
       request.onsuccess = () => resolve(request.result || []);
       request.onerror = (event) => {
         console.error("Error reading all sessions:", event);
         reject(new Error("Failed to read sessions"));
       };
     });
-    
+
     return sessions;
   } catch (error) {
     console.error('Error in getAllSessions:', error);
