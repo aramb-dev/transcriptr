@@ -322,7 +322,7 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
           {changelogItems.map((item, index) => (
             <div key={index} className="relative flex items-start sm:space-x-4">
               {/* Date and Version */}
-              <div className="flex-shrink-0 w-24 sm:w-32 text-right sm:text-left pr-4 sm:pr-0">
+              <div className="shrink-0 w-24 sm:w-32 text-right sm:text-left pr-4 sm:pr-0">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{item.date}</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">v{item.version}</p>
               </div>
@@ -394,7 +394,7 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 text-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 text-gray-900 dark:text-gray-100">
       <div className="container mx-auto px-4 max-w-3xl">
         {content}
       </div>

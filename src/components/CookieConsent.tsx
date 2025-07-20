@@ -45,7 +45,7 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, onEssent
           >
             <div className="p-4">
               <div className="flex items-start gap-3">
-                <Cookie className="h-5 w-5 text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <Cookie className="h-5 w-5 text-blue-500 dark:text-blue-400 mt-0.5 shrink-0" />
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-gray-100">Cookie consent</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
@@ -57,7 +57,7 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, onEssent
               </div>
 
               <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-md flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0" />
+                <AlertCircle className="h-5 w-5 text-amber-500 shrink-0" />
                 <p className="text-sm text-amber-800 dark:text-amber-300">
                   Ad blocker detected. You can still use our service, but disabling it would help us improve.
                 </p>
@@ -133,7 +133,7 @@ export function showCookieConsent({ onAccept, onDecline, onEssentialOnly }: Cook
       >
         <div className="p-4">
           <div className="flex items-start gap-3">
-            <Cookie className="h-5 w-5 text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <Cookie className="h-5 w-5 text-blue-500 dark:text-blue-400 mt-0.5 shrink-0" />
             <div>
               <h3 className="font-medium text-gray-900 dark:text-gray-100">Cookie consent</h3>
               <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
