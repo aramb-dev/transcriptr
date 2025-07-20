@@ -1,13 +1,4 @@
-import { isLargeFile, uploadLargeFile, deleteFile } from '../lib/storage-service';
-import { isFormatSupportedByReplicate } from '../lib/audio-conversion';
-import { trackEvent } from '../lib/analytics';
-
 // Constants
-const MODEL_ID = 'vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c';
-const isNetlify = typeof window !== 'undefined' &&
-                 (window.location.hostname.includes('netlify.app') ||
-                  process.env.DEPLOY_ENV === 'netlify');
-
 export type TranscriptionStatus = 'idle' | 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled';
 
 export const statusMessages: Record<TranscriptionStatus, string> = {
@@ -20,9 +11,7 @@ export const statusMessages: Record<TranscriptionStatus, string> = {
 };
 
 export const getApiUrl = (endpoint: string) => {
-  return isNetlify
-    ? `/.netlify/functions/${endpoint}`
-    : `/api/${endpoint}`;
+  return `/api/${endpoint}`;
 };
 
 // Convert file to base64

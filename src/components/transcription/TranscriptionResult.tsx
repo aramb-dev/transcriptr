@@ -32,14 +32,14 @@ const dynamicImports = {
 
   // Load jsPDF only when needed
   getJsPdf: () => import('jspdf').then(module => module.jsPDF),
-  
+
   // HTML document generator for multilingual support
   generateHTML: (title: string, content: string) => {
     // Check for RTL languages
     const containsArabic = /[\u0600-\u06FF]/.test(content);
     const containsHebrew = /[\u0590-\u05FF]/.test(content);
     const isRTL = containsArabic || containsHebrew;
-    
+
     // Format current date
     const today = new Date();
     const options: Intl.DateTimeFormatOptions = {
@@ -51,7 +51,7 @@ const dynamicImports = {
       minute: '2-digit'
     };
     const formattedDate = today.toLocaleDateString('en-US', options);
-    
+
     // Create HTML with proper styling and UTF-8 encoding
     const htmlContent = `
       <!DOCTYPE html>
@@ -109,16 +109,11 @@ const dynamicImports = {
       </body>
       </html>
     `;
-    
+
     // Convert HTML to Blob
     return new Blob([htmlContent], { type: 'text/html' });
   }
 };
-
-// Helper function to determine if we're running on Netlify
-const isNetlify = typeof window !== 'undefined' &&
-                 (window.location.hostname.includes('netlify.app') ||
-                  process.env.DEPLOY_ENV === 'netlify');
 
 // Import the generatePdf function from the lib
 import { generatePdf as generatePdfFromLib } from '../../lib/pdf-generation';
@@ -192,22 +187,22 @@ const usePdfGeneration = () => {
 
     try {
       console.log('Generating PDF document using jsPDF');
-      
+
       // Import the function only when needed
       const { generatePdf } = await import('../../lib/pdf-generation');
-      
+
       // Generate PDF using our library function
       const blob = await generatePdf('', { title, content: transcription });
-      
+
       setPdfBlob(blob); // Store the generated blob
-      
+
       // Create preview if possible
       try {
         createPdfPreview(blob);
       } catch (previewError) {
         console.warn("Could not create preview for PDF document", previewError);
       }
-      
+
       toast.success("PDF generated successfully!");
       return blob; // Return the blob for the download handler
     } catch (error) {
@@ -353,9 +348,9 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
 
       // Check for RTL languages
       const containsArabic = /[\u0600-\u06FF]/.test(transcription);
-      const containsHebrew = /[\u0590-\u05FF]/.test(transcription); 
+      const containsHebrew = /[\u0590-\u05FF]/.test(transcription);
       const isRTL = containsArabic || containsHebrew;
-      
+
       // Create a title paragraph
       const titleParagraph = new Paragraph({
         text: pdfTitle,
@@ -366,7 +361,7 @@ export default function TranscriptionResult({ transcription }: TranscriptionResu
         // Set bidirectional text for RTL languages if needed
         bidirectional: isRTL
       });
-      
+
       // Create paragraph for each line with proper text direction
       const paragraphs = [
         titleParagraph,

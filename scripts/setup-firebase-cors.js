@@ -4,9 +4,9 @@ import fs from 'fs';
 dotenv.config();
 
 // Ensure the Firebase Storage bucket is defined
-const bucket = process.env.VITE_FIREBASE_STORAGE_BUCKET;
+const bucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
 if (!bucket) {
-  console.error('Error: VITE_FIREBASE_STORAGE_BUCKET is not defined in your .env file');
+  console.error('Error: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET is not defined in your .env file');
   process.exit(1);
 }
 

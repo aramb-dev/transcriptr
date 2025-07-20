@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     }
 
     // Get API key from environment variables
-    const apiKey = process.env.VITE_PRINTERZ_API_KEY;
+    const apiKey = process.env.PRINTERZ_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 });
     }

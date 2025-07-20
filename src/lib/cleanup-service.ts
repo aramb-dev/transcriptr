@@ -15,7 +15,7 @@ export async function cleanupFirebaseFile(filePath: string): Promise<boolean> {
   }
 
   try {
-    const response = await fetch('/.netlify/functions/cleanup', {
+    const response = await fetch('/api/cleanup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

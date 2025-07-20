@@ -1,8 +1,14 @@
 import * as dotenv from 'dotenv';
+import https from 'https';
 dotenv.config(); // Ensure environment variables are loaded
 
 const REPLICATE_API_URL = 'https://api.replicate.com/v1/predictions';
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
+
+// Create an HTTPS agent that can handle certificate issues
+const httpsAgent = new https.Agent({
+  rejectUnauthorized: process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0'
+});
 
 if (!REPLICATE_API_TOKEN) {
   console.error("FATAL: REPLICATE_API_TOKEN environment variable is not set.");
@@ -59,6 +65,8 @@ export async function startReplicateTranscription(inputParams: any, modelId: str
           'Content-Type': 'application/json',
         },
         body: body,
+        // @ts-ignore - Node.js specific agent property
+        agent: httpsAgent,
       });
 
       let responseData;
