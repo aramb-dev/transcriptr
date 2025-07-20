@@ -1,19 +1,15 @@
-import * as dotenv from 'dotenv';
-// Firebase imports are now handled in firebase-utils.js
-// Replicate fetch logic is now handled in replicate-client.js
-import { uploadBase64ToFirebase } from './lib/firebase-utils.js';
-import { startReplicateTranscription } from './lib/replicate-client.js';
-
-dotenv.config();
+import { NextResponse } from 'next/server';
+import { uploadBase64ToFirebase } from '@/lib/firebase-utils';
+import { startReplicateTranscription } from '@/lib/replicate-client';
 
 // Default model ID, can be overridden by options
 const DEFAULT_MODEL_ID = 'vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c';
 const LARGE_FILE_THRESHOLD_MB = 1; // Define threshold for direct base64 vs upload
 
 // Helper to prepare audio input for the transcription service
-async function prepareAudioInput(audioData, audioUrl) {
-  const inputParams = {};
-  let firebaseFilePath = null;
+async function prepareAudioInput(audioData: string | undefined, audioUrl: string | undefined) {
+  const inputParams: any = {};
+  let firebaseFilePath: string | null = null;
 
   if (audioUrl) {
     console.log("Using provided audio URL for Replicate input.");
@@ -38,20 +34,15 @@ async function prepareAudioInput(audioData, audioUrl) {
   return { inputParams, firebaseFilePath };
 }
 
-export async function handler(event, context) {
+export async function POST(request: Request) {
   console.log("Transcribe function invoked.");
-
-  if (event.httpMethod !== 'POST') {
-    console.warn("Method not allowed:", event.httpMethod);
-    return { statusCode: 405, body: JSON.stringify({ error: 'Method not allowed' }) };
-  }
 
   let requestBody;
   try {
-    requestBody = JSON.parse(event.body);
-  } catch (parseError) {
+    requestBody = await request.json();
+  } catch (parseError: any) {
     console.error("Error parsing request body:", parseError);
-    return { statusCode: 400, body: JSON.stringify({ error: "Invalid JSON", details: parseError.message }) };
+    return NextResponse.json({ error: "Invalid JSON", details: parseError.message }, { status: 400 });
   }
 
   const { audioData, audioUrl, options = {} } = requestBody;
@@ -65,12 +56,12 @@ export async function handler(event, context) {
 
   if (!audioData && !audioUrl) {
     console.error("Validation Error: No audio data or URL provided.");
-    return { statusCode: 400, body: JSON.stringify({ error: 'No audio data or URL provided' }) };
+    return NextResponse.json({ error: 'No audio data or URL provided' }, { status: 400 });
   }
 
   try {
     // Set up base parameters
-    const transcriptionParams = {
+    const transcriptionParams: any = {
       task: options.task || 'transcribe',
       batch_size: options.batch_size || 8,
       return_timestamps: options.return_timestamps !== undefined ? options.return_timestamps : true,
@@ -93,24 +84,18 @@ export async function handler(event, context) {
 
     // Add firebase path to response if a file was uploaded
     if (firebaseFilePath) {
-      predictionData.firebaseFilePath = firebaseFilePath;
+      (predictionData as any).firebaseFilePath = firebaseFilePath;
       console.log("Included Firebase path in response:", firebaseFilePath);
     }
 
     console.log("Successfully initiated Replicate prediction:", predictionData.id);
-    return {
-      statusCode: 200,
-      body: JSON.stringify(predictionData)
-    };
+    return NextResponse.json(predictionData, { status: 200 });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error processing transcription request:', error);
     const statusCode = error.message.includes("Firebase") || error.message.includes("Replicate") ? 502 : 500;
-    return {
-      statusCode: statusCode,
-      body: JSON.stringify({
-        error: `Transcription processing failed: ${error.message}`
-      })
-    };
+    return NextResponse.json({
+      error: `Transcription processing failed: ${error.message}`
+    }, { status: statusCode });
   }
 }

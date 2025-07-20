@@ -6,7 +6,6 @@ const REPLICATE_API_TOKEN = process.env.VITE_REPLICATE_API_TOKEN;
 
 if (!REPLICATE_API_TOKEN) {
   console.error("FATAL: VITE_REPLICATE_API_TOKEN environment variable is not set.");
-  // Optionally throw an error during build/startup if critical
 }
 
 /**
@@ -15,7 +14,7 @@ if (!REPLICATE_API_TOKEN) {
  * @param {string} modelId - The Replicate model ID (e.g., 'owner/model:version').
  * @returns {Promise<object>} - Resolves with the initial prediction response from Replicate.
  */
-export async function startReplicateTranscription(inputParams, modelId) {
+export async function startReplicateTranscription(inputParams: any, modelId: string): Promise<any> {
   if (!REPLICATE_API_TOKEN) {
     throw new Error("Replicate API token is missing.");
   }
@@ -33,7 +32,7 @@ export async function startReplicateTranscription(inputParams, modelId) {
   let currentBatchSize = initialBatchSize;
   let maxRetries = 3; // Maximum number of retries with reduced batch size
   let retryCount = 0;
-  let lastError = null;
+  let lastError: Error | null = null;
 
   // Try multiple times with decreasing batch sizes
   while (retryCount <= maxRetries) {
@@ -97,7 +96,7 @@ export async function startReplicateTranscription(inputParams, modelId) {
         }
 
         responseData = await response.json();
-      } catch (jsonError) {
+      } catch (jsonError: any) {
         if (jsonError.message && jsonError.message.includes('CUDA out of memory')) {
           lastError = jsonError;
 
@@ -126,7 +125,7 @@ export async function startReplicateTranscription(inputParams, modelId) {
                  `(successful with batch_size=${currentBatchSize})`);
       return responseData;
 
-    } catch (error) {
+    } catch (error: any) {
       lastError = error;
 
       // If this wasn't a CUDA error or we're out of retries, break the loop
@@ -143,5 +142,5 @@ export async function startReplicateTranscription(inputParams, modelId) {
 
   // If we've exhausted all retries, throw the last error
   console.error('Error calling Replicate API after all retries:', lastError);
-  throw new Error(`Replicate API interaction failed after ${retryCount} retries: ${lastError.message}`);
+  throw new Error(`Replicate API interaction failed after ${retryCount} retries: ${lastError!.message}`);
 }

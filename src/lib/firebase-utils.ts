@@ -1,19 +1,19 @@
-import { initializeApp } from 'firebase/app';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getFirebaseConfig } from '../firebase-config.js'; // Adjust path as needed
+import { initializeApp, FirebaseApp } from 'firebase/app';
+import { getStorage, ref, uploadBytes, getDownloadURL, FirebaseStorage } from 'firebase/storage';
+import { getFirebaseConfig } from '@/lib/firebase';
 
-let storage; // Cache storage instance
+let storage: FirebaseStorage; // Cache storage instance
 
-const initializeFirebase = () => {
+const initializeFirebase = (): FirebaseStorage => {
   if (!storage) {
-    const firebaseApp = initializeApp(getFirebaseConfig());
+    const firebaseApp: FirebaseApp = initializeApp(getFirebaseConfig());
     storage = getStorage(firebaseApp);
     console.log("Firebase initialized for utils.");
   }
   return storage;
 };
 
-const generateUniqueFilename = (originalName) => {
+const generateUniqueFilename = (originalName: string): string => {
   const timestamp = Date.now();
   const randomString = Math.random().toString(36).substring(2, 8);
   const fileExtension = originalName?.split('.').pop() || 'audio';
@@ -26,7 +26,7 @@ const generateUniqueFilename = (originalName) => {
  * @param {string} [mimeType='audio/mpeg'] - The MIME type of the data.
  * @returns {Promise<{url: string, path: string}>} - Resolves with the download URL and storage path.
  */
-export async function uploadBase64ToFirebase(base64Data, mimeType = 'audio/mpeg') {
+export async function uploadBase64ToFirebase(base64Data: string, mimeType: string = 'audio/mpeg'): Promise<{url: string, path: string}> {
   const storageInstance = initializeFirebase();
   try {
     const base64WithoutPrefix = base64Data.replace(/^data:.*;base64,/, '');
@@ -53,7 +53,7 @@ export async function uploadBase64ToFirebase(base64Data, mimeType = 'audio/mpeg'
     console.log('Firebase download URL obtained:', downloadURL);
 
     return { url: downloadURL, path: filePath };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Firebase upload error:", error);
     // Enhance error reporting
     const errorMessage = error.message || 'Unknown Firebase upload error';
