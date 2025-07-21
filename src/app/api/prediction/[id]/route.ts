@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
+
 export async function GET(
   _request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: RouteParams,
 ) {
-  const predictionId = params.id;
+  const { id } = await params;
+  const predictionId = id;
 
   if (!predictionId) {
     return NextResponse.json(
