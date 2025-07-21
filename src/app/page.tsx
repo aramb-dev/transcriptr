@@ -9,6 +9,7 @@ import { TranscriptionForm } from "../components/transcription/TranscriptionForm
 import { Toaster } from "sonner";
 import { FeedbackModals } from "../components/feedback/FeedbackModals";
 import { ChangelogModal } from "../components/ChangelogModal";
+import { V2AnnouncementModal, useV2Announcement } from "../components/V2AnnouncementModal";
 import TranscriptionHistory from "../components/transcription/TranscriptionHistory";
 import { fadeInUp, expandCenter } from "../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
@@ -28,6 +29,9 @@ export default function Page() {
   const [showChangelogModal, setShowChangelogModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [formKey, setFormKey] = useState(Date.now()); // Key to force re-render TranscriptionForm when needed
+
+  // V2 Announcement modal logic
+  const { shouldShow: shouldShowV2Announcement, hideAnnouncement: hideV2Announcement } = useV2Announcement();
 
   // For handling session selection from history
   const [selectedSession, setSelectedSession] =
@@ -120,6 +124,10 @@ export default function Page() {
 
       <AnimatePresence>
         {showChangelogModal && <ChangelogModal onClose={closeChangelogModal} />}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {shouldShowV2Announcement && <V2AnnouncementModal onClose={hideV2Announcement} />}
       </AnimatePresence>
 
       <AnimatePresence>
