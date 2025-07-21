@@ -20,6 +20,12 @@ interface TranscriptionInput {
   [key: string]: unknown;
 }
 
+interface PredictionResponse {
+  id: string;
+  status: string;
+  [key: string]: unknown;
+}
+
 /**
  * Starts a transcription prediction job on Replicate.
  * @param {object} inputParams - The input parameters for the Replicate model.
@@ -29,7 +35,7 @@ interface TranscriptionInput {
 export async function startReplicateTranscription(
   inputParams: TranscriptionInput,
   modelId: string,
-): Promise<unknown> {
+): Promise<PredictionResponse> {
   if (!REPLICATE_API_TOKEN) {
     throw new Error("Replicate API token is missing.");
   }
@@ -165,7 +171,7 @@ export async function startReplicateTranscription(
         responseData.id,
         `(successful with batch_size=${currentBatchSize})`,
       );
-      return responseData;
+      return responseData as PredictionResponse;
     } catch (error: unknown) {
       lastError = error as Error;
 

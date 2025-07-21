@@ -84,6 +84,7 @@ export async function POST(request: Request) {
       diarize: boolean;
       audio?: string;
       language?: string;
+      [key: string]: unknown;
     }
 
     const transcriptionParams: TranscriptionParams = {
