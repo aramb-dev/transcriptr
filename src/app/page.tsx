@@ -12,7 +12,6 @@ import { ChangelogModal } from "../components/ChangelogModal";
 import TranscriptionHistory from "../components/transcription/TranscriptionHistory";
 import {
   fadeInUp,
-  slideInRight,
   expandCenter,
 } from "../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
@@ -27,7 +26,6 @@ const TranscriptionError = lazy(() =>
 );
 
 export default function Page() {
-  const [showSuccess, setShowSuccess] = useState(false);
   const [showResult] = useState(false);
   const [showError, setShowError] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
@@ -81,11 +79,6 @@ export default function Page() {
     setFormKey(Date.now());
   };
 
-  const handleShowSuccess = () => {
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
   return (
     <div className="min-h-screen bg-linear-to-b from-sky-50 to-white py-12 text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100">
       <div className="container mx-auto max-w-4xl px-4">
@@ -112,7 +105,6 @@ export default function Page() {
                 >
                   <TranscriptionForm
                     key={formKey}
-                    onShowSuccess={handleShowSuccess}
                     initialSession={selectedSession}
                   />
                 </Suspense>
@@ -121,38 +113,6 @@ export default function Page() {
           </motion.div>
         </AnimatePresence>
       </div>
-
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            className="fixed top-4 right-4 flex items-center gap-3 rounded-lg bg-green-100 p-4 shadow-lg dark:bg-green-900/70"
-            variants={slideInRight}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-green-600 dark:text-green-400"
-            >
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <span className="font-medium text-green-800 dark:text-green-200">
-              Transcription complete!
-            </span>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       <Footer
         onOpenFeedbackModal={openFeedbackModal}
