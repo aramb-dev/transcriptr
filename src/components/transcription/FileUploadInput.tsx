@@ -5,7 +5,6 @@ import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import {
   expandCenter,
   springTransition,
-  smoothLayoutTransition,
 } from "../../lib/animations";
 
 interface FileUploadInputProps {
@@ -184,7 +183,7 @@ export function FileUploadInput({
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  transition={smoothLayoutTransition}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   layout
                 >
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
@@ -215,7 +214,7 @@ export function FileUploadInput({
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.8 }}
-                  transition={smoothLayoutTransition}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   layout
                 >
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
@@ -247,7 +246,7 @@ export function FileUploadInput({
         <motion.div
           className="w-full text-center"
           layout
-          transition={smoothLayoutTransition}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
         >
           <Button
             type="button"
