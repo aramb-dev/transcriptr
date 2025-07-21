@@ -10,8 +10,8 @@ export const loadAnalytics = async () => {
   analyticsLoaded = true;
 };
 
-import Clarity from '@microsoft/clarity';
-import ReactGA from 'react-ga4';
+import Clarity from "@microsoft/clarity";
+import ReactGA from "react-ga4";
 
 // Initialize analytics services
 export const initializeAnalytics = (consent: boolean | string = false) => {
@@ -19,8 +19,8 @@ export const initializeAnalytics = (consent: boolean | string = false) => {
   const googleAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
 
   // Handle different consent levels
-  const fullConsent = consent === true || consent === 'true';
-  const essentialOnly = consent === 'essential';
+  const fullConsent = consent === true || consent === "true";
+  const essentialOnly = consent === "essential";
 
   // Initialize Google Analytics in a basic configuration regardless of consent
   // but with different consent modes
@@ -28,12 +28,13 @@ export const initializeAnalytics = (consent: boolean | string = false) => {
     ReactGA.initialize(googleAnalyticsId, {
       gtagOptions: {
         // Configure consent parameters
-        'consent_mode': {
-          'analytics_storage': fullConsent ? 'granted' : 'denied',
-          'functionality_storage': fullConsent || essentialOnly ? 'granted' : 'denied',
-          'ad_storage': 'denied', // Always deny ad storage as we don't use ads
-        }
-      }
+        consent_mode: {
+          analytics_storage: fullConsent ? "granted" : "denied",
+          functionality_storage:
+            fullConsent || essentialOnly ? "granted" : "denied",
+          ad_storage: "denied", // Always deny ad storage as we don't use ads
+        },
+      },
     });
 
     // Send initial pageview only with full consent
@@ -62,9 +63,9 @@ export const enableAnalytics = () => {
 
   if (googleAnalyticsId && ReactGA.isInitialized) {
     // Update consent status
-    ReactGA.gtag('consent', 'update', {
-      'analytics_storage': 'granted',
-      'functionality_storage': 'granted'
+    ReactGA.gtag("consent", "update", {
+      analytics_storage: "granted",
+      functionality_storage: "granted",
     });
 
     // Send pageview after consent is granted
@@ -78,9 +79,9 @@ export const disableAnalytics = () => {
 
   if (googleAnalyticsId && ReactGA.isInitialized) {
     // Update consent status
-    ReactGA.gtag('consent', 'update', {
-      'analytics_storage': 'denied',
-      'functionality_storage': 'denied'
+    ReactGA.gtag("consent", "update", {
+      analytics_storage: "denied",
+      functionality_storage: "denied",
     });
   }
 
@@ -88,13 +89,17 @@ export const disableAnalytics = () => {
 };
 
 // Track events (only if consent was given)
-export const trackEvent = (category: string, action: string, label?: string) => {
-  const consent = localStorage.getItem('cookieConsent');
-  if (consent === 'true') {
+export const trackEvent = (
+  category: string,
+  action: string,
+  label?: string,
+) => {
+  const consent = localStorage.getItem("cookieConsent");
+  if (consent === "true") {
     ReactGA.event({
       category,
       action,
-      label
+      label,
     });
   }
 };

@@ -1,13 +1,13 @@
-import * as dotenv from 'dotenv';
-import https from 'https';
+import * as dotenv from "dotenv";
+import https from "https";
 dotenv.config(); // Ensure environment variables are loaded
 
-const REPLICATE_API_URL = 'https://api.replicate.com/v1/predictions';
+const REPLICATE_API_URL = "https://api.replicate.com/v1/predictions";
 const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
 
 // Create an HTTPS agent that can handle certificate issues
 const httpsAgent = new https.Agent({
-  rejectUnauthorized: process.env.NODE_TLS_REJECT_UNAUTHORIZED !== '0'
+  rejectUnauthorized: process.env.NODE_TLS_REJECT_UNAUTHORIZED !== "0",
 });
 
 if (!REPLICATE_API_TOKEN) {
@@ -20,7 +20,10 @@ if (!REPLICATE_API_TOKEN) {
  * @param {string} modelId - The Replicate model ID (e.g., 'owner/model:version').
  * @returns {Promise<object>} - Resolves with the initial prediction response from Replicate.
  */
-export async function startReplicateTranscription(inputParams: any, modelId: string): Promise<any> {
+export async function startReplicateTranscription(
+  inputParams: any,
+  modelId: string,
+): Promise<any> {
   if (!REPLICATE_API_TOKEN) {
     throw new Error("Replicate API token is missing.");
   }
@@ -28,9 +31,11 @@ export async function startReplicateTranscription(inputParams: any, modelId: str
     throw new Error("Replicate model ID is missing.");
   }
 
-  const [, versionHash] = modelId.split(':');
+  const [, versionHash] = modelId.split(":");
   if (!versionHash) {
-     throw new Error(`Invalid Replicate model ID format: ${modelId}. Expected 'owner/model:version'.`);
+    throw new Error(
+      `Invalid Replicate model ID format: ${modelId}. Expected 'owner/model:version'.`,
+    );
   }
 
   // Start with the provided batch size or default to 8 if not specified
@@ -51,18 +56,24 @@ export async function startReplicateTranscription(inputParams: any, modelId: str
         input: currentParams,
       });
 
-      console.log(`Replicate API attempt ${retryCount + 1}/${maxRetries + 1} with batch_size: ${currentBatchSize}`);
-      console.log("Input type:",
+      console.log(
+        `Replicate API attempt ${retryCount + 1}/${maxRetries + 1} with batch_size: ${currentBatchSize}`,
+      );
+      console.log(
+        "Input type:",
         currentParams.audio
-          ? (typeof currentParams.audio === 'string' && currentParams.audio.startsWith('http') ? 'URL' : 'base64_data')
-          : 'none'
+          ? typeof currentParams.audio === "string" &&
+            currentParams.audio.startsWith("http")
+            ? "URL"
+            : "base64_data"
+          : "none",
       );
 
       const response = await fetch(REPLICATE_API_URL, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Authorization': `Token ${REPLICATE_API_TOKEN}`,
-          'Content-Type': 'application/json',
+          Authorization: `Token ${REPLICATE_API_TOKEN}`,
+          "Content-Type": "application/json",
         },
         body: body,
         // @ts-ignore - Node.js specific agent property
@@ -82,17 +93,26 @@ export async function startReplicateTranscription(inputParams: any, modelId: str
             // If parsing error response fails, use text
             errorDetails = await response.text();
           }
-          console.error(`Replicate API error (${response.status}): ${errorDetails}`);
+          console.error(
+            `Replicate API error (${response.status}): ${errorDetails}`,
+          );
 
           // Check if this is a CUDA out of memory error
-          if (errorDetails.includes('CUDA out of memory') || errorDetails.includes('GPU memory')) {
-            lastError = new Error(`Replicate API request failed: ${errorDetails}`);
+          if (
+            errorDetails.includes("CUDA out of memory") ||
+            errorDetails.includes("GPU memory")
+          ) {
+            lastError = new Error(
+              `Replicate API request failed: ${errorDetails}`,
+            );
 
             // Reduce batch size for the next attempt
             currentBatchSize = Math.max(1, Math.floor(currentBatchSize * 0.5));
             retryCount++;
 
-            console.log(`CUDA out of memory detected. Reducing batch_size to ${currentBatchSize} and retrying...`);
+            console.log(
+              `CUDA out of memory detected. Reducing batch_size to ${currentBatchSize} and retrying...`,
+            );
 
             // If we still have retries left, continue to the next iteration
             if (retryCount <= maxRetries) {
@@ -105,14 +125,19 @@ export async function startReplicateTranscription(inputParams: any, modelId: str
 
         responseData = await response.json();
       } catch (jsonError: any) {
-        if (jsonError.message && jsonError.message.includes('CUDA out of memory')) {
+        if (
+          jsonError.message &&
+          jsonError.message.includes("CUDA out of memory")
+        ) {
           lastError = jsonError;
 
           // Reduce batch size for the next attempt
           currentBatchSize = Math.max(1, Math.floor(currentBatchSize * 0.5));
           retryCount++;
 
-          console.log(`CUDA out of memory detected. Reducing batch_size to ${currentBatchSize} and retrying...`);
+          console.log(
+            `CUDA out of memory detected. Reducing batch_size to ${currentBatchSize} and retrying...`,
+          );
 
           // If we still have retries left, continue to the next iteration
           if (retryCount <= maxRetries) {
@@ -129,18 +154,22 @@ export async function startReplicateTranscription(inputParams: any, modelId: str
         throw jsonError;
       }
 
-      console.log("Replicate API initial response received:", responseData.id,
-                 `(successful with batch_size=${currentBatchSize})`);
+      console.log(
+        "Replicate API initial response received:",
+        responseData.id,
+        `(successful with batch_size=${currentBatchSize})`,
+      );
       return responseData;
-
     } catch (error: any) {
       lastError = error;
 
       // If this wasn't a CUDA error or we're out of retries, break the loop
-      if (!error.message ||
-          (!error.message.includes('CUDA out of memory') &&
-           !error.message.includes('GPU memory')) ||
-          retryCount >= maxRetries) {
+      if (
+        !error.message ||
+        (!error.message.includes("CUDA out of memory") &&
+          !error.message.includes("GPU memory")) ||
+        retryCount >= maxRetries
+      ) {
         break;
       }
 
@@ -149,6 +178,8 @@ export async function startReplicateTranscription(inputParams: any, modelId: str
   }
 
   // If we've exhausted all retries, throw the last error
-  console.error('Error calling Replicate API after all retries:', lastError);
-  throw new Error(`Replicate API interaction failed after ${retryCount} retries: ${lastError!.message}`);
+  console.error("Error calling Replicate API after all retries:", lastError);
+  throw new Error(
+    `Replicate API interaction failed after ${retryCount} retries: ${lastError!.message}`,
+  );
 }

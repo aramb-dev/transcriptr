@@ -1,21 +1,24 @@
-import { useState, useCallback } from 'react';
-import { AnimatedButton } from './ui/animated-button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { useFileInput } from '@/hooks/use-file-input';
-import { TranscriptionOptions } from './transcription/TranscriptionOptions';
-import { UploadCloud, Link as LinkIcon } from 'lucide-react';
-import { FileUploadInput } from './transcription/FileUploadInput';
-import { UrlInput } from './transcription/UrlInput';
+import { useState, useCallback } from "react";
+import { AnimatedButton } from "./ui/animated-button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
+import { useFileInput } from "@/hooks/use-file-input";
+import { TranscriptionOptions } from "./transcription/TranscriptionOptions";
+import { UploadCloud, Link as LinkIcon } from "lucide-react";
+import { FileUploadInput } from "./transcription/FileUploadInput";
+import { UrlInput } from "./transcription/UrlInput";
 
 interface UploadAudioProps {
-  onUpload: (data: FormData | { audioUrl: string }, options: { language: string; diarize: boolean }) => void;
+  onUpload: (
+    data: FormData | { audioUrl: string },
+    options: { language: string; diarize: boolean },
+  ) => void;
 }
 
 // --- URL Validation Helpers (can be moved to a util file if needed elsewhere) ---
 const isValidUrlFormat = (url: string) => {
   try {
     const parsedUrl = new URL(url);
-    return ['http:', 'https:'].includes(parsedUrl.protocol);
+    return ["http:", "https:"].includes(parsedUrl.protocol);
   } catch (e) {
     return false;
   }
@@ -26,17 +29,16 @@ const hasAudioExtension = (url: string) => {
 };
 // --- End URL Validation Helpers ---
 
-
 export function UploadAudio({ onUpload }: UploadAudioProps) {
   const [file, setFile] = useState<File | null>(null);
-  const [audioUrl, setAudioUrl] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<string>('file');
+  const [audioUrl, setAudioUrl] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<string>("file");
   const [transcriptionOptions, setTranscriptionOptions] = useState<{
     language: string;
-    diarize: boolean
+    diarize: boolean;
   }>({
     language: "None",
-    diarize: false
+    diarize: false,
   });
 
   const {
@@ -46,60 +48,78 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
     handleFileSelect,
     clearFile,
     fileSize,
-    validateFile // Add this to extract the validation function from your hook
+    validateFile, // Add this to extract the validation function from your hook
   } = useFileInput({
-    maxSize: 100 // Max size in MB
+    maxSize: 100, // Max size in MB
   });
 
-  const isUrlPotentiallyValid = audioUrl && isValidUrlFormat(audioUrl) && hasAudioExtension(audioUrl);
+  const isUrlPotentiallyValid =
+    audioUrl && isValidUrlFormat(audioUrl) && hasAudioExtension(audioUrl);
   let urlError: string | null = null;
   if (audioUrl && !isValidUrlFormat(audioUrl)) {
-    urlError = 'Please enter a valid URL (starting with http:// or https://)';
+    urlError = "Please enter a valid URL (starting with http:// or https://)";
   } else if (audioUrl && !hasAudioExtension(audioUrl)) {
-    urlError = 'URL does not seem to point to a supported audio file (.mp3, .wav, .flac, .ogg)';
+    urlError =
+      "URL does not seem to point to a supported audio file (.mp3, .wav, .flac, .ogg)";
   }
 
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFileSelect(e); // Let the hook handle validation
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-      setAudioUrl(''); // Clear URL if a file is selected
-    } else {
-       // If file selection is cancelled or fails in hook, ensure file state is null
-       setFile(null);
-    }
-  }, [handleFileSelect]);
+  const handleFileChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      handleFileSelect(e); // Let the hook handle validation
+      if (e.target.files && e.target.files[0]) {
+        setFile(e.target.files[0]);
+        setAudioUrl(""); // Clear URL if a file is selected
+      } else {
+        // If file selection is cancelled or fails in hook, ensure file state is null
+        setFile(null);
+      }
+    },
+    [handleFileSelect],
+  );
 
-
-  const handleUrlChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const newUrl = e.target.value;
-    setAudioUrl(newUrl);
-    if (file || fileName) { // Clear file if URL is being entered
-      clearFile();
-      setFile(null);
-    }
-  }, [file, fileName, clearFile]);
-
+  const handleUrlChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newUrl = e.target.value;
+      setAudioUrl(newUrl);
+      if (file || fileName) {
+        // Clear file if URL is being entered
+        clearFile();
+        setFile(null);
+      }
+    },
+    [file, fileName, clearFile],
+  );
 
   const handleButtonClick = useCallback(() => {
     fileInputRef.current?.click();
   }, [fileInputRef]);
 
-  const handleOptionsChange = useCallback((options: { language: string; diarize: boolean }) => {
-    setTranscriptionOptions(options);
-  }, []);
+  const handleOptionsChange = useCallback(
+    (options: { language: string; diarize: boolean }) => {
+      setTranscriptionOptions(options);
+    },
+    [],
+  );
 
   const handleSubmit = useCallback(async () => {
-    if (activeTab === 'file' && file && !fileError) {
+    if (activeTab === "file" && file && !fileError) {
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
       onUpload(formData, transcriptionOptions);
-    } else if (activeTab === 'url' && audioUrl && isUrlPotentiallyValid) {
+    } else if (activeTab === "url" && audioUrl && isUrlPotentiallyValid) {
       onUpload({ audioUrl }, transcriptionOptions);
     } else {
       console.error("Submit called with invalid input.");
     }
-  }, [activeTab, file, fileError, audioUrl, isUrlPotentiallyValid, onUpload, transcriptionOptions]);
+  }, [
+    activeTab,
+    file,
+    fileError,
+    audioUrl,
+    isUrlPotentiallyValid,
+    onUpload,
+    transcriptionOptions,
+  ]);
 
   const handleResetFile = useCallback(() => {
     clearFile();
@@ -109,46 +129,52 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
   }, [clearFile]);
 
   // Fix the handleDirectFileSet function
-  const handleDirectFileSet = useCallback((file: File) => {
-    console.log('Handling dropped file:', file.name);
+  const handleDirectFileSet = useCallback(
+    (file: File) => {
+      console.log("Handling dropped file:", file.name);
 
-    if (file) {
-      // First, validate the file
-      const validationError = validateFile(file);
+      if (file) {
+        // First, validate the file
+        const validationError = validateFile(file);
 
-      if (!validationError) {
-        // If validation passes:
-        // 1. Set the file state
-        setFile(file);
+        if (!validationError) {
+          // If validation passes:
+          // 1. Set the file state
+          setFile(file);
 
-        // 2. Update the file input hook state directly
-        handleFileSelect({
-          target: {
-            files: [file]
-          }
-        } as unknown as React.ChangeEvent<HTMLInputElement>);
+          // 2. Update the file input hook state directly
+          handleFileSelect({
+            target: {
+              files: [file],
+            },
+          } as unknown as React.ChangeEvent<HTMLInputElement>);
 
-        // 3. Switch to the file tab if not already there
-        setActiveTab('file');
+          // 3. Switch to the file tab if not already there
+          setActiveTab("file");
 
-        // 4. Clear URL if a file is selected
-        setAudioUrl('');
+          // 4. Clear URL if a file is selected
+          setAudioUrl("");
 
-        console.log('File set successfully:', file.name);
-      } else {
-        // If validation fails, log the error
-        console.log('File validation failed:', validationError);
-        // You also might want to handle showing the error to the user here
+          console.log("File set successfully:", file.name);
+        } else {
+          // If validation fails, log the error
+          console.log("File validation failed:", validationError);
+          // You also might want to handle showing the error to the user here
+        }
       }
-    }
-  }, [validateFile, handleFileSelect, setActiveTab, setAudioUrl]);
+    },
+    [validateFile, handleFileSelect, setActiveTab, setAudioUrl],
+  );
 
   // Determine if the submit button should be enabled
-  const canSubmit = (activeTab === 'file' && !!file && !fileError) || (activeTab === 'url' && isUrlPotentiallyValid);
+  const canSubmit =
+    (activeTab === "file" && !!file && !fileError) ||
+    (activeTab === "url" && isUrlPotentiallyValid);
 
   // Determine if options and submit should be shown
-  const showOptionsAndSubmit = (activeTab === 'file' && !!file && !fileError) || (activeTab === 'url' && isUrlPotentiallyValid);
-
+  const showOptionsAndSubmit =
+    (activeTab === "file" && !!file && !fileError) ||
+    (activeTab === "url" && isUrlPotentiallyValid);
 
   return (
     <div className="space-y-8">
@@ -194,10 +220,12 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
           <AnimatedButton
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="w-full py-6 h-auto text-base"
+            className="h-auto w-full py-6 text-base"
             size="lg"
           >
-            {activeTab === 'file' ? 'Upload and Transcribe File' : 'Transcribe from URL'}
+            {activeTab === "file"
+              ? "Upload and Transcribe File"
+              : "Transcribe from URL"}
           </AnimatedButton>
         </>
       )}

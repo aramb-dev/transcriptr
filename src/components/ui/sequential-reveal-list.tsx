@@ -1,7 +1,7 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
-import { sequentialFadeIn, sequentialItem } from '@/lib/animations';
+import React from "react";
+import { motion } from "framer-motion";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { sequentialFadeIn, sequentialItem } from "@/lib/animations";
 
 interface SequentialRevealListProps {
   items: React.ReactNode[];
@@ -13,10 +13,10 @@ interface SequentialRevealListProps {
 
 export function SequentialRevealList({
   items,
-  className = '',
-  itemClassName = '',
+  className = "",
+  itemClassName = "",
   containerVariants = sequentialFadeIn,
-  itemVariants = sequentialItem
+  itemVariants = sequentialItem,
 }: SequentialRevealListProps) {
   const { ref, isInView } = useScrollAnimation(0.1);
 

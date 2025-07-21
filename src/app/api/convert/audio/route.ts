@@ -1,10 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
 // Similar to cloud-convert.js, replace with a simpler version
 export async function POST(request: Request) {
-  return NextResponse.json({
-    error: 'Feature not available',
-    message: 'Audio format conversion is currently under development. Please convert your file to MP3, WAV, or FLAC format before uploading.',
-    supportedFormats: ['mp3', 'wav', 'flac', 'ogg']
-  }, { status: 501 });
+  return NextResponse.json(
+    {
+      error: "Feature not available",
+      message:
+        "Audio format conversion is currently under development. Please convert your file to MP3, WAV, or FLAC format before uploading.",
+      supportedFormats: ["mp3", "wav", "flac", "ogg"],
+    },
+    { status: 501 },
+  );
 }

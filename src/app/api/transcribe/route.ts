@@ -1,13 +1,17 @@
-import { NextResponse } from 'next/server';
-import { uploadBase64ToFirebase } from '@/lib/firebase-utils';
-import { startReplicateTranscription } from '@/lib/replicate-client';
+import { NextResponse } from "next/server";
+import { uploadBase64ToFirebase } from "@/lib/firebase-utils";
+import { startReplicateTranscription } from "@/lib/replicate-client";
 
 // Default model ID, can be overridden by options
-const DEFAULT_MODEL_ID = 'vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c';
+const DEFAULT_MODEL_ID =
+  "vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c";
 const LARGE_FILE_THRESHOLD_MB = 1; // Define threshold for direct base64 vs upload
 
 // Helper to prepare audio input for the transcription service
-async function prepareAudioInput(audioData: string | undefined, audioUrl: string | undefined) {
+async function prepareAudioInput(
+  audioData: string | undefined,
+  audioUrl: string | undefined,
+) {
   const inputParams: any = {};
   let firebaseFilePath: string | null = null;
 
@@ -17,7 +21,9 @@ async function prepareAudioInput(audioData: string | undefined, audioUrl: string
   } else if (audioData) {
     // Estimate size (base64 is ~4/3 * original size)
     const estimatedSizeInMB = (audioData.length * 0.75) / (1024 * 1024);
-    console.log(`Estimated audio size from base64: ${estimatedSizeInMB.toFixed(2)}MB`);
+    console.log(
+      `Estimated audio size from base64: ${estimatedSizeInMB.toFixed(2)}MB`,
+    );
 
     if (estimatedSizeInMB > LARGE_FILE_THRESHOLD_MB) {
       console.log("Audio data is large, uploading to Firebase...");
@@ -42,7 +48,10 @@ export async function POST(request: Request) {
     requestBody = await request.json();
   } catch (parseError: any) {
     console.error("Error parsing request body:", parseError);
-    return NextResponse.json({ error: "Invalid JSON", details: parseError.message }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid JSON", details: parseError.message },
+      { status: 400 },
+    );
   }
 
   const { audioData, audioUrl, options = {} } = requestBody;
@@ -50,26 +59,37 @@ export async function POST(request: Request) {
   console.log("Request received:", {
     hasAudioData: !!audioData,
     hasAudioUrl: !!audioUrl,
-    audioDataLength: audioData ? `${(audioData.length / 1024 / 1024).toFixed(2)}MB` : "N/A",
-    options
+    audioDataLength: audioData
+      ? `${(audioData.length / 1024 / 1024).toFixed(2)}MB`
+      : "N/A",
+    options,
   });
 
   if (!audioData && !audioUrl) {
     console.error("Validation Error: No audio data or URL provided.");
-    return NextResponse.json({ error: 'No audio data or URL provided' }, { status: 400 });
+    return NextResponse.json(
+      { error: "No audio data or URL provided" },
+      { status: 400 },
+    );
   }
 
   try {
     // Set up base parameters
     const transcriptionParams: any = {
-      task: options.task || 'transcribe',
+      task: options.task || "transcribe",
       batch_size: options.batch_size || 8,
-      return_timestamps: options.return_timestamps !== undefined ? options.return_timestamps : true,
+      return_timestamps:
+        options.return_timestamps !== undefined
+          ? options.return_timestamps
+          : true,
       diarize: options.diarize || false,
     };
 
     // Process audio input
-    const { inputParams, firebaseFilePath } = await prepareAudioInput(audioData, audioUrl);
+    const { inputParams, firebaseFilePath } = await prepareAudioInput(
+      audioData,
+      audioUrl,
+    );
     Object.assign(transcriptionParams, inputParams);
 
     // Add language if specified and not "None"
@@ -80,7 +100,10 @@ export async function POST(request: Request) {
     // Determine model ID and start prediction
     const modelId = options.modelId || DEFAULT_MODEL_ID;
     console.log(`Starting Replicate prediction with model: ${modelId}`);
-    const predictionData = await startReplicateTranscription(transcriptionParams, modelId);
+    const predictionData = await startReplicateTranscription(
+      transcriptionParams,
+      modelId,
+    );
 
     // Add firebase path to response if a file was uploaded
     if (firebaseFilePath) {
@@ -88,14 +111,22 @@ export async function POST(request: Request) {
       console.log("Included Firebase path in response:", firebaseFilePath);
     }
 
-    console.log("Successfully initiated Replicate prediction:", predictionData.id);
+    console.log(
+      "Successfully initiated Replicate prediction:",
+      predictionData.id,
+    );
     return NextResponse.json(predictionData, { status: 200 });
-
   } catch (error: any) {
-    console.error('Error processing transcription request:', error);
-    const statusCode = error.message.includes("Firebase") || error.message.includes("Replicate") ? 502 : 500;
-    return NextResponse.json({
-      error: `Transcription processing failed: ${error.message}`
-    }, { status: statusCode });
+    console.error("Error processing transcription request:", error);
+    const statusCode =
+      error.message.includes("Firebase") || error.message.includes("Replicate")
+        ? 502
+        : 500;
+    return NextResponse.json(
+      {
+        error: `Transcription processing failed: ${error.message}`,
+      },
+      { status: statusCode },
+    );
   }
 }

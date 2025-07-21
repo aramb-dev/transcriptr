@@ -1,16 +1,8 @@
 {
   "cors": [
     {
-      "origin": [
-        "*"
-      ],
-      "method": [
-        "GET",
-        "HEAD",
-        "PUT",
-        "POST",
-        "DELETE"
-      ],
+      "origin": ["*"],
+      "method": ["GET", "HEAD", "PUT", "POST", "DELETE"],
       "responseHeader": [
         "Content-Type",
         "Content-Length",

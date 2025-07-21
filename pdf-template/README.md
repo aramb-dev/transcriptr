@@ -1,7 +1,8 @@
 # Printerz Invoice template example
 
 Built with :
-- React 
+
+- React
 - TailwindCSS
 - Vite
 - TypeScript
@@ -9,6 +10,7 @@ Built with :
 - v0.dev
 
 ## Preview
+
 ![Preview](./assets/preview.png)
 
 ## How to use
@@ -31,7 +33,7 @@ npx degit https://github.com/printerz-app/printerz-example-templates/react-invoi
 pnpm install
 ## or
 npm install
-## or 
+## or
 yarn install
 ```
 
@@ -41,39 +43,40 @@ yarn install
 pnpm dev
 ## or
 npm run dev
-## or 
+## or
 yarn dev
 ```
 
 4. Make your changes
 
 You can test the print variable behavior by copy pasting the following code in the console of your browser :
+
 ```js
 window.printerzRender({
-  "invoiceNumber": "INV-1001",
-  "invoiceDate": "2024-08-15",
-  "customer": {
-    "name": "John Doe",
-    "address": "123 Maple Street, Springfield, IL, 62704"
+  invoiceNumber: "INV-1001",
+  invoiceDate: "2024-08-15",
+  customer: {
+    name: "John Doe",
+    address: "123 Maple Street, Springfield, IL, 62704",
   },
-  "invoiceItems": [
+  invoiceItems: [
     {
-      "name": "Widget A",
-      "quantity": 10,
-      "unitPrice": 1999
+      name: "Widget A",
+      quantity: 10,
+      unitPrice: 1999,
     },
     {
-      "name": "Gadget B",
-      "quantity": 5,
-      "unitPrice": 4995
+      name: "Gadget B",
+      quantity: 5,
+      unitPrice: 4995,
     },
     {
-      "name": "Thingamajig C",
-      "quantity": 2,
-      "unitPrice": 14950
-    }
-  ]
-})
+      name: "Thingamajig C",
+      quantity: 2,
+      unitPrice: 14950,
+    },
+  ],
+});
 ```
 
 5. Build the project
@@ -82,7 +85,7 @@ window.printerzRender({
 pnpm build
 ## or
 npm run build
-## or 
+## or
 yarn build
 ```
 

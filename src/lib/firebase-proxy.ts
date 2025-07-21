@@ -1,4 +1,4 @@
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
 /**
  * Utility functions for Firebase Storage and PDF generation
@@ -13,11 +13,11 @@ export async function proxyFirebaseDownload(url: string): Promise<Blob> {
     const serverUrl = determineServerUrl();
 
     const response = await fetch(`${serverUrl}/api/firebase-proxy`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ url })
+      body: JSON.stringify({ url }),
     });
 
     if (!response.ok) {
@@ -34,22 +34,27 @@ export async function proxyFirebaseDownload(url: string): Promise<Blob> {
 /**
  * Generate PDF using Printerz service
  */
-export async function generatePdf(templateId: string, data: any): Promise<Blob> {
+export async function generatePdf(
+  templateId: string,
+  data: any,
+): Promise<Blob> {
   try {
     // Determine server URL based on environment
     const serverUrl = determineServerUrl();
 
-    console.log(`Generating PDF with template ${templateId} via ${serverUrl}/api/printerz/render`);
+    console.log(
+      `Generating PDF with template ${templateId} via ${serverUrl}/api/printerz/render`,
+    );
 
     const response = await fetch(`${serverUrl}/api/printerz/render`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         templateId,
-        printerzData: data
-      })
+        printerzData: data,
+      }),
     });
 
     if (!response.ok) {
@@ -69,25 +74,30 @@ export async function generatePdf(templateId: string, data: any): Promise<Blob> 
  */
 export function determineServerUrl(): string {
   // Check if we're running in development or production
-  const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const isLocalDev =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
 
   if (isLocalDev) {
     // In development, the server is likely running on port 3001
-    return 'http://localhost:3001';
+    return "http://localhost:3001";
   } else {
     // In production, the API endpoints are on the same domain
-    return '';
+    return "";
   }
 }
 
 /**
  * Create a downloadable data URL from a blob
  */
-export async function createDownloadableDataUrl(blob: Blob, filename: string): Promise<void> {
+export async function createDownloadableDataUrl(
+  blob: Blob,
+  filename: string,
+): Promise<void> {
   return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onloadend = function() {
-      const a = document.createElement('a');
+    reader.onloadend = function () {
+      const a = document.createElement("a");
       a.href = reader.result as string;
       a.download = filename;
       document.body.appendChild(a);

@@ -10,15 +10,15 @@
  */
 export async function cleanupFirebaseFile(filePath: string): Promise<boolean> {
   if (!filePath) {
-    console.warn('No file path provided for cleanup');
+    console.warn("No file path provided for cleanup");
     return false;
   }
 
   try {
-    const response = await fetch('/api/cleanup', {
-      method: 'POST',
+    const response = await fetch("/api/cleanup", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ filePath }),
     });
@@ -30,10 +30,10 @@ export async function cleanupFirebaseFile(filePath: string): Promise<boolean> {
     }
 
     const result = await response.json();
-    console.log('Cleanup successful:', result);
+    console.log("Cleanup successful:", result);
     return true;
   } catch (error) {
-    console.error('Error during file cleanup:', error);
+    console.error("Error during file cleanup:", error);
     return false;
   }
 }

@@ -1,6 +1,6 @@
-import React, { forwardRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import React, { forwardRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 interface ScrollRevealSectionProps {
   children: React.ReactNode;
@@ -12,10 +12,10 @@ interface ScrollRevealSectionProps {
 
 export function ScrollRevealSection({
   children,
-  className = '',
+  className = "",
   delay = 0,
   threshold = 0.1,
-  variants
+  variants,
 }: ScrollRevealSectionProps) {
   const { ref, isInView } = useScrollAnimation(threshold);
 
@@ -26,9 +26,9 @@ export function ScrollRevealSection({
       y: 0,
       transition: {
         duration: 0.6,
-        delay
-      }
-    }
+        delay,
+      },
+    },
   };
 
   return (
