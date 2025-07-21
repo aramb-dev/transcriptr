@@ -78,7 +78,7 @@ export function Footer({ onOpenFeedbackModal, onOpenChangelog }: FooterProps) {
         </Link>
         <span>•</span>
         <Link
-          href="/docs"
+          href="/documentation"
           className="text-blue-600 hover:underline dark:text-blue-400"
         >
           Documentation
