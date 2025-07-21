@@ -60,7 +60,7 @@ export function Header({ onOpenChangelog, onShowHistory }: HeaderProps) {
       <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
         Developed by{" "}
         <a
-          href="https://github.com/aramb-dev"
+          href="https://aramb.dev"
           className="text-blue-600 hover:underline dark:text-blue-400"
           target="_blank"
           rel="noopener noreferrer"
