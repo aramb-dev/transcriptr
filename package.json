@@ -45,6 +45,7 @@
     "node-fetch": "^3.3.2",
     "pdfmake": "^0.2.20",
     "react": "^19.1.0",
+    "react-confetti": "^6.4.0",
     "react-dom": "^19.1.0",
     "react-dropzone": "^14.3.8",
     "react-ga4": "^2.1.0",
