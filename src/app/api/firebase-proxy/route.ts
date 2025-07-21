@@ -44,10 +44,11 @@ export async function POST(request: Request) {
         "Access-Control-Allow-Methods": "POST, OPTIONS",
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error proxying Firebase Storage request:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     return NextResponse.json(
-      { error: error.message || "Unknown error occurred" },
+      { error: errorMessage },
       { status: 500 },
     );
   }

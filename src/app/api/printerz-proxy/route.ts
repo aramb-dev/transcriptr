@@ -81,10 +81,11 @@ export async function POST(request: Request) {
         "Content-Disposition": 'attachment; filename="transcription.pdf"',
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error in printerz-proxy function:", error);
+    const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
     return NextResponse.json(
-      { error: "Internal Server Error", message: error.message },
+      { error: "Internal Server Error", message: errorMessage },
       { status: 500 },
     );
   }

@@ -43,11 +43,12 @@ export async function GET(
 
     console.log(`Prediction ${predictionId} status: ${data.status}`);
     return NextResponse.json(data, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error checking prediction:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       {
-        error: error.message || "Unknown error",
+        error: errorMessage,
       },
       { status: 500 },
     );

@@ -12,7 +12,7 @@ async function prepareAudioInput(
   audioData: string | undefined,
   audioUrl: string | undefined,
 ) {
-  const inputParams: any = {};
+  const inputParams: { audio: string } = {} as { audio: string };
   let firebaseFilePath: string | null = null;
 
   if (audioUrl) {
@@ -46,10 +46,11 @@ export async function POST(request: Request) {
   let requestBody;
   try {
     requestBody = await request.json();
-  } catch (parseError: any) {
+  } catch (parseError: unknown) {
     console.error("Error parsing request body:", parseError);
+    const errorMessage = parseError instanceof Error ? parseError.message : "Invalid JSON format";
     return NextResponse.json(
-      { error: "Invalid JSON", details: parseError.message },
+      { error: "Invalid JSON", details: errorMessage },
       { status: 400 },
     );
   }
@@ -75,7 +76,16 @@ export async function POST(request: Request) {
 
   try {
     // Set up base parameters
-    const transcriptionParams: any = {
+    interface TranscriptionParams {
+      task: string;
+      batch_size: number;
+      return_timestamps: boolean;
+      diarize: boolean;
+      audio?: string;
+      language?: string;
+    }
+
+    const transcriptionParams: TranscriptionParams = {
       task: options.task || "transcribe",
       batch_size: options.batch_size || 8,
       return_timestamps:
@@ -107,7 +117,7 @@ export async function POST(request: Request) {
 
     // Add firebase path to response if a file was uploaded
     if (firebaseFilePath) {
-      (predictionData as any).firebaseFilePath = firebaseFilePath;
+      (predictionData as Record<string, unknown>).firebaseFilePath = firebaseFilePath;
       console.log("Included Firebase path in response:", firebaseFilePath);
     }
 
@@ -116,15 +126,16 @@ export async function POST(request: Request) {
       predictionData.id,
     );
     return NextResponse.json(predictionData, { status: 200 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error processing transcription request:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     const statusCode =
-      error.message.includes("Firebase") || error.message.includes("Replicate")
+      errorMessage.includes("Firebase") || errorMessage.includes("Replicate")
         ? 502
         : 500;
     return NextResponse.json(
       {
-        error: `Transcription processing failed: ${error.message}`,
+        error: `Transcription processing failed: ${errorMessage}`,
       },
       { status: statusCode },
     );
