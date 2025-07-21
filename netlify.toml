@@ -1,23 +1,44 @@
 [build]
-  command = "npm run build:netlify"
-  publish = "dist/client"
-  functions = "netlify/functions"
+  command = "npm run build"
+  publish = ".next"
 
 [build.environment]
-  NODE_VERSION = "18" # Use Node.js 18 which has built-in fetch
+  NODE_VERSION = "18"
+  # Environment variables for build process
+  NEXT_TELEMETRY_DISABLED = "1"
 
-[functions]
-  node_bundler = "esbuild"
+# Enable the Next.js Runtime
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
-  # Specify external Node modules that should not be bundled
-  external_node_modules = ["dotenv", "firebase", "node-fetch"]
-
+# Redirects for API routes and SPA behavior
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to = "/api/:splat"
   status = 200
 
+# Catch-all redirect for client-side routing
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+  conditions = {Role = ["admin"]}
+
+# Headers for better performance and security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
