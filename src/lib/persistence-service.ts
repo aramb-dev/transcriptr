@@ -224,12 +224,12 @@ export const getActiveSession =
       const transaction = db.transaction([STORE_NAME], "readonly");
       const store = transaction.objectStore(STORE_NAME);
 
-      // Get all sessions
+      // Get all sessions with active statuses
       const sessions = await new Promise<TranscriptionSession[]>(
         (resolve, reject) => {
           const request = store
             .index("status")
-            .getAll(IDBKeyRange.bound("starting", "processing"));
+            .getAll(IDBKeyRange.bound("processing", "starting"));
           request.onsuccess = () => resolve(request.result || []);
           request.onerror = (event) => {
             console.error("Error reading sessions:", event);
