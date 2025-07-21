@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { AnalyticsOptOut } from "@/components/analytics/AnalyticsOptOut";
 
 export default function PrivacyPage() {
   return (
@@ -190,6 +191,7 @@ export default function PrivacyPage() {
                 prompted. You can also use browser extensions that block
                 tracking or enable "Do Not Track" settings in your browser.
               </p>
+              <AnalyticsOptOut />
             </section>
 
             <section className="mb-8">

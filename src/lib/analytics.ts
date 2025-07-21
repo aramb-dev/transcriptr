@@ -15,8 +15,26 @@ import ReactGA from "react-ga4";
 
 // Initialize analytics services
 export const initializeAnalytics = (consent: boolean | string = false) => {
-  const clarityId = process.env.NEXT_PUBLIC_MICROSOFT_CLARITY_ID;
+  const optOut = localStorage.getItem("analytics_opt_out");
   const googleAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
+
+  if (optOut === "true") {
+    // If opted out, initialize GA with consent denied and stop further execution.
+    if (googleAnalyticsId) {
+      ReactGA.initialize(googleAnalyticsId, {
+        gtagOptions: {
+          consent_mode: {
+            analytics_storage: "denied",
+            functionality_storage: "denied",
+            ad_storage: "denied",
+          },
+        },
+      });
+    }
+    return; // Exit early
+  }
+
+  const clarityId = process.env.NEXT_PUBLIC_MICROSOFT_CLARITY_ID;
 
   // Handle different consent levels
   const fullConsent = consent === true || consent === "true";
@@ -52,6 +70,11 @@ export const initializeAnalytics = (consent: boolean | string = false) => {
 
 // Enable analytics tracking when consent is granted
 export const enableAnalytics = () => {
+  const optOut = localStorage.getItem("analytics_opt_out");
+  if (optOut === "true") {
+    return; // Do not enable analytics if user has opted out
+  }
+
   const clarityId = process.env.NEXT_PUBLIC_MICROSOFT_CLARITY_ID;
   const googleAnalyticsId = process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID;
 
@@ -94,6 +117,10 @@ export const trackEvent = (
   action: string,
   label?: string,
 ) => {
+  const optOut = localStorage.getItem("analytics_opt_out");
+  if (optOut === "true") {
+    return; // Do not track event if user has opted out
+  }
   const consent = localStorage.getItem("cookieConsent");
   if (consent === "true") {
     ReactGA.event({
