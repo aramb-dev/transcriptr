@@ -14,11 +14,11 @@ export function MobileFeedbackModals() {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Global modal access
@@ -73,10 +73,10 @@ export function MobileFeedbackModals() {
                 exit={{ opacity: 0 }}
                 onClick={closeModal}
               />
-              
+
               {/* Modal content */}
               <motion.div
-                className="relative w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-xl overflow-hidden"
+                className="relative w-full max-w-md overflow-hidden rounded-xl bg-white shadow-xl dark:bg-gray-800"
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -87,10 +87,7 @@ export function MobileFeedbackModals() {
                 }}
                 onClick={(e) => e.stopPropagation()}
               >
-                <FeedbackForm
-                  initialType={activeModal}
-                  onClose={closeModal}
-                />
+                <FeedbackForm initialType={activeModal} onClose={closeModal} />
               </motion.div>
             </motion.div>
           )}

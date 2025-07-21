@@ -56,12 +56,12 @@ const MobileDialogContent = React.forwardRef<
           variant="ghost"
           size="sm"
           className={cn(
-            "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground",
+            "ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:pointer-events-none",
             // Mobile styles - larger close button
             "mobile:right-6 mobile:top-6 mobile:h-8 mobile:w-8",
           )}
         >
-          <X className="h-4 w-4 mobile:h-5 mobile:w-5" />
+          <X className="mobile:h-5 mobile:w-5 h-4 w-4" />
           <span className="sr-only">Close</span>
         </Button>
       </DialogPrimitive.Close>
@@ -129,7 +129,7 @@ const MobileDialogDescription = React.forwardRef<
       "text-muted-foreground text-sm",
       // Mobile styles
       "mobile:text-base mobile:leading-relaxed",
-      className
+      className,
     )}
     {...props}
   />

@@ -12,7 +12,7 @@ interface MobileHeaderProps {
 export function MobileHeader({
   onOpenChangelog,
   onShowHistory,
-  onOpenFeedbackModal
+  onOpenFeedbackModal,
 }: MobileHeaderProps) {
   return (
     <header className="mb-6 md:hidden">
@@ -47,7 +47,7 @@ export function MobileHeader({
 
         {/* Center - App Title */}
         <div className="flex-1 text-center">
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
+          <h1 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
             Transcriptr
           </h1>
         </div>

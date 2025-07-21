@@ -54,17 +54,23 @@ export function MobileFeedbackForm({
           const browserName = device.client?.name || "Unknown Browser";
           const browserVersion = device.client?.version || "";
           setBrowser(
-            browserVersion ? `${browserName} ${browserVersion}` : browserName
+            browserVersion ? `${browserName} ${browserVersion}` : browserName,
           );
 
           const osName = device.os?.name || "Unknown OS";
           const osVersion = device.os?.version || "";
-          setOperatingSystem(
-            osVersion ? `${osName} ${osVersion}` : osName
-          );
+          setOperatingSystem(osVersion ? `${osName} ${osVersion}` : osName);
         } catch (error) {
           console.error("Device detection failed:", error);
-          setBrowser(navigator.userAgent.includes("Chrome") ? "Chrome" : navigator.userAgent.includes("Firefox") ? "Firefox" : navigator.userAgent.includes("Safari") ? "Safari" : "Unknown Browser");
+          setBrowser(
+            navigator.userAgent.includes("Chrome")
+              ? "Chrome"
+              : navigator.userAgent.includes("Firefox")
+                ? "Firefox"
+                : navigator.userAgent.includes("Safari")
+                  ? "Safari"
+                  : "Unknown Browser",
+          );
           setOperatingSystem(navigator.platform || "Unknown");
         }
       }
@@ -109,9 +115,7 @@ export function MobileFeedbackForm({
     } catch (error) {
       setSubmitStatus("error");
       setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred"
+        error instanceof Error ? error.message : "An unexpected error occurred",
       );
     } finally {
       setIsSubmitting(false);
@@ -157,9 +161,11 @@ export function MobileFeedbackForm({
 
   // Mobile fullscreen layout
   const content = (
-    <div className={`${isModal ? "h-full" : "min-h-screen"} bg-white dark:bg-gray-900 flex flex-col`}>
+    <div
+      className={`${isModal ? "h-full" : "min-h-screen"} flex flex-col bg-white dark:bg-gray-900`}
+    >
       {/* Header - Fixed at top */}
-      <div className="flex-shrink-0 px-4 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+      <div className="flex-shrink-0 border-b border-gray-200 bg-white px-4 py-4 dark:border-gray-700 dark:bg-gray-900">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
             {getFormTitle()}
@@ -169,7 +175,7 @@ export function MobileFeedbackForm({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 h-10 w-10"
+              className="h-10 w-10 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -179,19 +185,20 @@ export function MobileFeedbackForm({
 
       {/* Content - Scrollable */}
       <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-6">
+        <div className="space-y-6 p-4">
           {submitStatus === "success" ? (
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               className="flex flex-col items-center justify-center py-12 text-center"
             >
-              <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              <CheckCircle2 className="mb-4 h-16 w-16 text-green-500" />
+              <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-gray-100">
                 {getSuccessMessage()}
               </h2>
-              <p className="text-gray-600 dark:text-gray-400 max-w-sm">
-                Thank you for helping us improve Transcriptr. Your input is valuable to us.
+              <p className="max-w-sm text-gray-600 dark:text-gray-400">
+                Thank you for helping us improve Transcriptr. Your input is
+                valuable to us.
               </p>
             </motion.div>
           ) : (
@@ -210,20 +217,26 @@ export function MobileFeedbackForm({
               <input type="hidden" name="feedbackType" value={feedbackType} />
               <div className="hidden">
                 <label>
-                  Don't fill this out if you're human: <input name="bot-field" />
+                  Don't fill this out if you're human:{" "}
+                  <input name="bot-field" />
                 </label>
               </div>
 
               {/* Feedback Type */}
               <motion.div variants={staggerItem}>
-                <Label htmlFor="feedback-type" className="text-base font-medium text-gray-900 dark:text-gray-100 mb-3 block">
+                <Label
+                  htmlFor="feedback-type"
+                  className="mb-3 block text-base font-medium text-gray-900 dark:text-gray-100"
+                >
                   What type of feedback is this?
                 </Label>
                 <Select
                   value={feedbackType}
-                  onValueChange={(value) => setFeedbackType(value as FeedbackType)}
+                  onValueChange={(value) =>
+                    setFeedbackType(value as FeedbackType)
+                  }
                 >
-                  <SelectTrigger className="w-full h-12 text-base">
+                  <SelectTrigger className="h-12 w-full text-base">
                     <SelectValue placeholder="Select feedback type" />
                   </SelectTrigger>
                   <SelectContent className="bg-white dark:bg-gray-800">
@@ -237,7 +250,10 @@ export function MobileFeedbackForm({
 
               {/* Name */}
               <motion.div variants={staggerItem}>
-                <Label htmlFor="name" className="text-base font-medium text-gray-900 dark:text-gray-100 mb-3 block">
+                <Label
+                  htmlFor="name"
+                  className="mb-3 block text-base font-medium text-gray-900 dark:text-gray-100"
+                >
                   Your Name
                 </Label>
                 <Input
@@ -248,14 +264,20 @@ export function MobileFeedbackForm({
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your name"
                   required
-                  className="w-full h-12 text-base"
+                  className="h-12 w-full text-base"
                 />
               </motion.div>
 
               {/* Email */}
               <motion.div variants={staggerItem}>
-                <Label htmlFor="email" className="text-base font-medium text-gray-900 dark:text-gray-100 mb-3 block">
-                  Email <span className="text-sm font-normal text-gray-500 dark:text-gray-400">(optional)</span>
+                <Label
+                  htmlFor="email"
+                  className="mb-3 block text-base font-medium text-gray-900 dark:text-gray-100"
+                >
+                  Email{" "}
+                  <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                    (optional)
+                  </span>
                 </Label>
                 <Input
                   id="email"
@@ -264,45 +286,69 @@ export function MobileFeedbackForm({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your.email@example.com"
-                  className="w-full h-12 text-base"
+                  className="h-12 w-full text-base"
                 />
                 <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                  We'll only contact you if we need more information about your {feedbackType === "issue" ? "issue" : "feedback"}.
+                  We'll only contact you if we need more information about your{" "}
+                  {feedbackType === "issue" ? "issue" : "feedback"}.
                 </p>
               </motion.div>
 
               {/* Auto-detected info for issues */}
               {feedbackType === "issue" && (
-                <motion.div variants={staggerItem} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                  <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3">
-                    System Information <span className="font-normal text-gray-500">(auto-detected)</span>
+                <motion.div
+                  variants={staggerItem}
+                  className="rounded-lg bg-gray-50 p-4 dark:bg-gray-800"
+                >
+                  <h3 className="mb-3 text-sm font-medium text-gray-900 dark:text-gray-100">
+                    System Information{" "}
+                    <span className="font-normal text-gray-500">
+                      (auto-detected)
+                    </span>
                   </h3>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Browser:</span>
-                      <span className="text-gray-900 dark:text-gray-100 font-medium">{browser || "Detecting..."}</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Browser:
+                      </span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                        {browser || "Detecting..."}
+                      </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-400">Operating System:</span>
-                      <span className="text-gray-900 dark:text-gray-100 font-medium">{operatingSystem || "Detecting..."}</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        Operating System:
+                      </span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">
+                        {operatingSystem || "Detecting..."}
+                      </span>
                     </div>
                   </div>
                   <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
                     This information helps us reproduce and fix issues faster.
                   </p>
-                  
+
                   {/* Hidden inputs for form submission */}
                   <input type="hidden" name="browser" value={browser} />
-                  <input type="hidden" name="operatingSystem" value={operatingSystem} />
+                  <input
+                    type="hidden"
+                    name="operatingSystem"
+                    value={operatingSystem}
+                  />
                 </motion.div>
               )}
 
               {/* Main feedback text */}
               <motion.div variants={staggerItem}>
-                <Label htmlFor="feedback" className="text-base font-medium text-gray-900 dark:text-gray-100 mb-3 block">
-                  {feedbackType === "issue" ? "Describe the Issue" : 
-                   feedbackType === "feature" ? "Describe Your Feature Idea" : 
-                   "Your Feedback"}
+                <Label
+                  htmlFor="feedback"
+                  className="mb-3 block text-base font-medium text-gray-900 dark:text-gray-100"
+                >
+                  {feedbackType === "issue"
+                    ? "Describe the Issue"
+                    : feedbackType === "feature"
+                      ? "Describe Your Feature Idea"
+                      : "Your Feedback"}
                 </Label>
                 <Textarea
                   id="feedback"
@@ -311,7 +357,7 @@ export function MobileFeedbackForm({
                   onChange={(e) => setFeedback(e.target.value)}
                   placeholder={getPlaceholderText()}
                   required
-                  className="min-h-[120px] w-full text-base resize-none"
+                  className="min-h-[120px] w-full resize-none text-base"
                   rows={6}
                 />
               </motion.div>
@@ -325,13 +371,14 @@ export function MobileFeedbackForm({
                     exit={{ opacity: 0, height: 0 }}
                     className="flex items-start rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-700 dark:bg-red-900/30"
                   >
-                    <AlertCircle className="mt-0.5 mr-3 h-5 w-5 text-red-500 flex-shrink-0" />
+                    <AlertCircle className="mt-0.5 mr-3 h-5 w-5 flex-shrink-0 text-red-500" />
                     <div>
                       <p className="font-medium text-red-700 dark:text-red-300">
                         Failed to submit feedback
                       </p>
                       <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                        {errorMessage || "Please check your connection and try again."}
+                        {errorMessage ||
+                          "Please check your connection and try again."}
                       </p>
                     </div>
                   </motion.div>
@@ -344,32 +391,32 @@ export function MobileFeedbackForm({
 
       {/* Footer - Fixed at bottom */}
       {submitStatus !== "success" && (
-        <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 space-y-3">
+        <div className="flex-shrink-0 space-y-3 border-t border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900">
           {/* Primary Submit Button */}
           <Button
             type="submit"
             form="feedback"
             disabled={isSubmitting}
             size="lg"
-            className="w-full h-12 text-base font-medium bg-blue-600 hover:bg-blue-700 text-white"
+            className="h-12 w-full bg-blue-600 text-base font-medium text-white hover:bg-blue-700"
             onClick={handleSubmit}
           >
             {isSubmitting ? (
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                 Submitting...
               </div>
             ) : (
               `Submit ${feedbackType === "issue" ? "Issue Report" : feedbackType === "feature" ? "Feature Request" : "Feedback"}`
             )}
           </Button>
-          
+
           {/* Secondary Cancel Button */}
           {onClose && (
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-3 text-base font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+              className="w-full py-3 text-base font-medium text-gray-600 transition-colors hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
             >
               Cancel
             </button>

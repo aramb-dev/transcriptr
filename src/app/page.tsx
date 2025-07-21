@@ -32,7 +32,10 @@ export default function Page() {
   const [formKey, setFormKey] = useState(Date.now()); // Key to force re-render TranscriptionForm when needed
 
   // V2 Announcement modal logic
-  const { shouldShow: shouldShowV2Announcement, hideAnnouncement: hideV2Announcement } = useV2Announcement();
+  const {
+    shouldShow: shouldShowV2Announcement,
+    hideAnnouncement: hideV2Announcement,
+  } = useV2Announcement();
 
   // For handling session selection from history
   const [selectedSession, setSelectedSession] =
@@ -80,7 +83,7 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-sky-50 to-white py-6 text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100 md:py-12">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-white py-6 text-gray-900 md:py-12 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100">
       <div className="container mx-auto max-w-4xl px-4">
         <Header
           onOpenChangelog={openChangelogModal}
@@ -129,7 +132,9 @@ export default function Page() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {shouldShowV2Announcement && <V2AnnouncementModal onClose={hideV2Announcement} />}
+        {shouldShowV2Announcement && (
+          <V2AnnouncementModal onClose={hideV2Announcement} />
+        )}
       </AnimatePresence>
 
       <AnimatePresence>

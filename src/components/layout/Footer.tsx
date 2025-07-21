@@ -17,7 +17,7 @@ export function Footer({ onOpenFeedbackModal, onOpenChangelog }: FooterProps) {
       />
 
       {/* Desktop Footer */}
-      <footer className="mt-12 hidden border-t border-gray-200 pt-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400 md:block">
+      <footer className="mt-12 hidden border-t border-gray-200 pt-8 text-center text-sm text-gray-500 md:block dark:border-gray-700 dark:text-gray-400">
         <div className="flex flex-col items-center justify-center space-y-2 sm:flex-row sm:space-y-0 sm:space-x-4">
           <a
             href="#feedback"

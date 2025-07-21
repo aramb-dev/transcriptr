@@ -21,9 +21,9 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
     };
 
     checkMobile();
-    window.addEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
 
-    return () => window.removeEventListener('resize', checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // Use mobile version on small screens
@@ -84,7 +84,10 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
                       {item.changes.new.map((change, i) => (
-                        <li key={i} dangerouslySetInnerHTML={parseMarkdown(change)} />
+                        <li
+                          key={i}
+                          dangerouslySetInnerHTML={parseMarkdown(change)}
+                        />
                       ))}
                     </ul>
                   </div>
@@ -97,7 +100,10 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
                       {item.changes.improved.map((change, i) => (
-                        <li key={i} dangerouslySetInnerHTML={parseMarkdown(change)} />
+                        <li
+                          key={i}
+                          dangerouslySetInnerHTML={parseMarkdown(change)}
+                        />
                       ))}
                     </ul>
                   </div>
@@ -110,7 +116,10 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
                       {item.changes.fixed.map((change, i) => (
-                        <li key={i} dangerouslySetInnerHTML={parseMarkdown(change)} />
+                        <li
+                          key={i}
+                          dangerouslySetInnerHTML={parseMarkdown(change)}
+                        />
                       ))}
                     </ul>
                   </div>

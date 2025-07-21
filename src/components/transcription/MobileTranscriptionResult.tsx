@@ -45,7 +45,7 @@ export function MobileTranscriptionResult({
   const handleDownloadText = async () => {
     setIsDownloading(true);
     try {
-      const timestamp = new Date().toISOString().split('T')[0];
+      const timestamp = new Date().toISOString().split("T")[0];
       const filename = `transcription_${timestamp}.txt`;
 
       const blob = new Blob([transcription], { type: "text/plain" });
@@ -89,14 +89,14 @@ export function MobileTranscriptionResult({
 
   // Show a preview of the transcription (first few lines)
   const getPreview = () => {
-    const lines = transcription.split('\n').filter(line => line.trim());
+    const lines = transcription.split("\n").filter((line) => line.trim());
     const previewLines = lines.slice(0, 3);
     const hasMore = lines.length > 3;
 
     return {
-      preview: previewLines.join('\n'),
+      preview: previewLines.join("\n"),
       hasMore,
-      totalLines: lines.length
+      totalLines: lines.length,
     };
   };
 
@@ -105,17 +105,17 @@ export function MobileTranscriptionResult({
   return (
     <div className="mobile:p-4 md:p-6">
       {/* Mobile Header */}
-      <div className="mb-6 flex items-center justify-between mobile:mb-4">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mobile:text-lg">
+      <div className="mobile:mb-4 mb-6 flex items-center justify-between">
+        <h2 className="mobile:text-lg text-xl font-semibold text-gray-900 dark:text-white">
           Your Transcription
         </h2>
         <Button
           variant="ghost"
           size="sm"
           onClick={onNewTranscription}
-          className="text-blue-600 hover:text-blue-700 mobile:text-sm"
+          className="mobile:text-sm text-blue-600 hover:text-blue-700"
         >
-          <RotateCcw className="mr-1 h-4 w-4 mobile:h-3 mobile:w-3" />
+          <RotateCcw className="mobile:h-3 mobile:w-3 mr-1 h-4 w-4" />
           New
         </Button>
       </div>
@@ -124,15 +124,15 @@ export function MobileTranscriptionResult({
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6 mobile:mb-4"
+        className="mobile:mb-4 mb-6"
       >
-        <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 mobile:rounded-xl mobile:p-4">
+        <div className="mobile:rounded-xl mobile:p-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           {/* Preview Text */}
           <div className="mb-4">
-            <div className="max-h-32 overflow-hidden text-sm leading-relaxed text-gray-700 dark:text-gray-300 mobile:text-base mobile:leading-6">
+            <div className="mobile:text-base mobile:leading-6 max-h-32 overflow-hidden text-sm leading-relaxed text-gray-700 dark:text-gray-300">
               {preview}
               {hasMore && (
-                <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 mobile:text-sm">
+                <div className="mobile:text-sm mt-2 text-xs text-gray-500 dark:text-gray-400">
                   ... and {totalLines - 3} more lines
                 </div>
               )}
@@ -140,16 +140,18 @@ export function MobileTranscriptionResult({
           </div>
 
           {/* Quick Stats */}
-          <div className="flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400 mobile:text-sm">
+          <div className="mobile:text-sm flex items-center justify-between border-t border-gray-100 pt-3 text-xs text-gray-500 dark:border-gray-700 dark:text-gray-400">
             <span>{transcription.length} characters</span>
             <span>{totalLines} lines</span>
-            <span>{Math.ceil(transcription.split(' ').length / 200)} min read</span>
+            <span>
+              {Math.ceil(transcription.split(" ").length / 200)} min read
+            </span>
           </div>
         </div>
       </motion.div>
 
       {/* Primary Actions */}
-      <div className="mb-6 space-y-3 mobile:mb-4">
+      <div className="mobile:mb-4 mb-6 space-y-3">
         {/* Copy Button - Most Important Action */}
         <MobileButton
           variant="mobileCta"
@@ -203,42 +205,43 @@ export function MobileTranscriptionResult({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="mb-6 mobile:mb-4"
+        className="mobile:mb-4 mb-6"
       >
-        <div className="rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50 mobile:rounded-xl">
+        <div className="mobile:rounded-xl rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50">
           <button
             onClick={() => setShowExportOptions(!showExportOptions)}
-            className="flex w-full items-center justify-between p-4 text-left mobile:p-4"
+            className="mobile:p-4 flex w-full items-center justify-between p-4 text-left"
           >
             <div className="flex items-center">
               <FileText className="mr-2 h-4 w-4 text-gray-600 dark:text-gray-400" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile:text-base">
+              <span className="mobile:text-base text-sm font-medium text-gray-700 dark:text-gray-300">
                 View Full Text & Export Options
               </span>
             </div>
-            <div className="text-gray-400">
-              {showExportOptions ? '−' : '+'}
-            </div>
+            <div className="text-gray-400">{showExportOptions ? "−" : "+"}</div>
           </button>
 
           {showExportOptions && (
-            <div className="border-t border-gray-200 p-4 dark:border-gray-700 mobile:p-4">
+            <div className="mobile:p-4 border-t border-gray-200 p-4 dark:border-gray-700">
               {/* Full Text */}
-              <div className="mb-4 max-h-64 overflow-y-auto rounded-md bg-white p-3 text-sm leading-relaxed text-gray-700 dark:bg-gray-800 dark:text-gray-300 mobile:max-h-48 mobile:text-base mobile:leading-6 mobile-scroll-container">
-                {transcription.split('\n').map((line, index) => (
+              <div className="mobile:max-h-48 mobile:text-base mobile:leading-6 mobile-scroll-container mb-4 max-h-64 overflow-y-auto rounded-md bg-white p-3 text-sm leading-relaxed text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                {transcription.split("\n").map((line, index) => (
                   <p key={index} className="mb-2 last:mb-0">
-                    {line || '\u00A0'} {/* Non-breaking space for empty lines */}
+                    {line || "\u00A0"}{" "}
+                    {/* Non-breaking space for empty lines */}
                   </p>
                 ))}
               </div>
 
               {/* Export Options */}
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mobile:text-base">
+                <h4 className="mobile:text-base text-sm font-medium text-gray-700 dark:text-gray-300">
                   More Export Options:
                 </h4>
-                <div className="text-xs text-gray-500 dark:text-gray-400 mobile:text-sm">
-                  For PDF, Word, and other formats, use the desktop version or the "New Transcription" button above to access full export options.
+                <div className="mobile:text-sm text-xs text-gray-500 dark:text-gray-400">
+                  For PDF, Word, and other formats, use the desktop version or
+                  the "New Transcription" button above to access full export
+                  options.
                 </div>
               </div>
             </div>
@@ -247,11 +250,11 @@ export function MobileTranscriptionResult({
       </motion.div>
 
       {/* Bottom Action - New Transcription */}
-      <div className="border-t border-gray-200 pt-4 dark:border-gray-700 mobile:pt-4">
+      <div className="mobile:pt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
         <Button
           variant="outline"
           onClick={onNewTranscription}
-          className="w-full mobile:h-12 mobile:text-base mobile:font-medium touch-feedback"
+          className="mobile:h-12 mobile:text-base mobile:font-medium touch-feedback w-full"
         >
           <RotateCcw className="mr-2 h-4 w-4" />
           Start New Transcription

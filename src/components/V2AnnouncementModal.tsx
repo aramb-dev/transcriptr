@@ -85,7 +85,9 @@ export function V2AnnouncementModal({ onClose }: V2AnnouncementModalProps) {
             {/* Main content */}
             <div className="space-y-6">
               <p className="text-lg text-gray-700 dark:text-gray-300">
-                Welcome to the completely redesigned Transcriptr! We've rebuilt the entire platform from the ground up to deliver a faster, more reliable, and feature-rich transcription experience.
+                Welcome to the completely redesigned Transcriptr! We've rebuilt
+                the entire platform from the ground up to deliver a faster, more
+                reliable, and feature-rich transcription experience.
               </p>
 
               {/* Feature highlights */}
@@ -99,7 +101,8 @@ export function V2AnnouncementModal({ onClose }: V2AnnouncementModalProps) {
                       Lightning Fast Performance
                     </h3>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
-                      Completely rewritten with Next.js for blazing-fast load times and seamless user experience.
+                      Completely rewritten with Next.js for blazing-fast load
+                      times and seamless user experience.
                     </p>
                   </div>
                 </div>
@@ -113,7 +116,8 @@ export function V2AnnouncementModal({ onClose }: V2AnnouncementModalProps) {
                       Enhanced Reliability
                     </h3>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
-                      Improved error handling, better file format support, and automatic retry mechanisms for failed transcriptions.
+                      Improved error handling, better file format support, and
+                      automatic retry mechanisms for failed transcriptions.
                     </p>
                   </div>
                 </div>
@@ -127,7 +131,8 @@ export function V2AnnouncementModal({ onClose }: V2AnnouncementModalProps) {
                       Modern Interface
                     </h3>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
-                      Beautiful new design with improved accessibility, better mobile support, and intuitive user workflows.
+                      Beautiful new design with improved accessibility, better
+                      mobile support, and intuitive user workflows.
                     </p>
                   </div>
                 </div>
@@ -136,13 +141,17 @@ export function V2AnnouncementModal({ onClose }: V2AnnouncementModalProps) {
               {/* Call to action */}
               <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
                 <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                  Ready to experience the future of transcription? Upload your first file and see the difference!
+                  Ready to experience the future of transcription? Upload your
+                  first file and see the difference!
                 </p>
               </div>
 
               {/* Action buttons */}
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-                <Button onClick={handleClose} className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700">
+                <Button
+                  onClick={handleClose}
+                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                >
                   Get Started
                 </Button>
                 <Button variant="outline" onClick={handleClose}>

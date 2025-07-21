@@ -146,7 +146,7 @@
     .mobile-feedback-safe-bottom {
       padding-bottom: max(16px, env(safe-area-inset-bottom));
     }
-    
+
     .mobile-feedback-safe-top {
       padding-top: max(16px, env(safe-area-inset-top));
     }
@@ -166,15 +166,15 @@
     .mobile-feedback-button-primary {
       background: rgb(59 130 246);
     }
-    
+
     .mobile-feedback-button-primary:hover {
       background: rgb(37 99 235);
     }
-    
+
     .mobile-feedback-button-secondary {
       color: rgb(156 163 175);
     }
-    
+
     .mobile-feedback-button-secondary:hover {
       color: rgb(209 213 219);
     }

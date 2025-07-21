@@ -4,19 +4,19 @@ export default {
   theme: {
     extend: {
       screens: {
-        'xs': '475px',
-        'touch': { 'raw': '(pointer: coarse)' },
-        'mouse': { 'raw': '(pointer: fine)' },
-        'mobile': { 'max': '767px' },
-        'tablet': { 'min': '768px', 'max': '1023px' },
-        'desktop': { 'min': '1024px' },
+        xs: "475px",
+        touch: { raw: "(pointer: coarse)" },
+        mouse: { raw: "(pointer: fine)" },
+        mobile: { max: "767px" },
+        tablet: { min: "768px", max: "1023px" },
+        desktop: { min: "1024px" },
       },
       spacing: {
-        'touch': '44px', // Minimum touch target size (44px recommended)
-        'safe-top': 'env(safe-area-inset-top)',
-        'safe-bottom': 'env(safe-area-inset-bottom)',
-        'safe-left': 'env(safe-area-inset-left)',
-        'safe-right': 'env(safe-area-inset-right)',
+        touch: "44px", // Minimum touch target size (44px recommended)
+        "safe-top": "env(safe-area-inset-top)",
+        "safe-bottom": "env(safe-area-inset-bottom)",
+        "safe-left": "env(safe-area-inset-left)",
+        "safe-right": "env(safe-area-inset-right)",
       },
     },
     fontFamily: {

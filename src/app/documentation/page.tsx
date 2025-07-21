@@ -27,7 +27,8 @@ export default function DocumentationPage() {
               </h2>
               <div className="rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50 p-6 dark:from-blue-900/20 dark:to-indigo-900/20">
                 <p className="mb-4 text-gray-700 dark:text-gray-300">
-                  Transform your audio files into accurate transcriptions in just a few simple steps.
+                  Transform your audio files into accurate transcriptions in
+                  just a few simple steps.
                 </p>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-3">
@@ -201,7 +202,8 @@ export default function DocumentationPage() {
                 </div>
                 <div className="mt-4 rounded-md bg-blue-50 p-3 dark:bg-blue-900/20">
                   <p className="text-sm text-blue-800 dark:text-blue-200">
-                    💡 <strong>Tip:</strong> For best results, use uncompressed formats like WAV or FLAC when possible.
+                    💡 <strong>Tip:</strong> For best results, use uncompressed
+                    formats like WAV or FLAC when possible.
                   </p>
                 </div>
               </div>
@@ -218,8 +220,13 @@ export default function DocumentationPage() {
                     Upload Issues
                   </summary>
                   <div className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                    <p>• Ensure your file is in a supported format (MP3, WAV, FLAC, OGG)</p>
-                    <p>• Check that the file size doesn't exceed the upload limit</p>
+                    <p>
+                      • Ensure your file is in a supported format (MP3, WAV,
+                      FLAC, OGG)
+                    </p>
+                    <p>
+                      • Check that the file size doesn't exceed the upload limit
+                    </p>
                     <p>• Try refreshing the page if uploads are failing</p>
                     <p>• Verify your internet connection is stable</p>
                   </div>
@@ -233,7 +240,10 @@ export default function DocumentationPage() {
                     <p>• Check your internet connection and try again</p>
                     <p>• Ensure the audio quality is clear and audible</p>
                     <p>• Try reducing the batch size in advanced options</p>
-                    <p>• For persistent issues, use the feedback form to report bugs</p>
+                    <p>
+                      • For persistent issues, use the feedback form to report
+                      bugs
+                    </p>
                   </div>
                 </details>
 
@@ -242,7 +252,9 @@ export default function DocumentationPage() {
                     Browser Compatibility
                   </summary>
                   <div className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
-                    <p>• Use modern browsers: Chrome, Firefox, Safari, or Edge</p>
+                    <p>
+                      • Use modern browsers: Chrome, Firefox, Safari, or Edge
+                    </p>
                     <p>• Enable JavaScript for full functionality</p>
                     <p>• Clear browser cache if experiencing issues</p>
                     <p>• Disable ad blockers if uploads are blocked</p>
@@ -255,9 +267,14 @@ export default function DocumentationPage() {
                   </summary>
                   <div className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <p>• Shorter audio files (under 1 hour) process faster</p>
-                    <p>• Use lower batch sizes for large files to avoid memory issues</p>
+                    <p>
+                      • Use lower batch sizes for large files to avoid memory
+                      issues
+                    </p>
                     <p>• Close other browser tabs to free up resources</p>
-                    <p>• Consider splitting very long recordings into segments</p>
+                    <p>
+                      • Consider splitting very long recordings into segments
+                    </p>
                   </div>
                 </details>
               </div>
@@ -274,7 +291,9 @@ export default function DocumentationPage() {
                     Is my audio data secure?
                   </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Yes, your audio files are processed securely and automatically deleted after transcription. We don't store your audio permanently.
+                    Yes, your audio files are processed securely and
+                    automatically deleted after transcription. We don't store
+                    your audio permanently.
                   </p>
                 </div>
                 <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-900/50">
@@ -282,7 +301,8 @@ export default function DocumentationPage() {
                     What's the maximum file size?
                   </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    File size limits depend on your plan. Free users can upload files up to 25MB, while premium users enjoy higher limits.
+                    File size limits depend on your plan. Free users can upload
+                    files up to 25MB, while premium users enjoy higher limits.
                   </p>
                 </div>
                 <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-900/50">
@@ -290,7 +310,8 @@ export default function DocumentationPage() {
                     How accurate are the transcriptions?
                   </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Transcription accuracy typically ranges from 85-95% depending on audio quality, language, and speech clarity.
+                    Transcription accuracy typically ranges from 85-95%
+                    depending on audio quality, language, and speech clarity.
                   </p>
                 </div>
                 <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-900/50">
@@ -298,7 +319,9 @@ export default function DocumentationPage() {
                     Can I edit transcriptions after they're generated?
                   </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Currently, you can copy and edit transcriptions in external applications. Built-in editing features are planned for future releases.
+                    Currently, you can copy and edit transcriptions in external
+                    applications. Built-in editing features are planned for
+                    future releases.
                   </p>
                 </div>
               </div>
@@ -309,7 +332,10 @@ export default function DocumentationPage() {
               <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-between">
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Need more help? Check out our{" "}
-                  <Link href="/changelog" className="text-blue-600 hover:text-blue-800 dark:text-blue-400">
+                  <Link
+                    href="/changelog"
+                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                  >
                     changelog
                   </Link>{" "}
                   or submit{" "}

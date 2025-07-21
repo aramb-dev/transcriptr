@@ -2,7 +2,17 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Clock, FileText, MessageCircle, Bug, Lightbulb, Github, BookOpen } from "lucide-react";
+import {
+  Menu,
+  X,
+  Clock,
+  FileText,
+  MessageCircle,
+  Bug,
+  Lightbulb,
+  Github,
+  BookOpen,
+} from "lucide-react";
 import Link from "next/link";
 import { Button } from "./button";
 
@@ -15,7 +25,7 @@ interface MobileNavigationProps {
 export function MobileNavigation({
   onOpenChangelog,
   onShowHistory,
-  onOpenFeedbackModal
+  onOpenFeedbackModal,
 }: MobileNavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -25,34 +35,34 @@ export function MobileNavigation({
   const menuVariants = {
     closed: {
       opacity: 0,
-      x: "100%"
+      x: "100%",
     },
     open: {
       opacity: 1,
-      x: 0
-    }
+      x: 0,
+    },
   };
 
   const overlayVariants = {
     closed: {
-      opacity: 0
+      opacity: 0,
     },
     open: {
-      opacity: 1
-    }
+      opacity: 1,
+    },
   };
 
   const itemVariants = {
     closed: { opacity: 0, x: 20 },
     open: {
       opacity: 1,
-      x: 0
-    }
+      x: 0,
+    },
   };
 
   const containerVariants = {
     closed: {},
-    open: {}
+    open: {},
   };
 
   const handleHistoryClick = () => {
@@ -104,7 +114,7 @@ export function MobileNavigation({
               animate="open"
               exit="closed"
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="fixed right-0 top-0 z-50 h-full w-80 max-w-[85vw] bg-white shadow-2xl dark:bg-gray-900"
+              className="fixed top-0 right-0 z-50 h-full w-80 max-w-[85vw] bg-white shadow-2xl dark:bg-gray-900"
             >
               {/* Menu Header */}
               <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">

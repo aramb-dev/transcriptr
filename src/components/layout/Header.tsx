@@ -7,7 +7,11 @@ interface HeaderProps {
   onOpenFeedbackModal?: (type: "general" | "issue" | "feature") => void;
 }
 
-export function Header({ onOpenChangelog, onShowHistory, onOpenFeedbackModal }: HeaderProps) {
+export function Header({
+  onOpenChangelog,
+  onShowHistory,
+  onOpenFeedbackModal,
+}: HeaderProps) {
   return (
     <>
       {/* Mobile Header */}

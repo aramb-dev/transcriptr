@@ -47,7 +47,10 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
 
   useEffect(() => {
     const checkIsMobile = () => {
-      return window.innerWidth <= 767 || window.matchMedia('(pointer: coarse)').matches;
+      return (
+        window.innerWidth <= 767 ||
+        window.matchMedia("(pointer: coarse)").matches
+      );
     };
 
     setIsMobile(checkIsMobile());
@@ -56,8 +59,8 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       setIsMobile(checkIsMobile());
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Add session persistence hook
@@ -617,7 +620,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       exit="exit"
       transition={springTransition}
     >
-      <div className="p-6 mobile:p-4">
+      <div className="mobile:p-4 p-6">
         {isLoadingSession ? (
           <div className="flex h-40 items-center justify-center">
             <div className="animate-pulse text-gray-500 dark:text-gray-400">
@@ -727,7 +730,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
           )
         ) : (
           // Default: show upload form when idle or if something unexpected happened
-          <div className="p-8 mobile:p-6">
+          <div className="mobile:p-6 p-8">
             <UploadAudio onUpload={handleUpload} />
           </div>
         )}

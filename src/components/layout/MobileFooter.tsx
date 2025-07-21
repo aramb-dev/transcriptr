@@ -8,9 +8,12 @@ interface MobileFooterProps {
   onOpenChangelog: () => void;
 }
 
-export function MobileFooter({ onOpenFeedbackModal, onOpenChangelog }: MobileFooterProps) {
+export function MobileFooter({
+  onOpenFeedbackModal,
+  onOpenChangelog,
+}: MobileFooterProps) {
   return (
-    <footer className="mt-8 border-t border-gray-200 pt-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400 md:hidden">
+    <footer className="mt-8 border-t border-gray-200 pt-6 text-center text-sm text-gray-500 md:hidden dark:border-gray-700 dark:text-gray-400">
       {/* Mobile Footer - Stacked Layout */}
       <div className="space-y-4">
         {/* Quick Actions */}

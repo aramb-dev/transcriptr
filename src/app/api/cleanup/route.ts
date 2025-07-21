@@ -9,7 +9,7 @@ export async function POST() {
   console.log("Cleanup endpoint is temporarily disabled");
   return NextResponse.json(
     { message: "Cleanup endpoint is temporarily disabled" },
-    { status: 200 }
+    { status: 200 },
   );
 
   /* DISABLED CODE:

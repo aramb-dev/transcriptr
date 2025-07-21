@@ -177,18 +177,24 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
     (activeTab === "url" && isUrlPotentiallyValid);
 
   return (
-    <div className="space-y-6 mobile:space-y-4">
+    <div className="mobile:space-y-4 space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mobile:h-12 mobile:rounded-lg">
-          <TabsTrigger value="file" className="mobile:text-sm mobile:font-medium">
-            <UploadCloud className="mr-2 h-4 w-4 mobile:h-3 mobile:w-3" />
+        <TabsList className="mobile:h-12 mobile:rounded-lg grid w-full grid-cols-2">
+          <TabsTrigger
+            value="file"
+            className="mobile:text-sm mobile:font-medium"
+          >
+            <UploadCloud className="mobile:h-3 mobile:w-3 mr-2 h-4 w-4" />
             <span className="mobile:hidden">Upload File</span>
-            <span className="hidden mobile:inline">Upload</span>
+            <span className="mobile:inline hidden">Upload</span>
           </TabsTrigger>
-          <TabsTrigger value="url" className="mobile:text-sm mobile:font-medium">
-            <LinkIcon className="mr-2 h-4 w-4 mobile:h-3 mobile:w-3" />
+          <TabsTrigger
+            value="url"
+            className="mobile:text-sm mobile:font-medium"
+          >
+            <LinkIcon className="mobile:h-3 mobile:w-3 mr-2 h-4 w-4" />
             <span className="mobile:hidden">Paste URL</span>
-            <span className="hidden mobile:inline">URL</span>
+            <span className="mobile:inline hidden">URL</span>
           </TabsTrigger>
         </TabsList>
 
@@ -224,7 +230,7 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
           <AnimatedButton
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="h-auto w-full py-6 text-base mobile:py-4 mobile:text-lg mobile:font-semibold mobile:rounded-xl mobile:shadow-lg touch-feedback"
+            className="mobile:py-4 mobile:text-lg mobile:font-semibold mobile:rounded-xl mobile:shadow-lg touch-feedback h-auto w-full py-6 text-base"
             size="lg"
           >
             {activeTab === "file"

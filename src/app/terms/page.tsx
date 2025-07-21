@@ -67,9 +67,9 @@ export default function TermsPage() {
               <p className="mb-4">
                 You are responsible for any content you upload to the Service.
                 You agree not to upload content that violates any laws,
-                infringes on the intellectual property rights of others, contains
-                malicious code, or includes private or sensitive information
-                without proper authorization.
+                infringes on the intellectual property rights of others,
+                contains malicious code, or includes private or sensitive
+                information without proper authorization.
               </p>
               <h3 className="mb-4 text-xl font-semibold text-gray-800 dark:text-gray-200">
                 Acceptable Use Policy for Audio Content
