@@ -5,7 +5,6 @@ import { UploadAudio } from "../UploadAudio";
 import { TranscriptionProcessing } from "./TranscriptionProcessing";
 import { TranscriptionError } from "./TranscriptionError";
 import TranscriptionResult from "./TranscriptionResult";
-import { MobileTranscriptionResult } from "./MobileTranscriptionResult";
 import SessionRecoveryPrompt from "./SessionRecoveryPrompt";
 import {
   TranscriptionStatus,
@@ -41,24 +40,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     null,
   );
   const [firebaseFilePath, setFirebaseFilePath] = useState<string | null>(null);
-
-  // Mobile detection hook
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkIsMobile = () => {
-      return window.innerWidth <= 767 || window.matchMedia('(pointer: coarse)').matches;
-    };
-    
-    setIsMobile(checkIsMobile());
-    
-    const handleResize = () => {
-      setIsMobile(checkIsMobile());
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Add session persistence hook
   const {
@@ -617,7 +598,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       exit="exit"
       transition={springTransition}
     >
-      <div className="p-6 mobile:p-4">
+      <div className="p-6">
         {isLoadingSession ? (
           <div className="flex h-40 items-center justify-center">
             <div className="animate-pulse text-gray-500 dark:text-gray-400">
@@ -653,81 +634,72 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
             formatTimestamp={formatTimestamp}
           />
         ) : transcription !== null && transStatus === "succeeded" ? ( // Check for transcription text and succeeded status
-          isMobile ? (
-            // Mobile-optimized result view
-            <MobileTranscriptionResult
-              transcription={transcription}
-              onNewTranscription={handleReset}
-            />
-          ) : (
-            // Desktop result view with existing layout
-            <div className="p-8">
-              <TranscriptionResult transcription={transcription} />
-              {/* Buttons moved outside TranscriptionResult */}
-              <div className="mt-4 flex justify-center gap-4 border-t border-gray-100 bg-gray-50 px-8 py-4 dark:border-gray-700 dark:bg-gray-800/80">
-                <Button
-                  variant="outline"
-                  onClick={handleReset}
-                  className="bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                >
-                  New Transcription
-                </Button>
-                <Button
-                  onClick={handleCopyToClipboard}
-                  className="gap-2 bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                  disabled={copySuccess}
-                >
-                  {copySuccess ? (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-green-500"
-                      >
-                        <path d="M20 6L9 17l-5-5"></path>
-                      </svg>
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect
-                          x="9"
-                          y="9"
-                          width="13"
-                          height="13"
-                          rx="2"
-                          ry="2"
-                        ></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                      </svg>
-                      Copy to Clipboard
-                    </>
-                  )}
-                </Button>
-              </div>
+          <div className="p-8">
+            <TranscriptionResult transcription={transcription} />
+            {/* Buttons moved outside TranscriptionResult */}
+            <div className="mt-4 flex justify-center gap-4 border-t border-gray-100 bg-gray-50 px-8 py-4 dark:border-gray-700 dark:bg-gray-800/80">
+              <Button
+                variant="outline"
+                onClick={handleReset}
+                className="bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+              >
+                New Transcription
+              </Button>
+              <Button
+                onClick={handleCopyToClipboard}
+                className="gap-2 bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                disabled={copySuccess}
+              >
+                {copySuccess ? (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="text-green-500"
+                    >
+                      <path d="M20 6L9 17l-5-5"></path>
+                    </svg>
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect
+                        x="9"
+                        y="9"
+                        width="13"
+                        height="13"
+                        rx="2"
+                        ry="2"
+                      ></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1-2 2v1"></path>
+                    </svg>
+                    Copy to Clipboard
+                  </>
+                )}
+              </Button>
             </div>
-          )
+          </div>
         ) : (
           // Default: show upload form when idle or if something unexpected happened
-          <div className="p-8 mobile:p-6">
+          <div className="p-8">
             <UploadAudio onUpload={handleUpload} />
           </div>
         )}
