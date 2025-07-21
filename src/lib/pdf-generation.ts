@@ -11,7 +11,6 @@ export const generatePdf = async (
   return await generatePdfLocally(data);
 };
 
-
 // Helper to add header and date
 const addHeaderAndDate = (
   doc: jsPDF,
@@ -95,7 +94,9 @@ const renderContent = (
 };
 
 // Client-side PDF generation using jsPDF with proper font handling
-const generatePdfLocally = async (data: Record<string, unknown>): Promise<Blob> => {
+const generatePdfLocally = async (
+  data: Record<string, unknown>,
+): Promise<Blob> => {
   const toastId = toast.loading("Generating PDF...");
 
   try {

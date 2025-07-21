@@ -2,10 +2,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { UploadCloud, FileCheck2, XCircle } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
-import {
-  expandCenter,
-  springTransition,
-} from "../../lib/animations";
+import { expandCenter, springTransition } from "../../lib/animations";
 
 interface FileUploadInputProps {
   fileName: string | null;

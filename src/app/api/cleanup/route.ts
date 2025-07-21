@@ -24,10 +24,8 @@ export async function POST(request: Request) {
     );
   } catch (error: unknown) {
     console.error("Error deleting file:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 },
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

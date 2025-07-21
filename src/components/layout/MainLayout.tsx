@@ -8,17 +8,16 @@ import { Toaster } from "sonner";
 import { FeedbackModals } from "../feedback/FeedbackModals";
 import { ChangelogModal } from "../ChangelogModal";
 import TranscriptionHistory from "../transcription/TranscriptionHistory";
-import {
-  fadeInUp,
-  expandCenter,
-} from "../../lib/animations";
+import { fadeInUp, expandCenter } from "../../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
 
 const TranscriptionResult = lazy(
   () => import("../transcription/TranscriptionResult"),
 );
-const TranscriptionError = lazy(
-  () => import("../transcription/TranscriptionError").then(module => ({ default: module.TranscriptionError })),
+const TranscriptionError = lazy(() =>
+  import("../transcription/TranscriptionError").then((module) => ({
+    default: module.TranscriptionError,
+  })),
 );
 
 export function MainLayout() {

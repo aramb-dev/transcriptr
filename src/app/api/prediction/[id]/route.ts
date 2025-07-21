@@ -45,7 +45,8 @@ export async function GET(
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
     console.error("Error checking prediction:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       {
         error: errorMessage,

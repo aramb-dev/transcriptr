@@ -26,9 +26,7 @@ interface TranscriptionFormProps {
   initialSession?: TranscriptionSession | null;
 }
 
-export function TranscriptionForm({
-  initialSession,
-}: TranscriptionFormProps) {
+export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
   const [transcription, setTranscription] = useState<string | null>(null);
   const [transStatus, setTransStatus] = useState<TranscriptionStatus>("idle");
   const [error, setError] = useState<string | null>(null);

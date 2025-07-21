@@ -10,10 +10,7 @@ import { Toaster } from "sonner";
 import { FeedbackModals } from "../components/feedback/FeedbackModals";
 import { ChangelogModal } from "../components/ChangelogModal";
 import TranscriptionHistory from "../components/transcription/TranscriptionHistory";
-import {
-  fadeInUp,
-  expandCenter,
-} from "../lib/animations";
+import { fadeInUp, expandCenter } from "../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
 
 const TranscriptionResult = lazy(
@@ -35,9 +32,7 @@ export default function Page() {
   // For handling session selection from history
   const [selectedSession, setSelectedSession] =
     useState<TranscriptionSession | null>(null);
-  const [transcriptionResult] = useState<string | null>(
-    null,
-  );
+  const [transcriptionResult] = useState<string | null>(null);
 
   // Updated to use the new window method instead of direct DOM manipulation
   const openFeedbackModal = (type: "general" | "issue" | "feature") => {

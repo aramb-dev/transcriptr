@@ -566,29 +566,31 @@ export default function TranscriptionResult({
         <TabsContent value="segments" className="mt-4">
           {transcript && transcript.segments ? (
             <SequentialRevealList
-              items={transcript.segments.map((segment: TranscriptSegment, idx: number) => (
-                <div
-                  key={idx}
-                  className="rounded-md bg-gray-50 p-4 dark:bg-gray-800/50"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
-                      {segment.start
-                        ? new Date(segment.start * 1000)
-                            .toISOString()
-                            .substr(14, 8)
-                        : "00:00:00"}{" "}
-                      -
-                      {segment.end
-                        ? new Date(segment.end * 1000)
-                            .toISOString()
-                            .substr(14, 8)
-                        : "00:00:00"}
-                    </span>
+              items={transcript.segments.map(
+                (segment: TranscriptSegment, idx: number) => (
+                  <div
+                    key={idx}
+                    className="rounded-md bg-gray-50 p-4 dark:bg-gray-800/50"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">
+                        {segment.start
+                          ? new Date(segment.start * 1000)
+                              .toISOString()
+                              .substr(14, 8)
+                          : "00:00:00"}{" "}
+                        -
+                        {segment.end
+                          ? new Date(segment.end * 1000)
+                              .toISOString()
+                              .substr(14, 8)
+                          : "00:00:00"}
+                      </span>
+                    </div>
+                    <p className="mt-1">{segment.text}</p>
                   </div>
-                  <p className="mt-1">{segment.text}</p>
-                </div>
-              ))}
+                ),
+              )}
               className="space-y-4"
             />
           ) : (

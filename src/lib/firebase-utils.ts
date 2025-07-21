@@ -67,7 +67,8 @@ export async function uploadBase64ToFirebase(
   } catch (error: unknown) {
     console.error("Firebase upload error:", error);
     // Enhance error reporting
-    const errorMessage = error instanceof Error ? error.message : "Unknown Firebase upload error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown Firebase upload error";
     const errorCode = (error as { code?: string }).code || "N/A";
     throw new Error(
       `Firebase upload failed (Code: ${errorCode}): ${errorMessage}`,

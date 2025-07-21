@@ -35,10 +35,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 },
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

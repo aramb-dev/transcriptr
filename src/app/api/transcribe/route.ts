@@ -48,7 +48,8 @@ export async function POST(request: Request) {
     requestBody = await request.json();
   } catch (parseError: unknown) {
     console.error("Error parsing request body:", parseError);
-    const errorMessage = parseError instanceof Error ? parseError.message : "Invalid JSON format";
+    const errorMessage =
+      parseError instanceof Error ? parseError.message : "Invalid JSON format";
     return NextResponse.json(
       { error: "Invalid JSON", details: errorMessage },
       { status: 400 },
@@ -117,7 +118,8 @@ export async function POST(request: Request) {
 
     // Add firebase path to response if a file was uploaded
     if (firebaseFilePath) {
-      (predictionData as Record<string, unknown>).firebaseFilePath = firebaseFilePath;
+      (predictionData as Record<string, unknown>).firebaseFilePath =
+        firebaseFilePath;
       console.log("Included Firebase path in response:", firebaseFilePath);
     }
 
@@ -128,7 +130,8 @@ export async function POST(request: Request) {
     return NextResponse.json(predictionData, { status: 200 });
   } catch (error: unknown) {
     console.error("Error processing transcription request:", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     const statusCode =
       errorMessage.includes("Firebase") || errorMessage.includes("Replicate")
         ? 502
