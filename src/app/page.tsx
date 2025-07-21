@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect, lazy } from "react";
+import { Suspense, useState, lazy } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "../components/ui/card";
 import { Header } from "../components/layout/Header";
@@ -14,8 +14,6 @@ import {
   fadeInUp,
   slideInRight,
   expandCenter,
-  fadeOutDown,
-  exitTransition,
 } from "../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
 
@@ -30,7 +28,7 @@ const TranscriptionError = lazy(() =>
 
 export default function Page() {
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showResult, setShowResult] = useState(false);
+  const [showResult] = useState(false);
   const [showError, setShowError] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
@@ -39,7 +37,7 @@ export default function Page() {
   // For handling session selection from history
   const [selectedSession, setSelectedSession] =
     useState<TranscriptionSession | null>(null);
-  const [transcriptionResult, setTranscriptionResult] = useState<string | null>(
+  const [transcriptionResult] = useState<string | null>(
     null,
   );
 
@@ -103,7 +101,7 @@ export default function Page() {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={exitTransition as any}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             <Card className="w-full overflow-hidden rounded-xl border-0 shadow-lg dark:bg-gray-800/60 dark:backdrop-blur-sm">
               <CardContent className="p-0">
@@ -132,7 +130,7 @@ export default function Page() {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={exitTransition as any}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -188,7 +186,7 @@ export default function Page() {
               initial="initial"
               animate="animate"
               exit="exit"
-              transition={exitTransition as any}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <TranscriptionResult transcription={transcriptionResult || ""} />
             </motion.div>
@@ -204,7 +202,7 @@ export default function Page() {
               initial="initial"
               animate="animate"
               exit="exit"
-              transition={exitTransition as any}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <TranscriptionError
                 status="failed"

@@ -3,38 +3,6 @@
 > eslint .
 
 
-/Users/aramb-dev/Github/transcriptr/src/app/api/cleanup/route.ts
-  25:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-/Users/aramb-dev/Github/transcriptr/src/app/api/convert/audio/route.ts
-  4:28  error  'request' is defined but never used  @typescript-eslint/no-unused-vars
-
-/Users/aramb-dev/Github/transcriptr/src/app/api/convert/cloud/route.ts
-  4:28  error  'request' is defined but never used  @typescript-eslint/no-unused-vars
-
-/Users/aramb-dev/Github/transcriptr/src/app/api/firebase-proxy/route.ts
-  47:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-/Users/aramb-dev/Github/transcriptr/src/app/api/predict/route.ts
-  37:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-/Users/aramb-dev/Github/transcriptr/src/app/api/prediction/[id]/route.ts
-  46:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-/Users/aramb-dev/Github/transcriptr/src/app/api/printerz-proxy/route.ts
-  84:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-/Users/aramb-dev/Github/transcriptr/src/app/api/transcribe/route.ts
-   15:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-   49:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-   78:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  110:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-  119:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
-
-/Users/aramb-dev/Github/transcriptr/src/app/layout.tsx
-   5:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
-  37:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
-
 /Users/aramb-dev/Github/transcriptr/src/app/page.tsx
     3:30  error  'useEffect' is defined but never used                        @typescript-eslint/no-unused-vars
    17:3   error  'fadeOutDown' is defined but never used                      @typescript-eslint/no-unused-vars
@@ -126,6 +94,6 @@
   127:27  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
   163:21  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
 
-✖ 67 problems (62 errors, 5 warnings)
+✖ 53 problems (50 errors, 3 warnings)
   2 errors and 0 warnings potentially fixable with the `--fix` option.
 
