@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 // Replace the function with a simpler version that returns an informative message
-export async function POST(request: Request) {
+export async function POST() {
   return NextResponse.json(
     {
       error: "Feature not available",

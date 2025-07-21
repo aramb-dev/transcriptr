@@ -22,10 +22,11 @@ export async function POST(request: Request) {
       { message: "File deleted successfully" },
       { status: 200 },
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleting file:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: error.message || "Unknown error" },
+      { error: errorMessage },
       { status: 500 },
     );
   }

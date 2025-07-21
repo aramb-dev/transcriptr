@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 // Similar to cloud-convert.js, replace with a simpler version
-export async function POST(request: Request) {
+export async function POST() {
   return NextResponse.json(
     {
       error: "Feature not available",

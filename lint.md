@@ -3,18 +3,6 @@
 > eslint .
 
 
-/Users/aramb-dev/Github/transcriptr/src/App.tsx
-   1:10  error  'Suspense' is defined but never used               @typescript-eslint/no-unused-vars
-   3:10  error  'motion' is defined but never used                 @typescript-eslint/no-unused-vars
-   5:10  error  'LoadingFallback' is defined but never used        @typescript-eslint/no-unused-vars
-   7:3   error  'TermsOfService' is defined but never used         @typescript-eslint/no-unused-vars
-   8:3   error  'PrivacyPolicy' is defined but never used          @typescript-eslint/no-unused-vars
-   9:3   error  'Changelog' is defined but never used              @typescript-eslint/no-unused-vars
-  10:3   error  'Feedback' is defined but never used               @typescript-eslint/no-unused-vars
-  11:3   error  'Documentation' is defined but never used          @typescript-eslint/no-unused-vars
-  15:7   error  'pageVariants' is assigned a value but never used  @typescript-eslint/no-unused-vars
-  31:9   error  'location' is assigned a value but never used      @typescript-eslint/no-unused-vars
-
 /Users/aramb-dev/Github/transcriptr/src/app/api/cleanup/route.ts
   25:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
@@ -138,6 +126,6 @@
   127:27  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
   163:21  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
 
-✖ 77 problems (72 errors, 5 warnings)
+✖ 67 problems (62 errors, 5 warnings)
   2 errors and 0 warnings potentially fixable with the `--fix` option.
 
