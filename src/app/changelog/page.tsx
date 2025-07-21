@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { marked } from "marked";
 import { Button } from "../../components/ui/button";
 import { X } from "lucide-react";
 
@@ -26,6 +27,29 @@ export default function Changelog({
 }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
+    {
+      date: "Mon, 21 Jul 2025",
+      version: "2.0.0",
+      changes: {
+        new: [
+          "**Analytics Opt-Out**: You can now opt-out of analytics tracking in the settings.",
+          "**Improved Session History**: Added ranged query support for fetching your transcription history.",
+        ],
+        improved: [
+          "**Complete Migration to Next.js**: The entire application has been migrated from Vite to Next.js, including the move from Netlify Functions to Next.js API Routes and the adoption of native Next.js routing.",
+          "**Modernized Styling**: Adopted CSS variables for theming and migrated to Tailwind CSS v4 syntax for a more maintainable and modern codebase.",
+          "**Simplified PDF Generation**: Removed the external 'printerz' PDF generation service, streamlining the architecture.",
+          "**Smoother UI**: Replaced layout transitions with more fluid, spring-based animations.",
+          "**Codebase Health**: Performed a major refactoring across the entire application, improving type safety, removing unused code, simplifying components, and enforcing a consistent code style with ESLint and Prettier.",
+        ],
+        fixed: [
+          "Resolved a type error for the `fileInputRef` prop.",
+          "Fixed various linting errors across the application and API.",
+          "Corrected the environment variable for the Replicate API.",
+          "Enabled proper client-side routing within Next.js.",
+        ],
+      },
+    },
     {
       date: "Thu, 26 Jun 2025",
       version: "1.4.7",
@@ -293,11 +317,28 @@ export default function Changelog({
     },
   ];
 
+  const parseMarkdown = (markdown: string) => {
+    const rawMarkup = marked(markdown, { breaks: true, gfm: true });
+    // Important: Ensure the type is compatible with dangerouslySetInnerHTML
+    return { __html: rawMarkup as string };
+  };
+
   const content = (
     <div
       className={`bg-white dark:bg-gray-800 ${isModal ? "rounded-lg shadow-xl" : "rounded-xl shadow-lg"} overflow-hidden`}
     >
       <div className="p-6 sm:p-8">
+        <div className="mb-8 text-center">
+          <h1 className="text-5xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 sm:text-6xl">
+            <span className="block text-blue-600 dark:text-blue-400">
+              V2 is here!
+            </span>
+          </h1>
+          <p className="mt-4 text-lg text-gray-600 dark:text-gray-300">
+            We've rebuilt Transcriptr from the ground up for a faster, more
+            reliable, and feature-rich experience.
+          </p>
+        </div>
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
             Changelog
@@ -340,7 +381,10 @@ export default function Changelog({
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
                       {item.changes.new.map((change, i) => (
-                        <li key={i}>{change}</li>
+                        <li
+                          key={i}
+                          dangerouslySetInnerHTML={parseMarkdown(change)}
+                        />
                       ))}
                     </ul>
                   </div>
@@ -353,7 +397,10 @@ export default function Changelog({
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
                       {item.changes.improved.map((change, i) => (
-                        <li key={i}>{change}</li>
+                        <li
+                          key={i}
+                          dangerouslySetInnerHTML={parseMarkdown(change)}
+                        />
                       ))}
                     </ul>
                   </div>
@@ -366,7 +413,10 @@ export default function Changelog({
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
                       {item.changes.fixed.map((change, i) => (
-                        <li key={i}>{change}</li>
+                        <li
+                          key={i}
+                          dangerouslySetInnerHTML={parseMarkdown(change)}
+                        />
                       ))}
                     </ul>
                   </div>

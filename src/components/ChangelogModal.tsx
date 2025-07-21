@@ -1,5 +1,5 @@
 import React from "react";
-import { Changelog } from "./Changelog";
+import Changelog from "../app/changelog/page";
 import { motion } from "framer-motion";
 import { scaleDown } from "../lib/animations";
 import { AnimatedBackdrop } from "./ui/animated-backdrop";
