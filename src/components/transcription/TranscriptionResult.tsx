@@ -7,6 +7,13 @@ import { toast } from "sonner";
 import { SequentialRevealList } from "../ui/sequential-reveal-list";
 import { ScrollRevealSection } from "../ui/scroll-reveal-section";
 
+// Define interfaces for better type safety
+interface TranscriptSegment {
+  start?: number;
+  end?: number;
+  text: string;
+}
+
 // Removed the heavy imports:
 // import JSZip from 'jszip';
 // import { saveAs } from 'file-saver';
@@ -269,7 +276,7 @@ export default function TranscriptionResult({
   useEffect(() => {
     // When title is set initially or reset
     initialPdfTitleRef.current = pdfTitle;
-  }, []);
+  }, [pdfTitle]);
 
   // Handle PDF preview generation
   const handleGeneratePdfPreview = async () => {
@@ -559,7 +566,7 @@ export default function TranscriptionResult({
         <TabsContent value="segments" className="mt-4">
           {transcript && transcript.segments ? (
             <SequentialRevealList
-              items={transcript.segments.map((segment: any, idx: number) => (
+              items={transcript.segments.map((segment: TranscriptSegment, idx: number) => (
                 <div
                   key={idx}
                   className="rounded-md bg-gray-50 p-4 dark:bg-gray-800/50"

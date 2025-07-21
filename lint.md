@@ -3,21 +3,6 @@
 > eslint .
 
 
-/Users/aramb-dev/Github/transcriptr/src/components/layout/MainLayout.tsx
-   1:30  error  'useEffect' is defined but never used               @typescript-eslint/no-unused-vars
-  15:3   error  'fadeOutDown' is defined but never used             @typescript-eslint/no-unused-vars
-  29:22  error  'setShowResult' is assigned a value but never used  @typescript-eslint/no-unused-vars
-  30:21  error  'setShowError' is assigned a value but never used   @typescript-eslint/no-unused-vars
-
-/Users/aramb-dev/Github/transcriptr/src/components/transcription/TranscriptionForm.tsx
-    1:20  error  'useRef' is defined but never used                           @typescript-eslint/no-unused-vars
-    5:3   error  'UseSessionPersistenceResult' is defined but never used      @typescript-eslint/no-unused-vars
-   34:3   error  'onShowSuccess' is defined but never used                    @typescript-eslint/no-unused-vars
-   50:10  error  'isLoadingState' is assigned a value but never used          @typescript-eslint/no-unused-vars
-   50:26  error  'setIsLoadingState' is assigned a value but never used       @typescript-eslint/no-unused-vars
-  296:11  error  'firebaseFilePath' is never reassigned. Use 'const' instead  prefer-const
-  423:18  error  'e' is defined but never used                                @typescript-eslint/no-unused-vars
-
 /Users/aramb-dev/Github/transcriptr/src/components/transcription/TranscriptionProcessing.tsx
   19:3  error  'getProgressColor' is defined but never used  @typescript-eslint/no-unused-vars
 
@@ -78,6 +63,6 @@
   127:27  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
   163:21  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
 
-✖ 43 problems (40 errors, 3 warnings)
-  2 errors and 0 warnings potentially fixable with the `--fix` option.
+✖ 32 problems (29 errors, 3 warnings)
+  1 error and 0 warnings potentially fixable with the `--fix` option.
 
