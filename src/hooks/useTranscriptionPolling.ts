@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { TranscriptionStatus, getApiUrl } from "../services/transcription";
 
 interface UseTranscriptionPollingProps {
   predictionId: string | null;
-  onSuccess: (output: any) => void;
+  onSuccess: (output: unknown) => void;
   onError: (error: string) => void;
   onProgress: (value: number) => void;
   onStatusChange: (status: TranscriptionStatus) => void;
@@ -43,6 +43,7 @@ export function useTranscriptionPolling({
         pollIntervalRef.current = null;
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [predictionId]);
 
   const startPolling = (id: string) => {

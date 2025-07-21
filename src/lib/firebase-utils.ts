@@ -64,11 +64,11 @@ export async function uploadBase64ToFirebase(
     console.log("Firebase download URL obtained:", downloadURL);
 
     return { url: downloadURL, path: filePath };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Firebase upload error:", error);
     // Enhance error reporting
-    const errorMessage = error.message || "Unknown Firebase upload error";
-    const errorCode = error.code || "N/A";
+    const errorMessage = error instanceof Error ? error.message : "Unknown Firebase upload error";
+    const errorCode = (error as { code?: string }).code || "N/A";
     throw new Error(
       `Firebase upload failed (Code: ${errorCode}): ${errorMessage}`,
     );

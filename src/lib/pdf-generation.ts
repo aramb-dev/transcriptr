@@ -1,87 +1,16 @@
 import { toast } from "sonner";
-import { determineServerUrl } from "./firebase-proxy";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
 
 export const generatePdf = async (
-  templateId: string,
-  data: any,
+  _templateId: string,
+  data: Record<string, unknown>,
 ): Promise<Blob> => {
   // Use true PDF generation with jsPDF
   console.log("Using local PDF generation");
   return await generatePdfLocally(data);
 };
 
-// Original Printerz API implementation
-const generatePdfWithPrinterz = async (
-  templateId: string,
-  data: any,
-): Promise<Blob> => {
-  try {
-    const serverUrl = determineServerUrl();
-    const toastId = toast.loading("Generating PDF with Printerz...");
-
-    console.log(
-      `Sending PDF generation request to ${serverUrl}/api/printerz/render`,
-    );
-    console.log("PDF data:", {
-      templateId,
-      dataSize: JSON.stringify(data).length,
-    });
-
-    const response = await fetch(`${serverUrl}/api/printerz/render`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        templateId,
-        printerzData: data,
-      }),
-    });
-
-    console.log(`PDF response status: ${response.status}`);
-
-    if (!response.ok) {
-      // Try to get more details from the error response
-      let errorMessage = `PDF generation failed with status: ${response.status}`;
-      try {
-        const errorData = await response.json();
-        errorMessage = `PDF generation failed: ${errorData.error || errorData.message || errorMessage}`;
-        console.error("PDF generation error details:", errorData);
-      } catch (e) {
-        // If we can't parse the error as JSON, try text
-        try {
-          const errorText = await response.text();
-          if (errorText) {
-            errorMessage = `PDF generation failed: ${errorText}`;
-          }
-        } catch {
-          // If both fail, just use the status code message
-        }
-      }
-
-      toast.error(errorMessage, { id: toastId });
-      throw new Error(errorMessage);
-    }
-
-    // Get the blob and verify it's not empty
-    const blob = await response.blob();
-    console.log(`PDF blob received, size: ${blob.size} bytes`);
-
-    if (blob.size === 0) {
-      const errorMsg = "PDF generation failed: Received empty PDF file";
-      toast.error(errorMsg, { id: toastId });
-      throw new Error(errorMsg);
-    }
-
-    toast.success("PDF generated successfully", { id: toastId });
-    return blob;
-  } catch (error) {
-    console.error("Error generating PDF with Printerz:", error);
-    throw error;
-  }
-};
 
 // Helper to add header and date
 const addHeaderAndDate = (
@@ -166,14 +95,14 @@ const renderContent = (
 };
 
 // Client-side PDF generation using jsPDF with proper font handling
-const generatePdfLocally = async (data: any): Promise<Blob> => {
+const generatePdfLocally = async (data: Record<string, unknown>): Promise<Blob> => {
   const toastId = toast.loading("Generating PDF...");
 
   try {
     console.log("Generating PDF using jsPDF");
 
-    const title = data.title || "Transcription";
-    const contentText = data.content || "";
+    const title = (data.title as string) || "Transcription";
+    const contentText = (data.content as string) || "";
 
     // Check for RTL languages
     const containsArabic = /[\u0600-\u06FF]/.test(contentText);
@@ -247,8 +176,8 @@ const generatePdfLocally = async (data: any): Promise<Blob> => {
     try {
       console.log("Falling back to HTML document generation");
 
-      const title = data.title || "Transcription";
-      const contentText = data.content || "";
+      const title = (data.title as string) || "Transcription";
+      const contentText = (data.content as string) || "";
 
       // Check for RTL languages
       const containsArabic = /[\u0600-\u06FF]/.test(contentText);

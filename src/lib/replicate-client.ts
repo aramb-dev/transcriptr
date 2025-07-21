@@ -14,6 +14,12 @@ if (!REPLICATE_API_TOKEN) {
   console.error("FATAL: REPLICATE_API_TOKEN environment variable is not set.");
 }
 
+interface TranscriptionInput {
+  audio?: string;
+  batch_size?: number;
+  [key: string]: unknown;
+}
+
 /**
  * Starts a transcription prediction job on Replicate.
  * @param {object} inputParams - The input parameters for the Replicate model.
@@ -21,9 +27,9 @@ if (!REPLICATE_API_TOKEN) {
  * @returns {Promise<object>} - Resolves with the initial prediction response from Replicate.
  */
 export async function startReplicateTranscription(
-  inputParams: any,
+  inputParams: TranscriptionInput,
   modelId: string,
-): Promise<any> {
+): Promise<unknown> {
   if (!REPLICATE_API_TOKEN) {
     throw new Error("Replicate API token is missing.");
   }
@@ -41,7 +47,7 @@ export async function startReplicateTranscription(
   // Start with the provided batch size or default to 8 if not specified
   const initialBatchSize = inputParams.batch_size || 8;
   let currentBatchSize = initialBatchSize;
-  let maxRetries = 3; // Maximum number of retries with reduced batch size
+  const maxRetries = 3; // Maximum number of retries with reduced batch size
   let retryCount = 0;
   let lastError: Error | null = null;
 
@@ -76,7 +82,7 @@ export async function startReplicateTranscription(
           "Content-Type": "application/json",
         },
         body: body,
-        // @ts-ignore - Node.js specific agent property
+        // @ts-expect-error - Node.js specific agent property
         agent: httpsAgent,
       });
 
@@ -89,7 +95,7 @@ export async function startReplicateTranscription(
           try {
             const errorJson = await response.json();
             errorDetails = JSON.stringify(errorJson.detail || errorJson);
-          } catch (e) {
+          } catch (_) {
             // If parsing error response fails, use text
             errorDetails = await response.text();
           }
@@ -124,12 +130,12 @@ export async function startReplicateTranscription(
         }
 
         responseData = await response.json();
-      } catch (jsonError: any) {
+      } catch (jsonError: unknown) {
         if (
-          jsonError.message &&
-          jsonError.message.includes("CUDA out of memory")
+          (jsonError as Error).message &&
+          (jsonError as Error).message.includes("CUDA out of memory")
         ) {
-          lastError = jsonError;
+          lastError = jsonError as Error;
 
           // Reduce batch size for the next attempt
           currentBatchSize = Math.max(1, Math.floor(currentBatchSize * 0.5));
@@ -160,14 +166,14 @@ export async function startReplicateTranscription(
         `(successful with batch_size=${currentBatchSize})`,
       );
       return responseData;
-    } catch (error: any) {
-      lastError = error;
+    } catch (error: unknown) {
+      lastError = error as Error;
 
       // If this wasn't a CUDA error or we're out of retries, break the loop
       if (
-        !error.message ||
-        (!error.message.includes("CUDA out of memory") &&
-          !error.message.includes("GPU memory")) ||
+        !(error as Error).message ||
+        (!(error as Error).message.includes("CUDA out of memory") &&
+          !(error as Error).message.includes("GPU memory")) ||
         retryCount >= maxRetries
       ) {
         break;

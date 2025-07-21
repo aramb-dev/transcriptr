@@ -1,4 +1,4 @@
-import type { Variants, Target, TargetAndTransition } from "framer-motion";
+import type { Variants } from "framer-motion";
 
 // Fade in from below
 export const fadeInUp: Variants = {

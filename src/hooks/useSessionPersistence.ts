@@ -6,7 +6,6 @@ import {
   deleteSession,
   TranscriptionSession,
 } from "@/lib/persistence-service";
-import { TranscriptionStatus } from "@/services/transcription";
 
 export interface UseSessionPersistenceProps {
   onSessionRecovered?: (session: TranscriptionSession) => void;

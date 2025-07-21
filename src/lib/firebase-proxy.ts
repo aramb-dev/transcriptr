@@ -36,7 +36,7 @@ export async function proxyFirebaseDownload(url: string): Promise<Blob> {
  */
 export async function generatePdf(
   templateId: string,
-  data: any,
+  data: Record<string, unknown>,
 ): Promise<Blob> {
   try {
     // Determine server URL based on environment
