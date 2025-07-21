@@ -196,3 +196,17 @@ export function useV2Announcement() {
 
   return { shouldShow, hideAnnouncement };
 }
+
+// Debug function to control V2 announcement visibility
+// Usage in browser console: seenV2(false) to re-enable the announcement
+if (typeof window !== "undefined") {
+  (window as any).seenV2 = (seen: boolean) => {
+    if (seen) {
+      localStorage.setItem("seenV2", "true");
+      console.log("V2 announcement disabled - will not show on next visit");
+    } else {
+      localStorage.removeItem("seenV2");
+      console.log("V2 announcement enabled - will show on next page refresh");
+    }
+  };
+}
