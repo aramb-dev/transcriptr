@@ -5,6 +5,7 @@ import Confetti from "react-confetti";
 import { Button } from "./ui/button";
 import { AnimatedBackdrop } from "./ui/animated-backdrop";
 import { expandCenter } from "../lib/animations";
+import { initializeV2Debug } from "../lib/v2-debug";
 
 interface V2AnnouncementModalProps {
   onClose: () => void;
@@ -188,6 +189,9 @@ export function useV2Announcement() {
     if (!hasSeenV2) {
       setShouldShow(true);
     }
+
+    // Initialize debug function
+    initializeV2Debug();
   }, []);
 
   const hideAnnouncement = () => {
@@ -195,18 +199,4 @@ export function useV2Announcement() {
   };
 
   return { shouldShow, hideAnnouncement };
-}
-
-// Debug function to control V2 announcement visibility
-// Usage in browser console: seenV2(false) to re-enable the announcement
-if (typeof window !== "undefined") {
-  (window as any).seenV2 = (seen: boolean) => {
-    if (seen) {
-      localStorage.setItem("seenV2", "true");
-      console.log("V2 announcement disabled - will not show on next visit");
-    } else {
-      localStorage.removeItem("seenV2");
-      console.log("V2 announcement enabled - will show on next page refresh");
-    }
-  };
 }

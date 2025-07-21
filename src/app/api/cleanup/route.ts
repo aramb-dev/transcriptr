@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 // import { getStorage, ref, deleteObject } from "firebase/storage";
 // import { getFirebaseConfig } from "@/lib/firebase";
 
-export async function POST(_request: Request) {
+export async function POST() {
   // TEMPORARILY DISABLED - Cleanup endpoint disabled to prevent Firebase Storage errors
   console.log("Cleanup endpoint is temporarily disabled");
   return NextResponse.json(
