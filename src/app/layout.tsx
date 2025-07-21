@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import "../index.css";
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const metadata: Metadata = {
   title: "Transcriptr | AI Audio Transcription",
   description:
@@ -34,6 +35,7 @@ export const metadata: Metadata = {
   },
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const viewport: Viewport = {
   themeColor: "#ffffff",
 };
