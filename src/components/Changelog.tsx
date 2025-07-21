@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { marked } from "marked";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";
 
@@ -29,12 +30,24 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
           "Added V2 Announcement modal for first-time visitors with celebratory confetti animation",
           "Implemented localStorage-based persistence to show announcement only once per user",
           "Added debug function `seenV2(false)` for developers to re-enable the announcement modal",
+          "**Analytics Opt-Out**: You can now opt-out of analytics tracking in the settings.",
+          "**Improved Session History**: Added ranged query support for fetching your transcription history.",
         ],
         improved: [
           "Enhanced user onboarding experience with welcoming V2 announcement",
           "Integrated confetti animation with proper z-index layering for visual celebration",
+          "**Complete Migration to Next.js**: The entire application has been migrated from Vite to Next.js, including the move from Netlify Functions to Next.js API Routes and the adoption of native Next.js routing.",
+          "**Modernized Styling**: Adopted CSS variables for theming and migrated to Tailwind CSS v4 syntax for a more maintainable and modern codebase.",
+          "**Simplified PDF Generation**: Removed the external 'printerz' PDF generation service, streamlining the architecture.",
+          "**Smoother UI**: Replaced layout transitions with more fluid, spring-based animations.",
+          "**Codebase Health**: Performed a major refactoring across the entire application, improving type safety, removing unused code, simplifying components, and enforcing a consistent code style with ESLint and Prettier.",
         ],
-        fixed: [],
+        fixed: [
+          "Resolved a type error for the `fileInputRef` prop.",
+          "Fixed various linting errors across the application and API.",
+          "Corrected the environment variable for the Replicate API.",
+          "Enabled proper client-side routing within Next.js.",
+        ],
       },
     },
     {
@@ -304,6 +317,12 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
     },
   ];
 
+  const parseMarkdown = (markdown: string) => {
+    const rawMarkup = marked(markdown, { breaks: true, gfm: true });
+    // Important: Ensure the type is compatible with dangerouslySetInnerHTML
+    return { __html: rawMarkup as string };
+  };
+
   const content = (
     <div
       className={`bg-white dark:bg-gray-800 ${isModal ? "rounded-lg shadow-xl" : "rounded-xl shadow-lg"} overflow-hidden`}
@@ -351,7 +370,7 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
                       {item.changes.new.map((change, i) => (
-                        <li key={i}>{change}</li>
+                        <li key={i} dangerouslySetInnerHTML={parseMarkdown(change)} />
                       ))}
                     </ul>
                   </div>
@@ -364,7 +383,7 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
                       {item.changes.improved.map((change, i) => (
-                        <li key={i}>{change}</li>
+                        <li key={i} dangerouslySetInnerHTML={parseMarkdown(change)} />
                       ))}
                     </ul>
                   </div>
@@ -377,7 +396,7 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
                       {item.changes.fixed.map((change, i) => (
-                        <li key={i}>{change}</li>
+                        <li key={i} dangerouslySetInnerHTML={parseMarkdown(change)} />
                       ))}
                     </ul>
                   </div>
