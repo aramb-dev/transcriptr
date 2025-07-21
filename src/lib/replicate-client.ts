@@ -95,7 +95,7 @@ export async function startReplicateTranscription(
           try {
             const errorJson = await response.json();
             errorDetails = JSON.stringify(errorJson.detail || errorJson);
-          } catch (_) {
+          } catch {
             // If parsing error response fails, use text
             errorDetails = await response.text();
           }
