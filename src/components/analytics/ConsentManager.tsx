@@ -1,14 +1,21 @@
-import { useState, useEffect, useRef } from 'react'; // <-- Add useRef
-import { showCookieConsent } from '../CookieConsent';
-import { initializeAnalytics, enableAnalytics, disableAnalytics, trackEvent } from '../../lib/analytics';
+import { useState, useEffect, useRef } from "react"; // <-- Add useRef
+import { showCookieConsent } from "../CookieConsent";
+import {
+  initializeAnalytics,
+  enableAnalytics,
+  disableAnalytics,
+  trackEvent,
+} from "../../lib/analytics";
 
 export function useConsentManager() {
-  const [cookieConsent, setCookieConsent] = useState<boolean | string | null>(null);
+  const [cookieConsent, setCookieConsent] = useState<boolean | string | null>(
+    null,
+  );
   const consentCheckInitiated = useRef(false); // <-- Add a ref to track if check has started
 
   useEffect(() => {
     // Add ad blocker detection style (only once)
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.innerHTML = `
       .adsbox {
         height: 1px;
@@ -24,43 +31,42 @@ export function useConsentManager() {
     if (!consentCheckInitiated.current) {
       consentCheckInitiated.current = true; // <-- Mark as initiated
 
-      const savedConsent = localStorage.getItem('cookieConsent');
+      const savedConsent = localStorage.getItem("cookieConsent");
       if (savedConsent !== null) {
-        console.log('ConsentManager: Found saved consent:', savedConsent); // Debug log
+        console.log("ConsentManager: Found saved consent:", savedConsent); // Debug log
         setCookieConsent(savedConsent);
         initializeAnalytics(savedConsent);
       } else {
-        console.log('ConsentManager: No saved consent found, showing banner.'); // Debug log
+        console.log("ConsentManager: No saved consent found, showing banner."); // Debug log
         initializeAnalytics(false); // Initialize with consent denied
         showCookieConsent({
           onAccept: () => {
-            console.log('ConsentManager: Consent Accepted'); // Debug log
-            localStorage.setItem('cookieConsent', 'true');
+            console.log("ConsentManager: Consent Accepted"); // Debug log
+            localStorage.setItem("cookieConsent", "true");
             setCookieConsent(true);
             enableAnalytics();
-            trackEvent('Consent', 'Accept', 'Cookie Consent');
+            trackEvent("Consent", "Accept", "Cookie Consent");
           },
           onDecline: () => {
-            console.log('ConsentManager: Consent Declined'); // Debug log
-            localStorage.setItem('cookieConsent', 'false');
+            console.log("ConsentManager: Consent Declined"); // Debug log
+            localStorage.setItem("cookieConsent", "false");
             setCookieConsent(false);
             disableAnalytics();
-            trackEvent('Consent', 'Decline', 'Cookie Consent');
+            trackEvent("Consent", "Decline", "Cookie Consent");
           },
           onEssentialOnly: () => {
-            console.log('ConsentManager: Consent Essential Only'); // Debug log
-            localStorage.setItem('cookieConsent', 'essential');
-            setCookieConsent('essential');
+            console.log("ConsentManager: Consent Essential Only"); // Debug log
+            localStorage.setItem("cookieConsent", "essential");
+            setCookieConsent("essential");
             // Don't enable tracking analytics but still allow essential cookies
             disableAnalytics(); // Ensure GA consent is denied/updated
-            trackEvent('Consent', 'Essential Only', 'Cookie Consent');
-          }
+            trackEvent("Consent", "Essential Only", "Cookie Consent");
+          },
         });
       }
     } else {
-       console.log('ConsentManager: Consent check already initiated, skipping.'); // Debug log
+      console.log("ConsentManager: Consent check already initiated, skipping."); // Debug log
     }
-
 
     // Cleanup function for the style element
     return () => {

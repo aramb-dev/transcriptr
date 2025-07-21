@@ -1,32 +1,38 @@
-import { Suspense, useState, useEffect, lazy } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Card, CardContent } from '../ui/card';
-import { Header } from './Header';
-import { Footer } from './Footer';
-import { TranscriptionForm } from '../transcription/TranscriptionForm';
-import { Toaster } from 'sonner';
-import { FeedbackModals } from '../feedback/FeedbackModals';
-import { ChangelogModal } from '../ChangelogModal';
-import TranscriptionHistory from '../transcription/TranscriptionHistory';
-import { fadeInUp, slideInRight, expandCenter, fadeOutDown, exitTransition } from '../../lib/animations';
-import { TranscriptionSession } from '@/lib/persistence-service';
+import { Suspense, useState, lazy } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Card, CardContent } from "../ui/card";
+import { Header } from "./Header";
+import { Footer } from "./Footer";
+import { TranscriptionForm } from "../transcription/TranscriptionForm";
+import { Toaster } from "sonner";
+import { FeedbackModals } from "../feedback/FeedbackModals";
+import { ChangelogModal } from "../ChangelogModal";
+import TranscriptionHistory from "../transcription/TranscriptionHistory";
+import { fadeInUp, expandCenter } from "../../lib/animations";
+import { TranscriptionSession } from "@/lib/persistence-service";
 
-const TranscriptionResult = lazy(() => import('../transcription/TranscriptionResult'));
-const TranscriptionError = lazy(() => import('../transcription/TranscriptionError'));
+const TranscriptionResult = lazy(
+  () => import("../transcription/TranscriptionResult"),
+);
+const TranscriptionError = lazy(() =>
+  import("../transcription/TranscriptionError").then((module) => ({
+    default: module.TranscriptionError,
+  })),
+);
 
 export function MainLayout() {
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-  const [showError, setShowError] = useState(false);
+  const [showResult] = useState(false);
+  const [showError] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [formKey, setFormKey] = useState(Date.now()); // Key to force re-render TranscriptionForm when needed
-  
+
   // For handling session selection from history
-  const [selectedSession, setSelectedSession] = useState<TranscriptionSession | null>(null);
+  const [selectedSession, setSelectedSession] =
+    useState<TranscriptionSession | null>(null);
 
   // Updated to use the new window method instead of direct DOM manipulation
-  const openFeedbackModal = (type: 'general' | 'issue' | 'feature') => {
+  const openFeedbackModal = (type: "general" | "issue" | "feature") => {
     if (window.openFeedbackModal) {
       window.openFeedbackModal(type);
     }
@@ -39,25 +45,25 @@ export function MainLayout() {
   const closeChangelogModal = () => {
     setShowChangelogModal(false);
   };
-  
+
   const openHistoryModal = () => {
     setShowHistoryModal(true);
   };
-  
+
   const closeHistoryModal = () => {
     setShowHistoryModal(false);
   };
-  
+
   const handleDeleteSession = async (sessionId: string) => {
     try {
       // Import dynamically to prevent circular dependencies
-      const { deleteSession } = await import('@/lib/persistence-service');
+      const { deleteSession } = await import("@/lib/persistence-service");
       await deleteSession(sessionId);
     } catch (error) {
-      console.error('Failed to delete session:', error);
+      console.error("Failed to delete session:", error);
     }
   };
-  
+
   const handleSelectSession = (session: TranscriptionSession) => {
     setSelectedSession(session);
     closeHistoryModal();
@@ -65,15 +71,13 @@ export function MainLayout() {
     setFormKey(Date.now());
   };
 
-  const handleShowSuccess = () => {
-    setShowSuccess(true);
-    setTimeout(() => setShowSuccess(false), 3000);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-800 py-12 text-gray-900 dark:text-gray-100">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <Header onOpenChangelog={openChangelogModal} onShowHistory={openHistoryModal} />
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-white py-12 text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100">
+      <div className="container mx-auto max-w-4xl px-4">
+        <Header
+          onOpenChangelog={openChangelogModal}
+          onShowHistory={openHistoryModal}
+        />
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -82,14 +86,17 @@ export function MainLayout() {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={exitTransition}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
-            <Card className="w-full overflow-hidden border-0 shadow-lg rounded-xl dark:bg-gray-800/60 dark:backdrop-blur-sm">
+            <Card className="w-full overflow-hidden rounded-xl border-0 shadow-lg dark:bg-gray-800/60 dark:backdrop-blur-sm">
               <CardContent className="p-0">
-                <Suspense fallback={<div className="p-8 text-center">Loading form...</div>}>
-                  <TranscriptionForm 
+                <Suspense
+                  fallback={
+                    <div className="p-8 text-center">Loading form...</div>
+                  }
+                >
+                  <TranscriptionForm
                     key={formKey}
-                    onShowSuccess={handleShowSuccess} 
                     initialSession={selectedSession}
                   />
                 </Suspense>
@@ -99,26 +106,10 @@ export function MainLayout() {
         </AnimatePresence>
       </div>
 
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            className="fixed top-4 right-4 bg-green-100 dark:bg-green-900/70 p-4 rounded-lg shadow-lg flex items-center gap-3"
-            variants={slideInRight}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            transition={exitTransition}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-600 dark:text-green-400">
-              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-              <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <span className="text-green-800 dark:text-green-200 font-medium">Transcription complete!</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <Footer onOpenFeedbackModal={openFeedbackModal} onOpenChangelog={openChangelogModal} />
+      <Footer
+        onOpenFeedbackModal={openFeedbackModal}
+        onOpenChangelog={openChangelogModal}
+      />
 
       <Suspense fallback={null}>
         <FeedbackModals />
@@ -127,10 +118,10 @@ export function MainLayout() {
       <AnimatePresence>
         {showChangelogModal && <ChangelogModal onClose={closeChangelogModal} />}
       </AnimatePresence>
-      
+
       <AnimatePresence>
         {showHistoryModal && (
-          <TranscriptionHistory 
+          <TranscriptionHistory
             open={showHistoryModal}
             onOpenChange={setShowHistoryModal}
             onSelectSession={handleSelectSession}
@@ -147,9 +138,9 @@ export function MainLayout() {
               initial="initial"
               animate="animate"
               exit="exit"
-              transition={exitTransition}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <TranscriptionResult />
+              <TranscriptionResult transcription="" />
             </motion.div>
           </Suspense>
         )}
@@ -163,9 +154,17 @@ export function MainLayout() {
               initial="initial"
               animate="animate"
               exit="exit"
-              transition={exitTransition}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <TranscriptionError />
+              <TranscriptionError
+                status="failed"
+                error="An error occurred"
+                onReset={() => {}}
+                apiResponses={[]}
+                showApiDetails={false}
+                setShowApiDetails={() => {}}
+                formatTimestamp={(date: Date) => date.toLocaleString()}
+              />
             </motion.div>
           </Suspense>
         )}

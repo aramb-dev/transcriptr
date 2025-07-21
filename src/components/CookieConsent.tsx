@@ -1,9 +1,9 @@
-import { Button } from './ui/button';
-import { AlertCircle, Cookie } from 'lucide-react';
-import { toast } from 'sonner';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { slideInRight, springTransition } from '../lib/animations';
+import { Button } from "./ui/button";
+import { AlertCircle, Cookie } from "lucide-react";
+import { toast } from "sonner";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { slideInRight, springTransition } from "../lib/animations";
 
 interface CookieConsentProps {
   onAccept: () => void;
@@ -12,18 +12,24 @@ interface CookieConsentProps {
 }
 
 // Check for ad blocker and handle the acceptance
-const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, onEssentialOnly: (() => void) | undefined, toastId: string) => {
+const checkForAdBlocker = (
+  onAccept: () => void,
+  onDecline: () => void,
+  onEssentialOnly: (() => void) | undefined,
+  toastId: string,
+) => {
   // Simple ad blocker detection - create a bait element
-  const testElement = document.createElement('div');
-  testElement.className = 'adsbox';
-  testElement.innerHTML = '&nbsp;';
+  const testElement = document.createElement("div");
+  testElement.className = "adsbox";
+  testElement.innerHTML = "&nbsp;";
   document.body.appendChild(testElement);
 
   // Give the browser a moment to hide the element if an ad blocker is active
   setTimeout(() => {
-    const isBlocked = testElement.offsetHeight === 0 ||
-                      testElement.offsetWidth === 0 ||
-                      getComputedStyle(testElement).display === 'none';
+    const isBlocked =
+      testElement.offsetHeight === 0 ||
+      testElement.offsetWidth === 0 ||
+      getComputedStyle(testElement).display === "none";
 
     document.body.removeChild(testElement);
 
@@ -36,7 +42,7 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, onEssent
       toast.custom(
         (t) => (
           <motion.div
-            className="font-sans w-full max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md overflow-hidden"
+            className="w-full max-w-md overflow-hidden rounded-lg border border-gray-200 bg-white font-sans shadow-md dark:border-gray-700 dark:bg-gray-800"
             variants={slideInRight}
             initial="initial"
             animate="animate"
@@ -45,25 +51,39 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, onEssent
           >
             <div className="p-4">
               <div className="flex items-start gap-3">
-                <Cookie className="h-5 w-5 text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <Cookie className="mt-0.5 h-5 w-5 shrink-0 text-blue-500 dark:text-blue-400" />
                 <div>
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100">Cookie consent</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                    We use cookies to analyze site traffic and improve your experience.
-                    By accepting, you consent to our use of analytics tools including Google Analytics and Microsoft Clarity
-                    as described in our <Link to="/privacy" onClick={(e) => {e.stopPropagation();}} className="underline hover:text-blue-500 transition-colors">Privacy Policy</Link>.
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                    Cookie consent
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                    We use cookies to analyze site traffic and improve your
+                    experience. By accepting, you consent to our use of
+                    analytics tools including Google Analytics and Microsoft
+                    Clarity as described in our{" "}
+                    <Link
+                      href="/privacy"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className="underline transition-colors hover:text-blue-500"
+                    >
+                      Privacy Policy
+                    </Link>
+                    .
                   </p>
                 </div>
               </div>
 
-              <div className="mt-3 p-2 bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 rounded-md flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-amber-500 flex-shrink-0" />
+              <div className="mt-3 flex items-center gap-2 rounded-md border border-yellow-200 bg-yellow-50 p-2 dark:border-yellow-800 dark:bg-yellow-900/30">
+                <AlertCircle className="h-5 w-5 shrink-0 text-amber-500" />
                 <p className="text-sm text-amber-800 dark:text-amber-300">
-                  Ad blocker detected. You can still use our service, but disabling it would help us improve.
+                  Ad blocker detected. You can still use our service, but
+                  disabling it would help us improve.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
+              <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row">
                 <Button
                   variant="outline"
                   size="sm"
@@ -103,10 +123,10 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, onEssent
         ),
         {
           duration: Infinity,
-          position: 'bottom-right',
+          position: "bottom-right",
           closeButton: false,
-          id: 'cookie-consent-adblock'
-        }
+          id: "cookie-consent-adblock",
+        },
       );
     } else {
       // No ad blocker detected, proceed with acceptance
@@ -116,15 +136,20 @@ const checkForAdBlocker = (onAccept: () => void, onDecline: () => void, onEssent
   }, 100);
 };
 
-export function showCookieConsent({ onAccept, onDecline, onEssentialOnly }: CookieConsentProps) {
+export function showCookieConsent({
+  onAccept,
+  onDecline,
+  onEssentialOnly,
+}: CookieConsentProps) {
   // Generate a unique ID for the toast
-  const toastId = 'cookie-consent-' + Math.random().toString(36).substring(2, 9);
+  const toastId =
+    "cookie-consent-" + Math.random().toString(36).substring(2, 9);
 
   // Show the initial cookie consent toast
   toast.custom(
     (t) => (
       <motion.div
-        className="font-sans w-full max-w-md bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md overflow-hidden"
+        className="w-full max-w-md overflow-hidden rounded-lg border border-gray-200 bg-white font-sans shadow-md dark:border-gray-700 dark:bg-gray-800"
         variants={slideInRight}
         initial="initial"
         animate="animate"
@@ -133,18 +158,32 @@ export function showCookieConsent({ onAccept, onDecline, onEssentialOnly }: Cook
       >
         <div className="p-4">
           <div className="flex items-start gap-3">
-            <Cookie className="h-5 w-5 text-blue-500 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+            <Cookie className="mt-0.5 h-5 w-5 shrink-0 text-blue-500 dark:text-blue-400" />
             <div>
-              <h3 className="font-medium text-gray-900 dark:text-gray-100">Cookie consent</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                We use cookies to analyze site traffic and improve your experience.
-                By accepting, you consent to our use of analytics tools including Google Analytics and Microsoft Clarity
-                as described in our <Link to="/privacy" onClick={(e) => {e.stopPropagation(); toast.dismiss(t);}} className="underline hover:text-blue-500 transition-colors">Privacy Policy</Link>.
+              <h3 className="font-medium text-gray-900 dark:text-gray-100">
+                Cookie consent
+              </h3>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
+                We use cookies to analyze site traffic and improve your
+                experience. By accepting, you consent to our use of analytics
+                tools including Google Analytics and Microsoft Clarity as
+                described in our{" "}
+                <Link
+                  href="/privacy"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toast.dismiss(t);
+                  }}
+                  className="underline transition-colors hover:text-blue-500"
+                >
+                  Privacy Policy
+                </Link>
+                .
               </p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-2 mt-4">
+          <div className="mt-4 flex flex-col items-center gap-2 sm:flex-row">
             <Button
               variant="outline"
               size="sm"
@@ -173,7 +212,12 @@ export function showCookieConsent({ onAccept, onDecline, onEssentialOnly }: Cook
               className="w-full sm:flex-1"
               onClick={() => {
                 // When accepting, check for ad blocker
-                checkForAdBlocker(onAccept, onDecline, onEssentialOnly, toastId);
+                checkForAdBlocker(
+                  onAccept,
+                  onDecline,
+                  onEssentialOnly,
+                  toastId,
+                );
               }}
             >
               Accept All
@@ -184,10 +228,10 @@ export function showCookieConsent({ onAccept, onDecline, onEssentialOnly }: Cook
     ),
     {
       duration: Infinity,
-      position: 'bottom-right',
+      position: "bottom-right",
       closeButton: false,
-      id: toastId
-    }
+      id: toastId,
+    },
   );
 
   return toastId;

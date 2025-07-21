@@ -1,44 +1,65 @@
-import { useState, useRef, useEffect } from 'react';
-import { useTranscriptionPolling } from '@/hooks/useTranscriptionPolling';
-import { useSessionPersistence, UseSessionPersistenceResult } from '@/hooks/useSessionPersistence';
-import { UploadAudio } from '../UploadAudio';
-import { TranscriptionProcessing } from './TranscriptionProcessing';
-import { TranscriptionError } from './TranscriptionError';
-import TranscriptionResult from './TranscriptionResult';
-import SessionRecoveryPrompt from './SessionRecoveryPrompt';
+import { useState, useEffect } from "react";
+import { useTranscriptionPolling } from "@/hooks/useTranscriptionPolling";
+import { useSessionPersistence } from "@/hooks/useSessionPersistence";
+import { UploadAudio } from "../UploadAudio";
+import { TranscriptionProcessing } from "./TranscriptionProcessing";
+import { TranscriptionError } from "./TranscriptionError";
+import TranscriptionResult from "./TranscriptionResult";
+import { MobileTranscriptionResult } from "./MobileTranscriptionResult";
+import SessionRecoveryPrompt from "./SessionRecoveryPrompt";
 import {
   TranscriptionStatus,
   statusMessages,
   getApiUrl,
   fileToBase64,
-  formatTimestamp
-} from '../../services/transcription';
-import { trackEvent } from '../../lib/analytics';
-import { isLargeFile, uploadLargeFile } from '../../lib/storage-service';
+  formatTimestamp,
+} from "../../services/transcription";
+import { trackEvent } from "../../lib/analytics";
+import { isLargeFile, uploadLargeFile } from "../../lib/storage-service";
 
-import { cleanupFirebaseFile } from '../../lib/cleanup-service';
-import { Button } from '../ui/button';
-import { motion } from 'framer-motion';
-import { fadeInUp, springTransition } from '../../lib/animations';
-import { TranscriptionSession } from '@/lib/persistence-service';
+import { cleanupFirebaseFile } from "../../lib/cleanup-service";
+import { Button } from "../ui/button";
+import { motion } from "framer-motion";
+import { fadeInUp, springTransition } from "../../lib/animations";
+import { TranscriptionSession } from "@/lib/persistence-service";
 
 interface TranscriptionFormProps {
-  onShowSuccess: () => void;
   initialSession?: TranscriptionSession | null;
 }
 
-export function TranscriptionForm({ onShowSuccess, initialSession }: TranscriptionFormProps) {
+export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
   const [transcription, setTranscription] = useState<string | null>(null);
-  const [transStatus, setTransStatus] = useState<TranscriptionStatus>('idle');
+  const [transStatus, setTransStatus] = useState<TranscriptionStatus>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [apiResponses, setApiResponses] = useState<Array<{timestamp: Date, data: Record<string, unknown>}>>([]);
+  const [apiResponses, setApiResponses] = useState<
+    Array<{ timestamp: Date; data: Record<string, unknown> }>
+  >([]);
   const [showApiDetails, setShowApiDetails] = useState(false);
   const [progress, setProgress] = useState(0);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [currentPredictionId, setCurrentPredictionId] = useState<string | null>(null);
+  const [currentPredictionId, setCurrentPredictionId] = useState<string | null>(
+    null,
+  );
   const [firebaseFilePath, setFirebaseFilePath] = useState<string | null>(null);
-  const [isLoadingState, setIsLoadingState] = useState(false);
-  
+
+  // Mobile detection hook
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      return window.innerWidth <= 767 || window.matchMedia('(pointer: coarse)').matches;
+    };
+
+    setIsMobile(checkIsMobile());
+
+    const handleResize = () => {
+      setIsMobile(checkIsMobile());
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Add session persistence hook
   const {
     activeSession,
@@ -47,49 +68,52 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
     createNewSession,
     updateSessionData,
     recoverSession,
-    discardSession
+    discardSession,
   } = useSessionPersistence({
     onSessionRecovered: (session) => {
-      console.log('Recovering session:', session);
+      console.log("Recovering session:", session);
       // Restore state from recovered session
       setTransStatus(session.status);
       setProgress(session.progress);
       setFirebaseFilePath(session.firebaseFilePath);
       setCurrentPredictionId(session.predictionId);
-      
+
       if (session.apiResponses) {
         setApiResponses(session.apiResponses);
       }
-      
+
       // If the session has a result already
       if (session.result) {
         setTranscription(session.result);
       }
-    }
+    },
   });
-  
+
   // Handle initialSession from props (from history)
   useEffect(() => {
     if (initialSession) {
-      console.log('Loading session from history:', initialSession);
-      
+      console.log("Loading session from history:", initialSession);
+
       // Set the correct state based on the session
       setTransStatus(initialSession.status);
       setProgress(initialSession.progress);
       setFirebaseFilePath(initialSession.firebaseFilePath);
       setCurrentPredictionId(initialSession.predictionId);
-      
+
       if (initialSession.apiResponses) {
         setApiResponses(initialSession.apiResponses);
       }
-      
+
       // If the session has a completed result
       if (initialSession.result) {
         setTranscription(initialSession.result);
       }
-      
+
       // If the transcription is still in progress, resume polling
-      if (initialSession.status === 'processing' && initialSession.predictionId) {
+      if (
+        initialSession.status === "processing" &&
+        initialSession.predictionId
+      ) {
         // The polling hook will automatically start since we set currentPredictionId
       }
     }
@@ -100,20 +124,24 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
     predictionId: currentPredictionId,
     onSuccess: (output) => {
       // Handle successful transcription
-      setTransStatus('succeeded');
+      setTransStatus("succeeded");
       setProgress(100);
 
       // Parse the output to extract the transcription text
-      let finalTranscription = 'Error: Could not parse transcription.';
-      if (typeof output === 'string') {
+      let finalTranscription = "Error: Could not parse transcription.";
+      if (typeof output === "string") {
         finalTranscription = output;
-      } else if (output && typeof output === 'object') {
-        if ('text' in output && typeof output.text === 'string') {
+      } else if (output && typeof output === "object") {
+        if ("text" in output && typeof output.text === "string") {
           finalTranscription = output.text;
-        } else if (Array.isArray(output) && output.length > 0 && typeof output[0] === 'string') {
-          finalTranscription = output.join('\n');
+        } else if (
+          Array.isArray(output) &&
+          output.length > 0 &&
+          typeof output[0] === "string"
+        ) {
+          finalTranscription = output.join("\n");
         } else {
-          console.error('Unexpected output format:', output);
+          console.error("Unexpected output format:", output);
           finalTranscription = JSON.stringify(output, null, 2);
         }
       }
@@ -122,42 +150,40 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
       // Update session with completed result
       if (activeSession) {
         updateSessionData({
-          status: 'succeeded',
+          status: "succeeded",
           progress: 100,
-          result: finalTranscription
+          result: finalTranscription,
         });
       }
 
       // Cleanup Firebase file if exists when transcription is complete
       if (firebaseFilePath) {
-        cleanupFirebaseFile(firebaseFilePath)
-          .then(success => {
-            if (success) {
-              console.log('Temporary file cleaned up successfully');
-              setFirebaseFilePath(null);
-              
-              // Update session to clear firebase path
-              if (activeSession) {
-                updateSessionData({ firebaseFilePath: null });
-              }
+        cleanupFirebaseFile(firebaseFilePath).then((success) => {
+          if (success) {
+            console.log("Temporary file cleaned up successfully");
+            setFirebaseFilePath(null);
+
+            // Update session to clear firebase path
+            if (activeSession) {
+              updateSessionData({ firebaseFilePath: null });
             }
-          });
+          }
+        });
       }
     },
     onError: (errorMsg) => {
       setError(errorMsg);
-      
+
       // Update session with error state
       if (activeSession) {
         updateSessionData({
-          status: 'failed',
-          error: errorMsg
+          status: "failed",
         });
       }
     },
     onProgress: (value) => {
       setProgress(value);
-      
+
       // Update session progress
       if (activeSession) {
         updateSessionData({ progress: value });
@@ -165,35 +191,44 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
     },
     onStatusChange: (status) => {
       setTransStatus(status);
-      
+
       // Update session status
       if (activeSession) {
         updateSessionData({ status });
       }
     },
     onApiResponse: (response) => {
-      setApiResponses(prev => [...prev, response]);
-      
+      setApiResponses((prev) => [...prev, response]);
+
       // Update session API responses
       if (activeSession) {
-        const updatedResponses = [...(activeSession.apiResponses || []), response];
+        const updatedResponses = [
+          ...(activeSession.apiResponses || []),
+          response,
+        ];
         updateSessionData({ apiResponses: updatedResponses });
       }
-    }
+    },
   });
 
   const getProgressColor = () => {
     switch (transStatus) {
-      case 'starting': return 'bg-blue-500';
-      case 'processing': return 'bg-indigo-500';
-      case 'succeeded': return 'bg-green-500';
-      case 'failed': return 'bg-red-500';
-      case 'canceled': return 'bg-orange-500';
-      default: return 'bg-gray-500';
+      case "starting":
+        return "bg-blue-500";
+      case "processing":
+        return "bg-indigo-500";
+      case "succeeded":
+        return "bg-green-500";
+      case "failed":
+        return "bg-red-500";
+      case "canceled":
+        return "bg-orange-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
-  const isLoading = transStatus === 'starting' || transStatus === 'processing';
+  const isLoading = transStatus === "starting" || transStatus === "processing";
 
   const handleCopyToClipboard = async () => {
     if (transcription) {
@@ -205,14 +240,14 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
           setCopySuccess(false);
         }, 2000);
       } catch (err) {
-        console.error('Failed to copy text: ', err);
+        console.error("Failed to copy text: ", err);
       }
     }
   };
 
   const handleUpload = async (
     data: FormData | { audioUrl: string },
-    options: { language: string; diarize: boolean }
+    options: { language: string; diarize: boolean },
   ) => {
     // --- Reset State ---
     setError(null);
@@ -220,33 +255,38 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
     setTranscription(null); // Ensure previous result is cleared
     stopPolling(); // Stop any existing polling
     setCurrentPredictionId(null); // Clear previous prediction ID
-    setTransStatus('starting'); // <--- SET STATUS TO STARTING HERE
+    setTransStatus("starting"); // <--- SET STATUS TO STARTING HERE
     setProgress(5);
     setFirebaseFilePath(null); // Reset Firebase file path
-    
+
     // Create new session
-    let audioSource = {
-      type: 'url' as const,
-      url: ''
+    let audioSource: {
+      type: "file" | "url";
+      name?: string;
+      size?: number;
+      url?: string;
+    } = {
+      type: "url",
+      url: "",
     };
-    
+
     // Determine audio source type
     if (data instanceof FormData) {
-      const file = data.get('file') as File;
+      const file = data.get("file") as File;
       if (file) {
         audioSource = {
-          type: 'file' as const,
+          type: "file",
           name: file.name,
-          size: file.size
+          size: file.size,
         };
       }
-    } else if ('audioUrl' in data) {
+    } else if ("audioUrl" in data) {
       audioSource = {
-        type: 'url' as const,
-        url: data.audioUrl
+        type: "url",
+        url: data.audioUrl,
       };
     }
-    
+
     // Create new session and store in state
     createNewSession(options, audioSource);
 
@@ -260,38 +300,63 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
         diarize?: boolean;
       } | null;
       audioData?: string; // Base64 data
-      audioUrl?: string;  // URL from input or Firebase
+      audioUrl?: string; // URL from input or Firebase
     } = { options: null };
 
-    trackEvent('Transcription', 'Start', options.language);
+    trackEvent("Transcription", "Start", options.language);
 
     try {
       let file: File | null = null;
-      let sourceDescription = '';
-      let firebaseFilePath: string | null = null; // Track Firebase path for potential cleanup
+      let sourceDescription = "";
+      const firebaseFilePath: string | null = null; // Track Firebase path for potential cleanup
 
       // Check if data is FormData (file upload) or object (URL input)
       if (data instanceof FormData) {
-        file = data.get('file') as File;
+        file = data.get("file") as File;
         if (!file) {
-          throw new Error('No file found in FormData');
+          throw new Error("No file found in FormData");
         }
         sourceDescription = `file: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB, Type: ${file.type}`;
 
-        
-
         if (isLargeFile(file)) {
           setProgress(10);
-          setApiResponses(prev => [...prev, { timestamp: new Date(), data: { message: `Large file detected. Uploading to temporary storage...` } }]);
+          setApiResponses((prev) => [
+            ...prev,
+            {
+              timestamp: new Date(),
+              data: {
+                message: `Large file detected. Uploading to temporary storage...`,
+              },
+            },
+          ]);
           try {
             const uploadResult = await uploadLargeFile(file);
             requestBody.audioUrl = uploadResult.url; // Use Firebase URL
             setFirebaseFilePath(uploadResult.path); // Store the path for cleanup later
             setProgress(20);
-            setApiResponses(prev => [...prev, { timestamp: new Date(), data: { message: 'File uploaded to temporary storage.', url: uploadResult.url } }]);
+            setApiResponses((prev) => [
+              ...prev,
+              {
+                timestamp: new Date(),
+                data: {
+                  message: "File uploaded to temporary storage.",
+                  url: uploadResult.url,
+                },
+              },
+            ]);
           } catch (uploadError) {
-             setApiResponses(prev => [...prev, { timestamp: new Date(), data: { error: `Firebase upload error: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}` } }]);
-             throw new Error(`Failed to upload large file: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`);
+            setApiResponses((prev) => [
+              ...prev,
+              {
+                timestamp: new Date(),
+                data: {
+                  error: `Firebase upload error: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`,
+                },
+              },
+            ]);
+            throw new Error(
+              `Failed to upload large file: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`,
+            );
           }
         } else {
           // Convert smaller files to base64
@@ -300,11 +365,12 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
             setProgress(15);
             requestBody.audioData = base64Audio;
           } catch (base64Error) {
-             throw new Error(`Failed to prepare file: ${base64Error instanceof Error ? base64Error.message : String(base64Error)}`);
+            throw new Error(
+              `Failed to prepare file: ${base64Error instanceof Error ? base64Error.message : String(base64Error)}`,
+            );
           }
         }
         // --- End File processing logic ---
-
       } else {
         // Handle URL input
         requestBody.audioUrl = data.audioUrl; // Use the provided URL directly
@@ -313,12 +379,20 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
       }
 
       console.log(`Processing ${sourceDescription}`);
-      setApiResponses(prev => [...prev, { timestamp: new Date(), data: { message: `Processing ${sourceDescription}` } }]);
+      setApiResponses((prev) => [
+        ...prev,
+        {
+          timestamp: new Date(),
+          data: { message: `Processing ${sourceDescription}` },
+        },
+      ]);
 
       // Set common API options
       const apiOptions = {
-        modelId: import.meta.env.VITE_REPLICATE_MODEL_ID || 'vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c',
-        task: 'transcribe',
+        modelId:
+          process.env.NEXT_PUBLIC_REPLICATE_MODEL_ID ||
+          "vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c",
+        task: "transcribe",
         batch_size: 64,
         return_timestamps: true,
         language: options.language === "None" ? undefined : options.language, // Send undefined if "None"
@@ -328,19 +402,27 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
 
       // Ensure only one audio source is sent
       if (requestBody.audioUrl && requestBody.audioData) {
-         console.warn("Both audioUrl and audioData present, preferring audioUrl.");
-         delete requestBody.audioData;
+        console.warn(
+          "Both audioUrl and audioData present, preferring audioUrl.",
+        );
+        delete requestBody.audioData;
       }
 
-      console.log('Sending request to server with options:', requestBody.options);
-      console.log('Using method:', requestBody.audioUrl ? 'URL' : 'base64 data');
+      console.log(
+        "Sending request to server with options:",
+        requestBody.options,
+      );
+      console.log(
+        "Using method:",
+        requestBody.audioUrl ? "URL" : "base64 data",
+      );
       setProgress(25);
 
       // --- API Call Logic (remains largely the same) ---
-      const response = await fetch(getApiUrl('transcribe'), {
-        method: 'POST',
+      const response = await fetch(getApiUrl("transcribe"), {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
       });
@@ -348,26 +430,38 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
       setProgress(40);
 
       if (!response.ok) {
-        let errorBody = 'Unknown server error';
+        let errorBody = "Unknown server error";
         try {
           const errorJson = await response.json();
-          errorBody = errorJson.error || errorJson.message || JSON.stringify(errorJson);
-        } catch (e) {
+          errorBody =
+            errorJson.error || errorJson.message || JSON.stringify(errorJson);
+        } catch {
           errorBody = await response.text();
         }
-         setApiResponses(prev => [...prev, { timestamp: new Date(), data: { error: `Server error: ${response.status} - ${errorBody}` } }]);
-        throw new Error(`Server responded with ${response.status}: ${errorBody}`);
+        setApiResponses((prev) => [
+          ...prev,
+          {
+            timestamp: new Date(),
+            data: { error: `Server error: ${response.status} - ${errorBody}` },
+          },
+        ]);
+        throw new Error(
+          `Server responded with ${response.status}: ${errorBody}`,
+        );
       }
 
       const resultData = await response.json();
-      console.log('API response data:', resultData);
+      console.log("API response data:", resultData);
 
       // Add Firebase path to result if it exists, for potential cleanup later
       if (firebaseFilePath) {
         resultData.firebaseFilePath = firebaseFilePath;
       }
 
-      setApiResponses(prev => [...prev, { timestamp: new Date(), data: resultData }]);
+      setApiResponses((prev) => [
+        ...prev,
+        { timestamp: new Date(), data: resultData },
+      ]);
 
       // --- Check for Prediction ID and Start Polling ---
       if (resultData && resultData.id) {
@@ -377,22 +471,76 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
         // Handle cases where the API might return the result directly (if applicable)
         // Or if the ID is missing for some reason
         if (resultData && resultData.output) {
-           // If result is immediate (unlikely for long audio but handle just in case)
-           handleSuccess(resultData.output);
+          // If result is immediate (unlikely for long audio but handle just in case)
+          // Handle successful transcription - same logic as in onSuccess callback
+          setTransStatus("succeeded");
+          setProgress(100);
+
+          // Parse the output to extract the transcription text
+          let finalTranscription = "Error: Could not parse transcription.";
+          const output = resultData.output;
+          if (typeof output === "string") {
+            finalTranscription = output;
+          } else if (output && typeof output === "object") {
+            if ("text" in output && typeof output.text === "string") {
+              finalTranscription = output.text;
+            } else if (
+              Array.isArray(output) &&
+              output.length > 0 &&
+              typeof output[0] === "string"
+            ) {
+              finalTranscription = output.join("\n");
+            } else {
+              console.error("Unexpected output format:", output);
+              finalTranscription = JSON.stringify(output, null, 2);
+            }
+          }
+          setTranscription(finalTranscription);
+
+          // Update session with completed result
+          if (activeSession) {
+            updateSessionData({
+              status: "succeeded",
+              progress: 100,
+              result: finalTranscription,
+            });
+          }
+
+          // Cleanup Firebase file if exists when transcription is complete
+          if (firebaseFilePath) {
+            cleanupFirebaseFile(firebaseFilePath).then((success) => {
+              if (success) {
+                console.log("Temporary file cleaned up successfully");
+                setFirebaseFilePath(null);
+
+                // Update session to clear firebase path
+                if (activeSession) {
+                  updateSessionData({ firebaseFilePath: null });
+                }
+              }
+            });
+          }
         } else {
-          throw new Error('Invalid API response: Missing prediction ID or result.');
+          throw new Error(
+            "Invalid API response: Missing prediction ID or result.",
+          );
         }
       }
       // --- End Initial API Call & Polling Start ---
-
     } catch (err) {
-      console.error('Transcription process failed:', err);
+      console.error("Transcription process failed:", err);
       const errorMessage = err instanceof Error ? err.message : String(err);
       setError(errorMessage); // Set error state
-      setTransStatus('failed'); // Set status to failed
-      setApiResponses(prev => [...prev, { timestamp: new Date(), data: { error: `Transcription failed: ${errorMessage}` } }]);
+      setTransStatus("failed"); // Set status to failed
+      setApiResponses((prev) => [
+        ...prev,
+        {
+          timestamp: new Date(),
+          data: { error: `Transcription failed: ${errorMessage}` },
+        },
+      ]);
       setProgress(0);
-      trackEvent('Transcription', 'Error', errorMessage);
+      trackEvent("Transcription", "Error", errorMessage);
     }
   };
 
@@ -400,7 +548,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
     stopPolling();
     setCurrentPredictionId(null); // Clear prediction ID on reset
     setTranscription(null);
-    setTransStatus('idle');
+    setTransStatus("idle");
     setError(null);
     setProgress(0);
     setApiResponses([]);
@@ -413,13 +561,12 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
 
     // Cleanup Firebase file if exists when resetting
     if (firebaseFilePath) {
-      cleanupFirebaseFile(firebaseFilePath)
-        .then(success => {
-          if (success) {
-            console.log('Temporary file cleaned up on reset');
-            setFirebaseFilePath(null);
-          }
-        });
+      cleanupFirebaseFile(firebaseFilePath).then((success) => {
+        if (success) {
+          console.log("Temporary file cleaned up on reset");
+          setFirebaseFilePath(null);
+        }
+      });
     }
   };
 
@@ -427,32 +574,38 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
   useEffect(() => {
     return () => {
       // Don't cleanup Firebase file automatically on unmount if we have an active session
-      if (firebaseFilePath && (!activeSession || activeSession.status === 'succeeded' || activeSession.status === 'failed')) {
-        cleanupFirebaseFile(firebaseFilePath)
-          .then(success => {
-            if (success) {
-              console.log('Temporary file cleaned up on component unmount');
-            }
-          });
+      if (
+        firebaseFilePath &&
+        (!activeSession ||
+          activeSession.status === "succeeded" ||
+          activeSession.status === "failed")
+      ) {
+        cleanupFirebaseFile(firebaseFilePath).then((success) => {
+          if (success) {
+            console.log("Temporary file cleaned up on component unmount");
+          }
+        });
       }
     };
   }, [firebaseFilePath, activeSession]);
-  
+
   // Run cleanup of expired sessions once on component mount
   useEffect(() => {
     const cleanupExpired = async () => {
       try {
         // Import dynamically to prevent circular dependencies
-        const { cleanupExpiredSessions } = await import('@/lib/persistence-service');
+        const { cleanupExpiredSessions } = await import(
+          "@/lib/persistence-service"
+        );
         const count = await cleanupExpiredSessions();
         if (count > 0) {
           console.log(`Cleaned up ${count} expired sessions`);
         }
       } catch (error) {
-        console.error('Failed to clean up expired sessions:', error);
+        console.error("Failed to clean up expired sessions:", error);
       }
     };
-    
+
     cleanupExpired();
   }, []);
 
@@ -464,15 +617,15 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
       exit="exit"
       transition={springTransition}
     >
-      <div className="p-6">
+      <div className="p-6 mobile:p-4">
         {isLoadingSession ? (
-          <div className="flex justify-center items-center h-40">
+          <div className="flex h-40 items-center justify-center">
             <div className="animate-pulse text-gray-500 dark:text-gray-400">
               Checking for saved progress...
             </div>
           </div>
         ) : hasRecoverableSession && activeSession ? (
-          <SessionRecoveryPrompt 
+          <SessionRecoveryPrompt
             session={activeSession}
             onRecover={recoverSession}
             onDiscard={discardSession}
@@ -480,7 +633,7 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
         ) : isLoading ? (
           <TranscriptionProcessing
             progress={progress}
-            transStatus={transStatus as 'starting' | 'processing'}
+            transStatus={transStatus as "starting" | "processing"}
             getProgressColor={getProgressColor}
             statusMessages={statusMessages}
             showApiDetails={showApiDetails}
@@ -489,9 +642,9 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
             formatTimestamp={formatTimestamp}
             onCancel={handleReset}
           />
-        ) : transStatus === 'failed' || transStatus === 'canceled' ? (
+        ) : transStatus === "failed" || transStatus === "canceled" ? (
           <TranscriptionError
-            status={transStatus as 'failed' | 'canceled'}
+            status={transStatus as "failed" | "canceled"}
             error={error}
             onReset={handleReset}
             apiResponses={apiResponses}
@@ -499,40 +652,82 @@ export function TranscriptionForm({ onShowSuccess, initialSession }: Transcripti
             setShowApiDetails={setShowApiDetails}
             formatTimestamp={formatTimestamp}
           />
-        ) : transcription !== null && transStatus === 'succeeded' ? ( // Check for transcription text and succeeded status
-          <div className="p-8">
-            <TranscriptionResult transcription={transcription} />
-            {/* Buttons moved outside TranscriptionResult */}
-            <div className="px-8 py-4 bg-gray-50 dark:bg-gray-800/80 border-t border-gray-100 dark:border-gray-700 flex justify-center gap-4 mt-4">
-              <Button variant="outline" onClick={handleReset} className="bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300">
-                New Transcription
-              </Button>
-              <Button
-                onClick={handleCopyToClipboard}
-                className="gap-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
-                disabled={copySuccess}
-              >
-                {copySuccess ? (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
-                      <path d="M20 6L9 17l-5-5"></path>
-                    </svg>
-                    Copied!
-                  </>
-                ) : (
-                  <>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1-2 2v1"></path>
-                    </svg>
-                    Copy to Clipboard
-                  </>
-                )}
-              </Button>
+        ) : transcription !== null && transStatus === "succeeded" ? ( // Check for transcription text and succeeded status
+          isMobile ? (
+            // Mobile-optimized result view
+            <MobileTranscriptionResult
+              transcription={transcription}
+              onNewTranscription={handleReset}
+            />
+          ) : (
+            // Desktop result view with existing layout
+            <div className="p-8">
+              <TranscriptionResult transcription={transcription} />
+              {/* Buttons moved outside TranscriptionResult */}
+              <div className="mt-4 flex justify-center gap-4 border-t border-gray-100 bg-gray-50 px-8 py-4 dark:border-gray-700 dark:bg-gray-800/80">
+                <Button
+                  variant="outline"
+                  onClick={handleReset}
+                  className="bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                >
+                  New Transcription
+                </Button>
+                <Button
+                  onClick={handleCopyToClipboard}
+                  className="gap-2 bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                  disabled={copySuccess}
+                >
+                  {copySuccess ? (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="text-green-500"
+                      >
+                        <path d="M20 6L9 17l-5-5"></path>
+                      </svg>
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <rect
+                          x="9"
+                          y="9"
+                          width="13"
+                          height="13"
+                          rx="2"
+                          ry="2"
+                        ></rect>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                      </svg>
+                      Copy to Clipboard
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
-        ) : ( // Default: show upload form when idle or if something unexpected happened
-          <div className="p-8">
+          )
+        ) : (
+          // Default: show upload form when idle or if something unexpected happened
+          <div className="p-8 mobile:p-6">
             <UploadAudio onUpload={handleUpload} />
           </div>
         )}

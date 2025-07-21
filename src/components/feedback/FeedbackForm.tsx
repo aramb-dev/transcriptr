@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Label } from '../ui/label';
-import { AlertCircle, CheckCircle2 } from 'lucide-react';
-import DeviceDetector from 'device-detector-js';
+import { useState, useEffect } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Label } from "../ui/label";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import DeviceDetector from "device-detector-js";
 import {
   Select,
   SelectContent,
@@ -12,28 +12,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { staggerContainer, staggerItem } from '../../lib/animations';
-import { motion } from 'framer-motion';
+import { staggerContainer, staggerItem } from "../../lib/animations";
+import { motion } from "framer-motion";
 
-type FeedbackType = 'general' | 'issue' | 'feature' | 'other';
+type FeedbackType = "general" | "issue" | "feature" | "other";
 
 interface FeedbackFormProps {
   initialType?: FeedbackType;
   onClose?: () => void;
 }
 
-export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormProps) {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+export function FeedbackForm({
+  initialType = "general",
+  onClose,
+}: FeedbackFormProps) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [feedbackType, setFeedbackType] = useState<FeedbackType>(initialType);
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [submitStatus, setSubmitStatus] = useState<
+    "idle" | "success" | "error"
+  >("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   // For bug reports
-  const [browser, setBrowser] = useState('');
-  const [operatingSystem, setOperatingSystem] = useState('');
+  const [browser, setBrowser] = useState("");
+  const [operatingSystem, setOperatingSystem] = useState("");
 
   // Detect browser and OS using device-detector-js
   useEffect(() => {
@@ -78,11 +83,15 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
     setFeedbackType(initialType);
 
     // Reset form fields that are specific to certain feedback types
-    if (initialType === 'general' || initialType === 'feature' || initialType === 'other') {
+    if (
+      initialType === "general" ||
+      initialType === "feature" ||
+      initialType === "other"
+    ) {
       // Clear fields that are only relevant for issue reports
-      setBrowser('');
-      setOperatingSystem('');
-    } else if (initialType === 'issue') {
+      setBrowser("");
+      setOperatingSystem("");
+    } else if (initialType === "issue") {
       // Re-detect device info when switching to issue reporting
       const detectDeviceInfo = () => {
         try {
@@ -119,52 +128,63 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setSubmitStatus('idle');
-    setErrorMessage('');
+    setSubmitStatus("idle");
+    setErrorMessage("");
 
     try {
       // Create a URLSearchParams object directly
       const params = new URLSearchParams();
-      params.append('form-name', 'feedback');
-      params.append('name', name);
-      params.append('email', email);
-      params.append('feedbackType', feedbackType);
-      params.append('feedback', feedback);
+      params.append("form-name", "feedback");
+      params.append("name", name);
+      params.append("email", email);
+      params.append("feedbackType", feedbackType);
+      params.append("feedback", feedback);
 
       // Add additional fields for issues
-      if (feedbackType === 'issue') {
-        params.append('browser', browser);
-        params.append('operatingSystem', operatingSystem);
+      if (feedbackType === "issue") {
+        params.append("browser", browser);
+        params.append("operatingSystem", operatingSystem);
       }
 
       // Log submission for debugging
-      console.log('Submitting form with data:', Object.fromEntries(params.entries()));
+      console.log(
+        "Submitting form with data:",
+        Object.fromEntries(params.entries()),
+      );
 
-      const response = await fetch('/', {
-        method: 'POST',
+      const response = await fetch("/__forms.html", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: params.toString()
+        body: params.toString(),
       });
 
       if (response.ok) {
-        console.log('Form submitted successfully');
-        setSubmitStatus('success');
+        console.log("Form submitted successfully");
+        setSubmitStatus("success");
         // Reset form
-        setName('');
-        setEmail('');
-        setFeedback('');
-        setBrowser('');
-        setOperatingSystem('');
+        setName("");
+        setEmail("");
+        setFeedback("");
+        setBrowser("");
+        setOperatingSystem("");
       } else {
-        console.error('Form submission failed:', response.status, response.statusText);
-        throw new Error(`Form submission failed: ${response.status} ${response.statusText}`);
+        console.error(
+          "Form submission failed:",
+          response.status,
+          response.statusText,
+        );
+        throw new Error(
+          `Form submission failed: ${response.status} ${response.statusText}`,
+        );
       }
     } catch (error) {
-      console.error('Error submitting form:', error);
-      setSubmitStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'Unknown error occurred');
+      console.error("Error submitting form:", error);
+      setSubmitStatus("error");
+      setErrorMessage(
+        error instanceof Error ? error.message : "Unknown error occurred",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -172,51 +192,57 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
 
   const getFormTitle = () => {
     switch (feedbackType) {
-      case 'issue':
-        return 'Report an Issue';
-      case 'feature':
-        return 'Suggest a Feature';
-      case 'other':
-        return 'Submit Feedback';
+      case "issue":
+        return "Report an Issue";
+      case "feature":
+        return "Suggest a Feature";
+      case "other":
+        return "Submit Feedback";
       default:
-        return 'Submit Feedback';
+        return "Submit Feedback";
     }
   };
 
   const getPlaceholderText = () => {
     switch (feedbackType) {
-      case 'issue':
-        return 'Please describe the issue in detail. What were you trying to do? What happened instead?';
-      case 'feature':
-        return 'Please describe the feature you would like to see. How would it improve your experience?';
-      case 'other':
-        return 'Your thoughts, suggestions, or questions';
+      case "issue":
+        return "Please describe the issue in detail. What were you trying to do? What happened instead?";
+      case "feature":
+        return "Please describe the feature you would like to see. How would it improve your experience?";
+      case "other":
+        return "Your thoughts, suggestions, or questions";
       default:
-        return 'Your thoughts, suggestions, or feedback';
+        return "Your thoughts, suggestions, or feedback";
     }
   };
 
   const getSuccessMessage = () => {
     switch (feedbackType) {
-      case 'issue':
-        return 'Thank you for reporting this issue!';
-      case 'feature':
-        return 'Thank you for your feature suggestion!';
+      case "issue":
+        return "Thank you for reporting this issue!";
+      case "feature":
+        return "Thank you for your feature suggestion!";
       default:
-        return 'Thank you for your feedback!';
+        return "Thank you for your feedback!";
     }
   };
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">{getFormTitle()}</h2>
+    <div className="mx-auto w-full max-w-md rounded-lg bg-white p-6 shadow-md dark:bg-gray-800">
+      <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-gray-100">
+        {getFormTitle()}
+      </h2>
 
-      {submitStatus === 'success' ? (
-        <div className="bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-md p-4 mb-4 flex items-start">
-          <CheckCircle2 className="h-5 w-5 text-green-500 dark:text-green-400 mr-3 mt-0.5" />
+      {submitStatus === "success" ? (
+        <div className="mb-4 flex items-start rounded-md border border-green-200 bg-green-50 p-4 dark:border-green-700 dark:bg-green-900/30">
+          <CheckCircle2 className="mt-0.5 mr-3 h-5 w-5 text-green-500 dark:text-green-400" />
           <div>
-            <p className="text-green-700 dark:text-green-300 font-medium">{getSuccessMessage()}</p>
-            <p className="text-green-600 dark:text-green-400 text-sm mt-1">Your input helps us improve Transcriptr.</p>
+            <p className="font-medium text-green-700 dark:text-green-300">
+              {getSuccessMessage()}
+            </p>
+            <p className="mt-1 text-sm text-green-600 dark:text-green-400">
+              Your input helps us improve Transcriptr.
+            </p>
           </div>
         </div>
       ) : (
@@ -241,7 +267,10 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
           </div>
 
           <div>
-            <Label htmlFor="feedback-type" className="block text-sm font-medium mb-1">
+            <Label
+              htmlFor="feedback-type"
+              className="mb-1 block text-sm font-medium"
+            >
               Type of Feedback
             </Label>
             <Select
@@ -262,7 +291,7 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
 
           <motion.div variants={staggerItem}>
             <div>
-              <Label htmlFor="name" className="block text-sm font-medium mb-1">
+              <Label htmlFor="name" className="mb-1 block text-sm font-medium">
                 Name
               </Label>
               <Input
@@ -280,8 +309,11 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
 
           <motion.div variants={staggerItem}>
             <div>
-              <Label htmlFor="email" className="block text-sm font-medium mb-1">
-                Email <span className="text-gray-500 dark:text-gray-400 font-normal">(optional)</span>
+              <Label htmlFor="email" className="mb-1 block text-sm font-medium">
+                Email{" "}
+                <span className="font-normal text-gray-500 dark:text-gray-400">
+                  (optional)
+                </span>
               </Label>
               <Input
                 id="email"
@@ -292,19 +324,26 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
                 placeholder="Your email address"
                 className="w-full"
               />
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                We only use your email if we need to contact you about your {feedbackType === 'issue' ? 'issue' : 'feedback'}.
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                We only use your email if we need to contact you about your{" "}
+                {feedbackType === "issue" ? "issue" : "feedback"}.
               </p>
             </div>
           </motion.div>
 
-          {feedbackType === 'issue' && (
+          {feedbackType === "issue" && (
             <>
               <motion.div variants={staggerItem}>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="browser" className="block text-sm font-medium mb-1">
-                      Browser <span className="text-gray-500 dark:text-gray-400 font-normal text-xs">(auto-detected)</span>
+                    <Label
+                      htmlFor="browser"
+                      className="mb-1 block text-sm font-medium"
+                    >
+                      Browser{" "}
+                      <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
+                        (auto-detected)
+                      </span>
                     </Label>
                     <Input
                       id="browser"
@@ -317,8 +356,14 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
                     />
                   </div>
                   <div>
-                    <Label htmlFor="operating-system" className="block text-sm font-medium mb-1">
-                      Operating System <span className="text-gray-500 dark:text-gray-400 font-normal text-xs">(auto-detected)</span>
+                    <Label
+                      htmlFor="operating-system"
+                      className="mb-1 block text-sm font-medium"
+                    >
+                      Operating System{" "}
+                      <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
+                        (auto-detected)
+                      </span>
                     </Label>
                     <Input
                       id="operating-system"
@@ -337,8 +382,15 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
 
           <motion.div variants={staggerItem}>
             <div>
-              <Label htmlFor="feedback" className="block text-sm font-medium mb-1">
-                {feedbackType === 'issue' ? 'Issue Details' : feedbackType === 'feature' ? 'Feature Suggestion' : 'Feedback'}
+              <Label
+                htmlFor="feedback"
+                className="mb-1 block text-sm font-medium"
+              >
+                {feedbackType === "issue"
+                  ? "Issue Details"
+                  : feedbackType === "feature"
+                    ? "Feature Suggestion"
+                    : "Feedback"}
               </Label>
               <Textarea
                 id="feedback"
@@ -347,17 +399,21 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
                 onChange={(e) => setFeedback(e.target.value)}
                 placeholder={getPlaceholderText()}
                 required
-                className="w-full min-h-[120px]"
+                className="min-h-[120px] w-full"
               />
             </div>
           </motion.div>
 
-          {submitStatus === 'error' && (
-            <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-md p-3 flex items-start">
-              <AlertCircle className="h-5 w-5 text-red-500 mr-3 mt-0.5" />
+          {submitStatus === "error" && (
+            <div className="flex items-start rounded-md border border-red-200 bg-red-50 p-3 dark:border-red-700 dark:bg-red-900/30">
+              <AlertCircle className="mt-0.5 mr-3 h-5 w-5 text-red-500" />
               <div>
-                <p className="text-red-700 dark:text-red-300 font-medium">Failed to submit</p>
-                <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errorMessage || 'Please try again later'}</p>
+                <p className="font-medium text-red-700 dark:text-red-300">
+                  Failed to submit
+                </p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                  {errorMessage || "Please try again later"}
+                </p>
               </div>
             </div>
           )}
@@ -378,7 +434,7 @@ export function FeedbackForm({ initialType = 'general', onClose }: FeedbackFormP
               disabled={isSubmitting}
               className={onClose ? "flex-1" : "w-full"}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit'}
+              {isSubmitting ? "Submitting..." : "Submit"}
             </Button>
           </div>
         </motion.form>
