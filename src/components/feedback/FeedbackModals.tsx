@@ -52,6 +52,7 @@ export function FeedbackModals() {
                 <button
                   onClick={() => setActiveModal(null)}
                   className="text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  title="Close feedback form"
                 >
                   <X className="h-5 w-5" />
                 </button>
