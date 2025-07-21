@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 interface AnimatedListProps {
   items: React.ReactNode[];
-  keyExtractor: (item: any, index: number) => string | number;
+  keyExtractor: (item: React.ReactNode, index: number) => string | number;
   className?: string;
   itemClassName?: string;
 }

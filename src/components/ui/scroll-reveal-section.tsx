@@ -1,5 +1,5 @@
-import React, { forwardRef } from "react";
-import { motion, useInView } from "framer-motion";
+import React from "react";
+import { motion, Variants } from "framer-motion";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 
 interface ScrollRevealSectionProps {
@@ -7,7 +7,7 @@ interface ScrollRevealSectionProps {
   className?: string;
   delay?: number;
   threshold?: number;
-  variants?: any;
+  variants?: Variants;
 }
 
 export function ScrollRevealSection({

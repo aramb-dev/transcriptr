@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { useInView } from "framer-motion";
 
 export function useScrollAnimation(threshold = 0.1, once = true) {

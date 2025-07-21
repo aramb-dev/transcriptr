@@ -3,13 +3,6 @@
 > eslint .
 
 
-/Users/aramb-dev/Github/transcriptr/src/components/transcription/TranscriptionProcessing.tsx
-  19:3  error  'getProgressColor' is defined but never used  @typescript-eslint/no-unused-vars
-
-/Users/aramb-dev/Github/transcriptr/src/components/transcription/TranscriptionResult.tsx
-  272:6   warning  React Hook useEffect has a missing dependency: 'pdfTitle'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
-  562:56  error    Unexpected any. Specify a different type                                                                     @typescript-eslint/no-explicit-any
-
 /Users/aramb-dev/Github/transcriptr/src/components/ui/animated-list.tsx
   6:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
 
@@ -63,6 +56,6 @@
   127:27  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
   163:21  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
 
-✖ 32 problems (29 errors, 3 warnings)
+✖ 29 problems (27 errors, 2 warnings)
   1 error and 0 warnings potentially fixable with the `--fix` option.
 
