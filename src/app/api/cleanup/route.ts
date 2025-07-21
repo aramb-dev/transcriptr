@@ -1,9 +1,18 @@
 import { NextResponse } from "next/server";
-import { initializeApp } from "firebase/app";
-import { getStorage, ref, deleteObject } from "firebase/storage";
-import { getFirebaseConfig } from "@/lib/firebase";
+// TEMPORARILY DISABLED IMPORTS:
+// import { initializeApp } from "firebase/app";
+// import { getStorage, ref, deleteObject } from "firebase/storage";
+// import { getFirebaseConfig } from "@/lib/firebase";
 
-export async function POST(request: Request) {
+export async function POST(_request: Request) {
+  // TEMPORARILY DISABLED - Cleanup endpoint disabled to prevent Firebase Storage errors
+  console.log("Cleanup endpoint is temporarily disabled");
+  return NextResponse.json(
+    { message: "Cleanup endpoint is temporarily disabled" },
+    { status: 200 }
+  );
+
+  /* DISABLED CODE:
   try {
     const { filePath } = await request.json();
 
@@ -28,4 +37,5 @@ export async function POST(request: Request) {
       error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
+  */
 }
