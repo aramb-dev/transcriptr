@@ -1,6 +1,12 @@
 import * as React from "react";
 import { motion } from "framer-motion";
-import { Button, ButtonProps } from "./button";
+import { Button, buttonVariants } from "./button";
+import { VariantProps } from "class-variance-authority";
+
+type ButtonProps = React.ComponentProps<"button"> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  };
 
 export function AnimatedButton({ children, ...props }: ButtonProps) {
   return (
