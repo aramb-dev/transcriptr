@@ -194,7 +194,7 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
             fileName={fileName}
             fileSize={fileSize}
             fileError={fileError}
-            fileInputRef={fileInputRef}
+            fileInputRef={fileInputRef as React.RefObject<HTMLInputElement>}
             onFileChange={handleFileChange}
             onButtonClick={handleButtonClick}
             onReset={handleResetFile}

@@ -3,22 +3,6 @@
 > eslint .
 
 
-/Users/aramb-dev/Github/transcriptr/src/app/page.tsx
-    3:30  error  'useEffect' is defined but never used                        @typescript-eslint/no-unused-vars
-   17:3   error  'fadeOutDown' is defined but never used                      @typescript-eslint/no-unused-vars
-   33:22  error  'setShowResult' is assigned a value but never used           @typescript-eslint/no-unused-vars
-   42:31  error  'setTranscriptionResult' is assigned a value but never used  @typescript-eslint/no-unused-vars
-  106:43  error  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
-  135:43  error  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
-  191:45  error  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
-  207:45  error  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
-
-/Users/aramb-dev/Github/transcriptr/src/components/UploadAudio.tsx
-  22:12  error  'e' is defined but never used  @typescript-eslint/no-unused-vars
-
-/Users/aramb-dev/Github/transcriptr/src/components/layout/Header.tsx
-  2:8  error  'Link' is defined but never used  @typescript-eslint/no-unused-vars
-
 /Users/aramb-dev/Github/transcriptr/src/components/layout/MainLayout.tsx
    1:30  error  'useEffect' is defined but never used               @typescript-eslint/no-unused-vars
   15:3   error  'fadeOutDown' is defined but never used             @typescript-eslint/no-unused-vars
@@ -94,6 +78,6 @@
   127:27  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
   163:21  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
 
-✖ 53 problems (50 errors, 3 warnings)
+✖ 43 problems (40 errors, 3 warnings)
   2 errors and 0 warnings potentially fixable with the `--fix` option.
 
