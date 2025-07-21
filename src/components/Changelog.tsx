@@ -22,6 +22,22 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Define your changelog entries here in reverse chronological order (newest first)
   const changelogItems: ChangeItem[] = [
     {
+      date: "Mon, 21 Jul 2025",
+      version: "2.0.0",
+      changes: {
+        new: [
+          "Added V2 Announcement modal for first-time visitors with celebratory confetti animation",
+          "Implemented localStorage-based persistence to show announcement only once per user",
+          "Added debug function `seenV2(false)` for developers to re-enable the announcement modal",
+        ],
+        improved: [
+          "Enhanced user onboarding experience with welcoming V2 announcement",
+          "Integrated confetti animation with proper z-index layering for visual celebration",
+        ],
+        fixed: [],
+      },
+    },
+    {
       date: "Thu, 26 Jun 2025",
       version: "1.4.7",
       changes: {
