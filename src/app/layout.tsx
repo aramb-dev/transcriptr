@@ -38,6 +38,11 @@ export const metadata: Metadata = {
 // eslint-disable-next-line react-refresh/only-export-components
 export const viewport: Viewport = {
   themeColor: "#ffffff",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: "cover", // Support for safe areas on mobile devices
 };
 
 export default function RootLayout({

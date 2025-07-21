@@ -598,7 +598,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       exit="exit"
       transition={springTransition}
     >
-      <div className="p-6">
+      <div className="p-6 mobile:p-4">
         {isLoadingSession ? (
           <div className="flex h-40 items-center justify-center">
             <div className="animate-pulse text-gray-500 dark:text-gray-400">
@@ -634,20 +634,20 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
             formatTimestamp={formatTimestamp}
           />
         ) : transcription !== null && transStatus === "succeeded" ? ( // Check for transcription text and succeeded status
-          <div className="p-8">
+          <div className="p-8 mobile:p-6">
             <TranscriptionResult transcription={transcription} />
             {/* Buttons moved outside TranscriptionResult */}
-            <div className="mt-4 flex justify-center gap-4 border-t border-gray-100 bg-gray-50 px-8 py-4 dark:border-gray-700 dark:bg-gray-800/80">
+            <div className="mt-4 flex justify-center gap-4 border-t border-gray-100 bg-gray-50 px-8 py-4 dark:border-gray-700 dark:bg-gray-800/80 mobile:flex-col mobile:gap-3 mobile:px-4 mobile:py-6">
               <Button
                 variant="outline"
                 onClick={handleReset}
-                className="bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                className="bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300 mobile:w-full mobile:h-12 mobile:text-base mobile:font-medium touch-feedback"
               >
                 New Transcription
               </Button>
               <Button
                 onClick={handleCopyToClipboard}
-                className="gap-2 bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                className="gap-2 bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300 mobile:w-full mobile:h-12 mobile:text-base mobile:font-medium touch-feedback"
                 disabled={copySuccess}
               >
                 {copySuccess ? (
@@ -699,7 +699,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
           </div>
         ) : (
           // Default: show upload form when idle or if something unexpected happened
-          <div className="p-8">
+          <div className="p-8 mobile:p-6">
             <UploadAudio onUpload={handleUpload} />
           </div>
         )}

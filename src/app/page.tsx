@@ -80,11 +80,12 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-sky-50 to-white py-12 text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100">
+    <div className="min-h-screen bg-linear-to-b from-sky-50 to-white py-6 text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100 md:py-12">
       <div className="container mx-auto max-w-4xl px-4">
         <Header
           onOpenChangelog={openChangelogModal}
           onShowHistory={openHistoryModal}
+          onOpenFeedbackModal={openFeedbackModal}
         />
 
         <AnimatePresence mode="wait">
