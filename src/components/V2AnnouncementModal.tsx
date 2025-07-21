@@ -5,7 +5,6 @@ import Confetti from "react-confetti";
 import { Button } from "./ui/button";
 import { AnimatedBackdrop } from "./ui/animated-backdrop";
 import { expandCenter } from "../lib/animations";
-import { initializeV2Debug } from "../lib/v2-debug";
 
 interface V2AnnouncementModalProps {
   onClose: () => void;
@@ -177,26 +176,4 @@ export function V2AnnouncementModal({ onClose }: V2AnnouncementModalProps) {
       </AnimatedBackdrop>
     </>
   );
-}
-
-// Hook to check if V2 announcement should be shown
-export function useV2Announcement() {
-  const [shouldShow, setShouldShow] = useState(false);
-
-  useEffect(() => {
-    // Check if user has seen V2 announcement
-    const hasSeenV2 = localStorage.getItem("seenV2");
-    if (!hasSeenV2) {
-      setShouldShow(true);
-    }
-
-    // Initialize debug function
-    initializeV2Debug();
-  }, []);
-
-  const hideAnnouncement = () => {
-    setShouldShow(false);
-  };
-
-  return { shouldShow, hideAnnouncement };
 }

@@ -9,7 +9,8 @@ import { TranscriptionForm } from "../components/transcription/TranscriptionForm
 import { Toaster } from "sonner";
 import { FeedbackModals } from "../components/feedback/FeedbackModals";
 import { ChangelogModal } from "../components/ChangelogModal";
-import { V2AnnouncementModal, useV2Announcement } from "../components/V2AnnouncementModal";
+import { V2AnnouncementModal } from "../components/V2AnnouncementModal";
+import { useV2Announcement } from "../hooks/useV2Announcement";
 import TranscriptionHistory from "../components/transcription/TranscriptionHistory";
 import { fadeInUp, expandCenter } from "../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
