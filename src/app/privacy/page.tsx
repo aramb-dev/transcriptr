@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 
-export default function PrivacyPolicy() {
+export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-linear-to-b from-sky-50 to-white py-12 text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100">
       <div className="mx-auto max-w-4xl px-4">
@@ -138,6 +138,14 @@ export default function PrivacyPolicy() {
                   after processing is complete (typically within minutes)
                 </li>
               </ul>
+              <p className="mb-4">
+                While we are committed to the timely deletion of your data,
+                unforeseen technical issues or operational anomalies may, on
+                occasion, cause audio files stored in Firebase Storage to be
+                retained for longer than the intended period. We take active
+                measures to minimize such occurrences and ensure that any
+                retained data is identified and purged as quickly as possible.
+              </p>
             </section>
 
             <section className="mb-8">
@@ -201,16 +209,14 @@ export default function PrivacyPolicy() {
               </h2>
               <p className="mb-4">
                 If you have questions or concerns about this Privacy Policy,
-                please contact us through our{" "}
+                please contact us at{" "}
                 <a
-                  href="https://github.com/aramb-dev/transcriptr"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="mailto:contact@aramb.dev"
                   className="text-blue-600 hover:underline dark:text-blue-400"
                 >
-                  GitHub repository
-                </a>{" "}
-                or by using the Feedback form on the main page.
+                  contact@aramb.dev
+                </a>
+                .
               </p>
             </section>
           </div>

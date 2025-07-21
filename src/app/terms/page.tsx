@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 
-export default function TermsOfService() {
+export default function TermsPage() {
   return (
     <div className="min-h-screen bg-linear-to-b from-sky-50 to-white py-12 text-gray-900 dark:from-gray-900 dark:to-gray-800 dark:text-gray-100">
       <div className="mx-auto max-w-4xl px-4">
@@ -62,21 +62,47 @@ export default function TermsOfService() {
 
             <section className="mb-8">
               <h2 className="mb-4 text-2xl font-semibold text-gray-800 dark:text-gray-200">
-                3. User Responsibilities
+                3. User Responsibilities and Acceptable Use
               </h2>
               <p className="mb-4">
                 You are responsible for any content you upload to the Service.
-                You agree not to upload content that:
+                You agree not to upload content that violates any laws,
+                infringes on the intellectual property rights of others, contains
+                malicious code, or includes private or sensitive information
+                without proper authorization.
+              </p>
+              <h3 className="mb-4 text-xl font-semibold text-gray-800 dark:text-gray-200">
+                Acceptable Use Policy for Audio Content
+              </h3>
+              <p className="mb-4">
+                In addition, you agree not to submit any audio content that:
               </p>
               <ul className="mb-4 list-disc space-y-2 pl-6">
-                <li>Violates any laws or regulations</li>
-                <li>Infringes on intellectual property rights of others</li>
-                <li>Contains malicious code or harmful components</li>
                 <li>
-                  Contains private or sensitive information without proper
-                  authorization
+                  Contains copyrighted music or other intellectual property for
+                  which you lack necessary rights or licenses for transcription.
                 </li>
+                <li>
+                  Is sexually explicit, pornographic, or depicts sexual acts.
+                </li>
+                <li>
+                  Constitutes hate speech, promotes discrimination, or incites
+                  violence.
+                </li>
+                <li>
+                  Contains excessive profanity, vulgar language, or is otherwise
+                  obscene.
+                </li>
+                <li>Depicts, promotes, or facilitates illegal activities.</li>
+                <li>Involves harassment, threats, or bullying.</li>
               </ul>
+              <p className="mb-4">
+                Violation of these terms may result in consequences including,
+                but not limited to, content removal, account suspension, or
+                termination. We reserve the right to take any action we deem
+                appropriate in response to a violation, including reporting to
+                law enforcement.
+              </p>
             </section>
 
             <section className="mb-8">
@@ -162,16 +188,14 @@ export default function TermsOfService() {
               </h2>
               <p className="mb-4">
                 If you have questions or concerns about these Terms of Service,
-                please contact us through our{" "}
+                please contact us at{" "}
                 <a
-                  href="https://github.com/aramb-dev/transcriptr"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="mailto:contact@aramb.dev"
                   className="text-blue-600 hover:underline dark:text-blue-400"
                 >
-                  GitHub repository
-                </a>{" "}
-                or by using the Feedback form on the main page.
+                  contact@aramb.dev
+                </a>
+                .
               </p>
             </section>
           </div>
