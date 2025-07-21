@@ -1,9 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useTranscriptionPolling } from "@/hooks/useTranscriptionPolling";
-import {
-  useSessionPersistence,
-  UseSessionPersistenceResult,
-} from "@/hooks/useSessionPersistence";
+import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { UploadAudio } from "../UploadAudio";
 import { TranscriptionProcessing } from "./TranscriptionProcessing";
 import { TranscriptionError } from "./TranscriptionError";
@@ -26,12 +23,10 @@ import { fadeInUp, springTransition } from "../../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
 
 interface TranscriptionFormProps {
-  onShowSuccess: () => void;
   initialSession?: TranscriptionSession | null;
 }
 
 export function TranscriptionForm({
-  onShowSuccess,
   initialSession,
 }: TranscriptionFormProps) {
   const [transcription, setTranscription] = useState<string | null>(null);
@@ -47,7 +42,6 @@ export function TranscriptionForm({
     null,
   );
   const [firebaseFilePath, setFirebaseFilePath] = useState<string | null>(null);
-  const [isLoadingState, setIsLoadingState] = useState(false);
 
   // Add session persistence hook
   const {
@@ -167,7 +161,6 @@ export function TranscriptionForm({
       if (activeSession) {
         updateSessionData({
           status: "failed",
-          error: errorMsg,
         });
       }
     },
@@ -250,8 +243,13 @@ export function TranscriptionForm({
     setFirebaseFilePath(null); // Reset Firebase file path
 
     // Create new session
-    let audioSource = {
-      type: "url" as const,
+    let audioSource: {
+      type: "file" | "url";
+      name?: string;
+      size?: number;
+      url?: string;
+    } = {
+      type: "url",
       url: "",
     };
 
@@ -260,14 +258,14 @@ export function TranscriptionForm({
       const file = data.get("file") as File;
       if (file) {
         audioSource = {
-          type: "file" as const,
+          type: "file",
           name: file.name,
           size: file.size,
         };
       }
     } else if ("audioUrl" in data) {
       audioSource = {
-        type: "url" as const,
+        type: "url",
         url: data.audioUrl,
       };
     }
@@ -293,7 +291,7 @@ export function TranscriptionForm({
     try {
       let file: File | null = null;
       let sourceDescription = "";
-      let firebaseFilePath: string | null = null; // Track Firebase path for potential cleanup
+      const firebaseFilePath: string | null = null; // Track Firebase path for potential cleanup
 
       // Check if data is FormData (file upload) or object (URL input)
       if (data instanceof FormData) {
@@ -420,7 +418,7 @@ export function TranscriptionForm({
           const errorJson = await response.json();
           errorBody =
             errorJson.error || errorJson.message || JSON.stringify(errorJson);
-        } catch (e) {
+        } catch {
           errorBody = await response.text();
         }
         setApiResponses((prev) => [
@@ -457,7 +455,54 @@ export function TranscriptionForm({
         // Or if the ID is missing for some reason
         if (resultData && resultData.output) {
           // If result is immediate (unlikely for long audio but handle just in case)
-          handleSuccess(resultData.output);
+          // Handle successful transcription - same logic as in onSuccess callback
+          setTransStatus("succeeded");
+          setProgress(100);
+
+          // Parse the output to extract the transcription text
+          let finalTranscription = "Error: Could not parse transcription.";
+          const output = resultData.output;
+          if (typeof output === "string") {
+            finalTranscription = output;
+          } else if (output && typeof output === "object") {
+            if ("text" in output && typeof output.text === "string") {
+              finalTranscription = output.text;
+            } else if (
+              Array.isArray(output) &&
+              output.length > 0 &&
+              typeof output[0] === "string"
+            ) {
+              finalTranscription = output.join("\n");
+            } else {
+              console.error("Unexpected output format:", output);
+              finalTranscription = JSON.stringify(output, null, 2);
+            }
+          }
+          setTranscription(finalTranscription);
+
+          // Update session with completed result
+          if (activeSession) {
+            updateSessionData({
+              status: "succeeded",
+              progress: 100,
+              result: finalTranscription,
+            });
+          }
+
+          // Cleanup Firebase file if exists when transcription is complete
+          if (firebaseFilePath) {
+            cleanupFirebaseFile(firebaseFilePath).then((success) => {
+              if (success) {
+                console.log("Temporary file cleaned up successfully");
+                setFirebaseFilePath(null);
+
+                // Update session to clear firebase path
+                if (activeSession) {
+                  updateSessionData({ firebaseFilePath: null });
+                }
+              }
+            });
+          }
         } else {
           throw new Error(
             "Invalid API response: Missing prediction ID or result.",

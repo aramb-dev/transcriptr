@@ -1,4 +1,4 @@
-import { Suspense, useState, useEffect, lazy } from "react";
+import { Suspense, useState, lazy } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "../ui/card";
 import { Header } from "./Header";
@@ -12,8 +12,6 @@ import {
   fadeInUp,
   slideInRight,
   expandCenter,
-  fadeOutDown,
-  exitTransition,
 } from "../../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
 
@@ -26,8 +24,8 @@ const TranscriptionError = lazy(
 
 export function MainLayout() {
   const [showSuccess, setShowSuccess] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-  const [showError, setShowError] = useState(false);
+  const [showResult] = useState(false);
+  const [showError] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [formKey, setFormKey] = useState(Date.now()); // Key to force re-render TranscriptionForm when needed
@@ -96,7 +94,7 @@ export function MainLayout() {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={exitTransition}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             <Card className="w-full overflow-hidden rounded-xl border-0 shadow-lg dark:bg-gray-800/60 dark:backdrop-blur-sm">
               <CardContent className="p-0">
@@ -125,7 +123,7 @@ export function MainLayout() {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={exitTransition}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -181,9 +179,9 @@ export function MainLayout() {
               initial="initial"
               animate="animate"
               exit="exit"
-              transition={exitTransition}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <TranscriptionResult />
+              <TranscriptionResult transcription="" />
             </motion.div>
           </Suspense>
         )}
@@ -197,9 +195,16 @@ export function MainLayout() {
               initial="initial"
               animate="animate"
               exit="exit"
-              transition={exitTransition}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <TranscriptionError />
+              <TranscriptionError
+                status="failed"
+                error="An error occurred"
+                onReset={() => {}}
+                apiResponses={[]}
+                showApiDetails={false}
+                setShowApiDetails={() => {}}
+              />
             </motion.div>
           </Suspense>
         )}
