@@ -1,0 +1,930 @@
+
+> transcriptr@0.1.0 lint
+> eslint .
+
+
+/Users/aramb-dev/Github/transcriptr/pdf-template/tailwind.config.js
+  76:13  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+/Users/aramb-dev/Github/transcriptr/public/ffmpeg/ffmpeg-core.js
+     1:1   error  Unexpected var, use let or const instead                                   no-var
+     2:3   error  Unexpected var, use let or const instead                                   no-var
+     8:5   error  Unexpected var, use let or const instead                                   no-var
+     9:5   error  Unexpected var, use let or const instead                                   no-var
+    96:5   error  Unexpected var, use let or const instead                                   no-var
+    97:5   error  Unexpected var, use let or const instead                                   no-var
+    98:5   error  Unexpected var, use let or const instead                                   no-var
+    99:5   error  Unexpected var, use let or const instead                                   no-var
+   102:5   error  Unexpected var, use let or const instead                                   no-var
+   103:5   error  Unexpected var, use let or const instead                                   no-var
+   104:5   error  Unexpected var, use let or const instead                                   no-var
+   108:5   error  Unexpected var, use let or const instead                                   no-var
+   115:5   error  Unexpected var, use let or const instead                                   no-var
+   117:7   error  Unexpected var, use let or const instead                                   no-var
+   117:16  error  A `require()` style import is forbidden                                    @typescript-eslint/no-require-imports
+   118:7   error  Unexpected var, use let or const instead                                   no-var
+   118:22  error  A `require()` style import is forbidden                                    @typescript-eslint/no-require-imports
+   131:9   error  Unexpected var, use let or const instead                                   no-var
+   174:11  error  Unexpected var, use let or const instead                                   no-var
+   181:13  error  Unexpected var, use let or const instead                                   no-var
+   189:11  error  Unexpected var, use let or const instead                                   no-var
+   203:7   error  'setWindowTitle' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+   204:12  error  Empty block statement                                                      no-empty
+   206:5   error  Unexpected var, use let or const instead                                   no-var
+   207:5   error  Unexpected var, use let or const instead                                   no-var
+   210:30  error  'arguments_' is assigned a value but never used                            @typescript-eslint/no-unused-vars
+   213:5   error  Unexpected var, use let or const instead                                   no-var
+   215:5   error  Unexpected var, use let or const instead                                   no-var
+   219:5   error  Unexpected var, use let or const instead                                   no-var
+   220:5   error  Unexpected var, use let or const instead                                   no-var
+   221:5   error  Unexpected var, use let or const instead                                   no-var
+   221:9   error  'EXITSTATUS' is assigned a value but never used                            @typescript-eslint/no-unused-vars
+   227:5   error  Unexpected var, use let or const instead                                   no-var
+   235:7   error  'HEAPU64' is assigned a value but never used                               @typescript-eslint/no-unused-vars
+   238:7   error  Unexpected var, use let or const instead                                   no-var
+   250:5   error  Unexpected var, use let or const instead                                   no-var
+   251:5   error  Unexpected var, use let or const instead                                   no-var
+   252:5   error  Unexpected var, use let or const instead                                   no-var
+   253:5   error  Unexpected var, use let or const instead                                   no-var
+   254:5   error  Unexpected var, use let or const instead                                   no-var
+   254:9   error  'runtimeInitialized' is assigned a value but never used                    @typescript-eslint/no-unused-vars
+   255:5   error  Unexpected var, use let or const instead                                   no-var
+   296:5   error  Unexpected var, use let or const instead                                   no-var
+   297:5   error  Unexpected var, use let or const instead                                   no-var
+   298:5   error  Unexpected var, use let or const instead                                   no-var
+   302:31  error  'id' is defined but never used                                             @typescript-eslint/no-unused-vars
+   308:34  error  'id' is defined but never used                                             @typescript-eslint/no-unused-vars
+   319:11  error  Unexpected var, use let or const instead                                   no-var
+   334:7   error  Unexpected var, use let or const instead                                   no-var
+   338:5   error  Unexpected var, use let or const instead                                   no-var
+   345:5   error  Unexpected var, use let or const instead                                   no-var
+   412:13  error  Unexpected var, use let or const instead                                   no-var
+   425:7   error  Unexpected var, use let or const instead                                   no-var
+   426:42  error  'module' is defined but never used                                         @typescript-eslint/no-unused-vars
+   427:9   error  Unexpected var, use let or const instead                                   no-var
+   456:5   error  Unexpected var, use let or const instead                                   no-var
+   480:5   error  Unexpected var, use let or const instead                                   no-var
+   482:7   error  Unexpected var, use let or const instead                                   no-var
+   544:5   error  Unexpected var, use let or const instead                                   no-var
+   547:7   error  Unexpected var, use let or const instead                                   no-var
+   548:7   error  Unexpected var, use let or const instead                                   no-var
+   553:7   error  Unexpected var, use let or const instead                                   no-var
+   555:9   error  Unexpected var, use let or const instead                                   no-var
+   560:9   error  Unexpected var, use let or const instead                                   no-var
+   565:9   error  Unexpected var, use let or const instead                                   no-var
+   578:11  error  Unexpected var, use let or const instead                                   no-var
+   597:5   error  Unexpected var, use let or const instead                                   no-var
+   599:23  error  'handle' is defined but never used                                         @typescript-eslint/no-unused-vars
+   599:31  error  'symbol' is defined but never used                                         @typescript-eslint/no-unused-vars
+   602:5   error  Unexpected var, use let or const instead                                   no-var
+   605:9   error  Unexpected var, use let or const instead                                   no-var
+   606:43  error  Unnecessary escape character: \/                                           no-useless-escape
+   606:56  error  Unnecessary escape character: \/                                           no-useless-escape
+   606:67  error  Unnecessary escape character: \/                                           no-useless-escape
+   610:9   error  Unexpected var, use let or const instead                                   no-var
+   611:14  error  Unexpected var, use let or const instead                                   no-var
+   612:11  error  Unexpected var, use let or const instead                                   no-var
+   631:9   error  Unexpected var, use let or const instead                                   no-var
+   646:9   error  Unexpected var, use let or const instead                                   no-var
+   661:9   error  Unexpected var, use let or const instead                                   no-var
+   666:9   error  Unexpected var, use let or const instead                                   no-var
+   666:48  error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+   681:11  error  Unexpected var, use let or const instead                                   no-var
+   681:31  error  A `require()` style import is forbidden                                    @typescript-eslint/no-require-imports
+   682:11  error  Unexpected var, use let or const instead                                   no-var
+   686:11  error  Unexpected var, use let or const instead                                   no-var
+   688:18  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+   688:21  error  Empty block statement                                                      no-empty
+   695:5   error  Unexpected var, use let or const instead                                   no-var
+   697:9   error  Unexpected var, use let or const instead                                   no-var
+   699:14  error  Unexpected var, use let or const instead                                   no-var
+   700:11  error  Unexpected var, use let or const instead                                   no-var
+   700:31  error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+   719:11  error  Unexpected var, use let or const instead                                   no-var
+   723:11  error  Unexpected var, use let or const instead                                   no-var
+   730:9   error  Unexpected var, use let or const instead                                   no-var
+   731:9   error  Unexpected var, use let or const instead                                   no-var
+   732:9   error  Unexpected var, use let or const instead                                   no-var
+   733:9   error  Unexpected var, use let or const instead                                   no-var
+   734:14  error  Unexpected var, use let or const instead                                   no-var
+   740:9   error  Unexpected var, use let or const instead                                   no-var
+   741:14  error  Unexpected var, use let or const instead                                   no-var
+   749:7   error  Unexpected var, use let or const instead                                   no-var
+   750:12  error  Unexpected var, use let or const instead                                   no-var
+   751:9   error  Unexpected var, use let or const instead                                   no-var
+   767:7   error  Unexpected var, use let or const instead                                   no-var
+   768:7   error  Unexpected var, use let or const instead                                   no-var
+   769:12  error  Unexpected var, use let or const instead                                   no-var
+   770:9   error  Unexpected var, use let or const instead                                   no-var
+   772:11  error  Unexpected var, use let or const instead                                   no-var
+   799:7   error  Unexpected var, use let or const instead                                   no-var
+   800:7   error  Unexpected var, use let or const instead                                   no-var
+   801:7   error  Unexpected var, use let or const instead                                   no-var
+   810:5   error  Unexpected var, use let or const instead                                   no-var
+   820:11  error  Unexpected var, use let or const instead                                   no-var
+   833:57  error  'pos' is defined but never used                                            @typescript-eslint/no-unused-vars
+   837:11  error  Unexpected var, use let or const instead                                   no-var
+   838:16  error  Unexpected var, use let or const instead                                   no-var
+   839:13  error  Unexpected var, use let or const instead                                   no-var
+   842:22  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+   857:58  error  'pos' is defined but never used                                            @typescript-eslint/no-unused-vars
+   862:18  error  Unexpected var, use let or const instead                                   no-var
+   865:20  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+   877:13  error  Unexpected var, use let or const instead                                   no-var
+   879:15  error  Unexpected var, use let or const instead                                   no-var
+   880:15  error  Unexpected var, use let or const instead                                   no-var
+   881:15  error  Unexpected var, use let or const instead                                   no-var
+   955:7   error  Unexpected var, use let or const instead                                   no-var
+   959:5   error  Unexpected var, use let or const instead                                   no-var
+   961:24  error  'mount' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1015:9   error  Unexpected var, use let or const instead                                   no-var
+  1046:9   error  Unexpected var, use let or const instead                                   no-var
+  1048:9   error  Unexpected var, use let or const instead                                   no-var
+  1056:9   error  Unexpected var, use let or const instead                                   no-var
+  1067:11  error  Unexpected var, use let or const instead                                   no-var
+  1079:11  error  Unexpected var, use let or const instead                                   no-var
+  1114:27  error  'parent' is defined but never used                                         @typescript-eslint/no-unused-vars
+  1114:35  error  'name' is defined but never used                                           @typescript-eslint/no-unused-vars
+  1122:13  error  Unexpected var, use let or const instead                                   no-var
+  1125:22  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  1125:25  error  Empty block statement                                                      no-empty
+  1127:20  error  Unexpected var, use let or const instead                                   no-var
+  1127:24  error  'i' is assigned a value but never used                                     @typescript-eslint/no-unused-vars
+  1144:11  error  Unexpected var, use let or const instead                                   no-var
+  1145:16  error  Unexpected var, use let or const instead                                   no-var
+  1145:20  error  'i' is assigned a value but never used                                     @typescript-eslint/no-unused-vars
+  1152:11  error  Unexpected var, use let or const instead                                   no-var
+  1153:16  error  Unexpected var, use let or const instead                                   no-var
+  1154:32  error  Do not access Object.prototype method 'hasOwnProperty' from target object  no-prototype-builtins
+  1162:11  error  Unexpected var, use let or const instead                                   no-var
+  1175:11  error  Unexpected var, use let or const instead                                   no-var
+  1177:11  error  Unexpected var, use let or const instead                                   no-var
+  1181:18  error  Unexpected var, use let or const instead                                   no-var
+  1191:11  error  Unexpected var, use let or const instead                                   no-var
+  1217:18  error  Unexpected var, use let or const instead                                   no-var
+  1225:11  error  Unexpected var, use let or const instead                                   no-var
+  1249:11  error  Unexpected var, use let or const instead                                   no-var
+  1250:11  error  Unexpected var, use let or const instead                                   no-var
+  1251:11  error  Unexpected var, use let or const instead                                   no-var
+  1276:58  error  'mmapFlags' is defined but never used                                      @typescript-eslint/no-unused-vars
+  1283:7   error  Unexpected var, use let or const instead                                   no-var
+  1294:10  error  'event' is defined but never used                                          @typescript-eslint/no-unused-vars
+  1304:5   error  Unexpected var, use let or const instead                                   no-var
+  1307:7   error  Unexpected var, use let or const instead                                   no-var
+  1329:7   error  Unexpected var, use let or const instead                                   no-var
+  1330:7   error  Unexpected var, use let or const instead                                   no-var
+  1365:7   error  Unexpected var, use let or const instead                                   no-var
+  1373:7   error  Unexpected var, use let or const instead                                   no-var
+  1380:7   error  Unexpected var, use let or const instead                                   no-var
+  1385:5   error  Unexpected var, use let or const instead                                   no-var
+  1402:9   error  Unexpected var, use let or const instead                                   no-var
+  1407:9   error  Unexpected var, use let or const instead                                   no-var
+  1408:9   error  Unexpected var, use let or const instead                                   no-var
+  1409:9   error  Unexpected var, use let or const instead                                   no-var
+  1410:14  error  Unexpected var, use let or const instead                                   no-var
+  1411:11  error  Unexpected var, use let or const instead                                   no-var
+  1423:13  error  Unexpected var, use let or const instead                                   no-var
+  1425:15  error  Unexpected var, use let or const instead                                   no-var
+  1427:15  error  Unexpected var, use let or const instead                                   no-var
+  1440:9   error  Unexpected var, use let or const instead                                   no-var
+  1443:13  error  Unexpected var, use let or const instead                                   no-var
+  1454:9   error  Unexpected var, use let or const instead                                   no-var
+  1455:14  error  Unexpected var, use let or const instead                                   no-var
+  1461:9   error  Unexpected var, use let or const instead                                   no-var
+  1466:9   error  Unexpected var, use let or const instead                                   no-var
+  1470:11  error  Unexpected var, use let or const instead                                   no-var
+  1481:9   error  Unexpected var, use let or const instead                                   no-var
+  1485:9   error  Unexpected var, use let or const instead                                   no-var
+  1486:14  error  Unexpected var, use let or const instead                                   no-var
+  1487:11  error  Unexpected var, use let or const instead                                   no-var
+  1495:9   error  Unexpected var, use let or const instead                                   no-var
+  1530:9   error  Unexpected var, use let or const instead                                   no-var
+  1550:9   error  Unexpected var, use let or const instead                                   no-var
+  1557:11  error  Unexpected var, use let or const instead                                   no-var
+  1557:15  error  'node' is assigned a value but never used                                  @typescript-eslint/no-unused-vars
+  1559:18  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  1559:21  error  Empty block statement                                                      no-empty
+  1563:9   error  Unexpected var, use let or const instead                                   no-var
+  1569:9   error  Unexpected var, use let or const instead                                   no-var
+  1602:14  error  Unexpected var, use let or const instead                                   no-var
+  1671:11  error  Unexpected var, use let or const instead                                   no-var
+  1689:9   error  Unexpected var, use let or const instead                                   no-var
+  1690:9   error  Unexpected var, use let or const instead                                   no-var
+  1692:11  error  Unexpected var, use let or const instead                                   no-var
+  1694:11  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  1709:9   error  Unexpected var, use let or const instead                                   no-var
+  1710:9   error  Unexpected var, use let or const instead                                   no-var
+  1735:9   error  Unexpected var, use let or const instead                                   no-var
+  1736:9   error  Unexpected var, use let or const instead                                   no-var
+  1737:9   error  Unexpected var, use let or const instead                                   no-var
+  1741:11  error  Unexpected var, use let or const instead                                   no-var
+  1751:9   error  Unexpected var, use let or const instead                                   no-var
+  1757:9   error  Unexpected var, use let or const instead                                   no-var
+  1771:9   error  Unexpected var, use let or const instead                                   no-var
+  1775:9   error  Unexpected var, use let or const instead                                   no-var
+  1776:9   error  Unexpected var, use let or const instead                                   no-var
+  1777:9   error  Unexpected var, use let or const instead                                   no-var
+  1779:11  error  Unexpected var, use let or const instead                                   no-var
+  1781:13  error  Unexpected var, use let or const instead                                   no-var
+  1789:9   error  Unexpected var, use let or const instead                                   no-var
+  1796:9   error  Unexpected var, use let or const instead                                   no-var
+  1797:9   error  Unexpected var, use let or const instead                                   no-var
+  1798:9   error  Unexpected var, use let or const instead                                   no-var
+  1802:9   error  Unexpected var, use let or const instead                                   no-var
+  1824:9   error  Unexpected var, use let or const instead                                   no-var
+  1825:9   error  Unexpected var, use let or const instead                                   no-var
+  1826:14  error  Unexpected var, use let or const instead                                   no-var
+  1848:9   error  Unexpected var, use let or const instead                                   no-var
+  1849:9   error  Unexpected var, use let or const instead                                   no-var
+  1853:9   error  Unexpected var, use let or const instead                                   no-var
+  1854:9   error  Unexpected var, use let or const instead                                   no-var
+  1864:9   error  Unexpected var, use let or const instead                                   no-var
+  1865:9   error  Unexpected var, use let or const instead                                   no-var
+  1866:9   error  Unexpected var, use let or const instead                                   no-var
+  1867:9   error  Unexpected var, use let or const instead                                   no-var
+  1868:9   error  Unexpected var, use let or const instead                                   no-var
+  1877:9   error  Unexpected var, use let or const instead                                   no-var
+  1878:9   error  Unexpected var, use let or const instead                                   no-var
+  1886:9   error  Unexpected var, use let or const instead                                   no-var
+  1889:18  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  1889:21  error  Empty block statement                                                      no-empty
+  1893:9   error  Unexpected var, use let or const instead                                   no-var
+  1894:9   error  Unexpected var, use let or const instead                                   no-var
+  1922:11  error  Unnecessary catch clause                                                   no-useless-catch
+  1929:9   error  Unexpected var, use let or const instead                                   no-var
+  1930:9   error  Unexpected var, use let or const instead                                   no-var
+  1931:9   error  Unexpected var, use let or const instead                                   no-var
+  1932:9   error  Unexpected var, use let or const instead                                   no-var
+  1933:9   error  Unexpected var, use let or const instead                                   no-var
+  1947:9   error  Unexpected var, use let or const instead                                   no-var
+  1948:9   error  Unexpected var, use let or const instead                                   no-var
+  1955:9   error  Unexpected var, use let or const instead                                   no-var
+  1956:9   error  Unexpected var, use let or const instead                                   no-var
+  1960:9   error  Unexpected var, use let or const instead                                   no-var
+  1961:9   error  Unexpected var, use let or const instead                                   no-var
+  1962:9   error  Unexpected var, use let or const instead                                   no-var
+  1976:9   error  Unexpected var, use let or const instead                                   no-var
+  1977:9   error  Unexpected var, use let or const instead                                   no-var
+  1990:9   error  Unexpected var, use let or const instead                                   no-var
+  1991:9   error  Unexpected var, use let or const instead                                   no-var
+  2004:9   error  Unexpected var, use let or const instead                                   no-var
+  2006:11  error  Unexpected var, use let or const instead                                   no-var
+  2023:9   error  Unexpected var, use let or const instead                                   no-var
+  2030:9   error  Unexpected var, use let or const instead                                   no-var
+  2032:11  error  Unexpected var, use let or const instead                                   no-var
+  2046:9   error  Unexpected var, use let or const instead                                   no-var
+  2056:9   error  Unexpected var, use let or const instead                                   no-var
+  2058:11  error  Unexpected var, use let or const instead                                   no-var
+  2072:9   error  Unexpected var, use let or const instead                                   no-var
+  2079:9   error  Unexpected var, use let or const instead                                   no-var
+  2089:9   error  Unexpected var, use let or const instead                                   no-var
+  2090:9   error  Unexpected var, use let or const instead                                   no-var
+  2104:9   error  Unexpected var, use let or const instead                                   no-var
+  2110:13  error  Unexpected var, use let or const instead                                   no-var
+  2112:20  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  2112:23  error  Empty block statement                                                      no-empty
+  2114:9   error  Unexpected var, use let or const instead                                   no-var
+  2135:11  error  Unexpected var, use let or const instead                                   no-var
+  2144:9   error  Unexpected var, use let or const instead                                   no-var
+  2174:11  error  Unnecessary catch clause                                                   no-useless-catch
+  2214:9   error  Unexpected var, use let or const instead                                   no-var
+  2220:9   error  Unexpected var, use let or const instead                                   no-var
+  2249:9   error  Unexpected var, use let or const instead                                   no-var
+  2255:9   error  Unexpected var, use let or const instead                                   no-var
+  2312:16  error  'stream' is defined but never used                                         @typescript-eslint/no-unused-vars
+  2325:9   error  Unexpected var, use let or const instead                                   no-var
+  2326:9   error  Unexpected var, use let or const instead                                   no-var
+  2327:9   error  Unexpected var, use let or const instead                                   no-var
+  2328:9   error  Unexpected var, use let or const instead                                   no-var
+  2329:9   error  Unexpected var, use let or const instead                                   no-var
+  2341:9   error  Unexpected var, use let or const instead                                   no-var
+  2343:11  error  Unexpected var, use let or const instead                                   no-var
+  2344:11  error  Unexpected var, use let or const instead                                   no-var
+  2355:9   error  Unexpected var, use let or const instead                                   no-var
+  2362:9   error  Unexpected var, use let or const instead                                   no-var
+  2377:51  error  'pos' is defined but never used                                            @typescript-eslint/no-unused-vars
+  2384:9   error  Unexpected var, use let or const instead                                   no-var
+  2386:9   error  Unexpected var, use let or const instead                                   no-var
+  2399:9   error  Unexpected var, use let or const instead                                   no-var
+  2404:15  error  Unexpected var, use let or const instead                                   no-var
+  2407:19  error  Unexpected var, use let or const instead                                   no-var
+  2408:19  error  Unexpected var, use let or const instead                                   no-var
+  2410:19  error  Unexpected var, use let or const instead                                   no-var
+  2442:9   error  Unexpected var, use let or const instead                                   no-var
+  2442:13  error  'stdin' is assigned a value but never used                                 @typescript-eslint/no-unused-vars
+  2443:9   error  Unexpected var, use let or const instead                                   no-var
+  2443:13  error  'stdout' is assigned a value but never used                                @typescript-eslint/no-unused-vars
+  2444:9   error  Unexpected var, use let or const instead                                   no-var
+  2444:13  error  'stderr' is assigned a value but never used                                @typescript-eslint/no-unused-vars
+  2483:14  error  Unexpected var, use let or const instead                                   no-var
+  2484:11  error  Unexpected var, use let or const instead                                   no-var
+  2492:9   error  Unexpected var, use let or const instead                                   no-var
+  2500:11  error  Unexpected var, use let or const instead                                   no-var
+  2502:18  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  2502:21  error  Empty block statement                                                      no-empty
+  2503:9   error  Unexpected var, use let or const instead                                   no-var
+  2515:11  error  Unexpected var, use let or const instead                                   no-var
+  2531:34  error  'canRead' is defined but never used                                        @typescript-eslint/no-unused-vars
+  2531:43  error  'canWrite' is defined but never used                                       @typescript-eslint/no-unused-vars
+  2533:9   error  Unexpected var, use let or const instead                                   no-var
+  2535:11  error  Unexpected var, use let or const instead                                   no-var
+  2537:11  error  Unexpected var, use let or const instead                                   no-var
+  2540:20  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  2540:23  error  Empty block statement                                                      no-empty
+  2546:9   error  Unexpected var, use let or const instead                                   no-var
+  2550:9   error  Unexpected var, use let or const instead                                   no-var
+  2554:9   error  Unexpected var, use let or const instead                                   no-var
+  2559:9   error  Unexpected var, use let or const instead                                   no-var
+  2560:9   error  Unexpected var, use let or const instead                                   no-var
+  2563:13  error  Unexpected var, use let or const instead                                   no-var
+  2564:18  error  Unexpected var, use let or const instead                                   no-var
+  2569:11  error  Unexpected var, use let or const instead                                   no-var
+  2577:9   error  Unexpected var, use let or const instead                                   no-var
+  2581:9   error  Unexpected var, use let or const instead                                   no-var
+  2583:9   error  Unexpected var, use let or const instead                                   no-var
+  2588:19  error  'stream' is defined but never used                                         @typescript-eslint/no-unused-vars
+  2593:50  error  'pos' is defined but never used                                            @typescript-eslint/no-unused-vars
+  2594:13  error  Unexpected var, use let or const instead                                   no-var
+  2595:18  error  Unexpected var, use let or const instead                                   no-var
+  2596:15  error  Unexpected var, use let or const instead                                   no-var
+  2599:24  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  2614:51  error  'pos' is defined but never used                                            @typescript-eslint/no-unused-vars
+  2615:18  error  Unexpected var, use let or const instead                                   no-var
+  2618:24  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  2641:20  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  2657:11  error  Unexpected var, use let or const instead                                   no-var
+  2658:11  error  Unexpected var, use let or const instead                                   no-var
+  2667:13  error  Unexpected var, use let or const instead                                   no-var
+  2676:13  error  Unexpected var, use let or const instead                                   no-var
+  2677:13  error  Unexpected var, use let or const instead                                   no-var
+  2678:13  error  Unexpected var, use let or const instead                                   no-var
+  2681:13  error  Unexpected var, use let or const instead                                   no-var
+  2684:13  error  Unexpected var, use let or const instead                                   no-var
+  2686:13  error  Unexpected var, use let or const instead                                   no-var
+  2699:15  error  Unexpected var, use let or const instead                                   no-var
+  2719:13  error  Unexpected var, use let or const instead                                   no-var
+  2719:17  error  Unexpected aliasing of 'this' to local variable                            @typescript-eslint/no-this-alias
+  2721:15  error  Unexpected var, use let or const instead                                   no-var
+  2722:15  error  Unexpected var, use let or const instead                                   no-var
+  2746:11  error  Unexpected var, use let or const instead                                   no-var
+  2765:11  error  Unexpected var, use let or const instead                                   no-var
+  2767:11  error  Unexpected var, use let or const instead                                   no-var
+  2769:9   error  Unexpected var, use let or const instead                                   no-var
+  2783:9   error  Unexpected var, use let or const instead                                   no-var
+  2784:9   error  Unexpected var, use let or const instead                                   no-var
+  2786:11  error  Unexpected var, use let or const instead                                   no-var
+  2789:20  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  2789:35  error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  2793:11  error  Unexpected var, use let or const instead                                   no-var
+  2795:11  error  Unexpected var, use let or const instead                                   no-var
+  2797:18  error  Unexpected var, use let or const instead                                   no-var
+  2801:18  error  Unexpected var, use let or const instead                                   no-var
+  2811:54  error  'prot' is defined but never used                                           @typescript-eslint/no-unused-vars
+  2811:60  error  'flags' is defined but never used                                          @typescript-eslint/no-unused-vars
+  2813:11  error  Unexpected var, use let or const instead                                   no-var
+  2824:5   error  Unexpected var, use let or const instead                                   no-var
+  2830:9   error  Unexpected var, use let or const instead                                   no-var
+  2834:11  error  Unexpected var, use let or const instead                                   no-var
+  2847:11  error  Unexpected var, use let or const instead                                   no-var
+  2868:9   error  Unexpected var, use let or const instead                                   no-var
+  2869:9   error  Unexpected var, use let or const instead                                   no-var
+  2870:9   error  Unexpected var, use let or const instead                                   no-var
+  2887:9   error  Unexpected var, use let or const instead                                   no-var
+  2893:9   error  Unexpected var, use let or const instead                                   no-var
+  2897:9   error  Unexpected var, use let or const instead                                   no-var
+  2901:9   error  Unexpected var, use let or const instead                                   no-var
+  2911:7   error  'timeout' is defined but never used                                        @typescript-eslint/no-unused-vars
+  2914:9   error  Unexpected var, use let or const instead                                   no-var
+  2915:9   error  Unexpected var, use let or const instead                                   no-var
+  2917:9   error  Unexpected var, use let or const instead                                   no-var
+  2919:9   error  Unexpected var, use let or const instead                                   no-var
+  2921:9   error  Unexpected var, use let or const instead                                   no-var
+  2923:9   error  Unexpected var, use let or const instead                                   no-var
+  2925:9   error  Unexpected var, use let or const instead                                   no-var
+  2927:9   error  Unexpected var, use let or const instead                                   no-var
+  2931:9   error  Unexpected var, use let or const instead                                   no-var
+  2935:9   error  Unexpected var, use let or const instead                                   no-var
+  2938:14  error  Unexpected var, use let or const instead                                   no-var
+  2939:11  error  Unexpected var, use let or const instead                                   no-var
+  2943:11  error  Unexpected var, use let or const instead                                   no-var
+  2944:11  error  Unexpected var, use let or const instead                                   no-var
+  2949:13  error  Expected an assignment or function call and instead saw an expression      @typescript-eslint/no-unused-expressions
+  2955:13  error  Expected an assignment or function call and instead saw an expression      @typescript-eslint/no-unused-expressions
+  2961:13  error  Expected an assignment or function call and instead saw an expression      @typescript-eslint/no-unused-expressions
+  2985:5   error  Unexpected var, use let or const instead                                   no-var
+  2986:24  error  'mount' is defined but never used                                          @typescript-eslint/no-unused-vars
+  3007:9   error  Unexpected var, use let or const instead                                   no-var
+  3011:9   error  Unexpected var, use let or const instead                                   no-var
+  3022:9   error  Unexpected var, use let or const instead                                   no-var
+  3023:9   error  Unexpected var, use let or const instead                                   no-var
+  3025:9   error  Unexpected var, use let or const instead                                   no-var
+  3036:9   error  Unexpected var, use let or const instead                                   no-var
+  3044:11  error  Unexpected var, use let or const instead                                   no-var
+  3048:11  error  Unexpected var, use let or const instead                                   no-var
+  3051:57  error  'position' is defined but never used                                       @typescript-eslint/no-unused-vars
+  3052:11  error  Unexpected var, use let or const instead                                   no-var
+  3053:11  error  Unexpected var, use let or const instead                                   no-var
+  3060:58  error  'position' is defined but never used                                       @typescript-eslint/no-unused-vars
+  3061:11  error  Unexpected var, use let or const instead                                   no-var
+  3065:11  error  Unexpected var, use let or const instead                                   no-var
+  3077:11  error  Unexpected var, use let or const instead                                   no-var
+  3088:15  error  Unexpected var, use let or const instead                                   no-var
+  3099:15  error  Unexpected var, use let or const instead                                   no-var
+  3101:15  error  Unexpected var, use let or const instead                                   no-var
+  3108:17  error  Unexpected var, use let or const instead                                   no-var
+  3112:15  error  Unexpected var, use let or const instead                                   no-var
+  3118:15  error  Unexpected var, use let or const instead                                   no-var
+  3132:15  error  Unexpected var, use let or const instead                                   no-var
+  3134:40  error  A `require()` style import is forbidden                                    @typescript-eslint/no-require-imports
+  3140:22  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  3144:11  error  Unexpected var, use let or const instead                                   no-var
+  3180:11  error  Unexpected var, use let or const instead                                   no-var
+  3181:11  error  Unexpected var, use let or const instead                                   no-var
+  3184:15  error  Unexpected var, use let or const instead                                   no-var
+  3189:22  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  3195:15  error  Unexpected var, use let or const instead                                   no-var
+  3204:13  error  Unexpected var, use let or const instead                                   no-var
+  3218:15  error  Unexpected var, use let or const instead                                   no-var
+  3242:47  error  'error' is defined but never used                                          @typescript-eslint/no-unused-vars
+  3258:45  error  'error' is defined but never used                                          @typescript-eslint/no-unused-vars
+  3272:11  error  Unexpected var, use let or const instead                                   no-var
+  3273:11  error  Unexpected var, use let or const instead                                   no-var
+  3299:15  error  Unexpected var, use let or const instead                                   no-var
+  3313:22  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  3313:25  error  Empty block statement                                                      no-empty
+  3316:11  error  Unexpected var, use let or const instead                                   no-var
+  3317:16  error  Unexpected var, use let or const instead                                   no-var
+  3318:13  error  Unexpected var, use let or const instead                                   no-var
+  3321:22  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  3321:25  error  Empty block statement                                                      no-empty
+  3356:13  error  Unexpected var, use let or const instead                                   no-var
+  3369:11  error  Unexpected var, use let or const instead                                   no-var
+  3374:33  error  'backlog' is defined but never used                                        @typescript-eslint/no-unused-vars
+  3381:11  error  Unexpected var, use let or const instead                                   no-var
+  3381:33  error  A `require()` style import is forbidden                                    @typescript-eslint/no-require-imports
+  3382:11  error  Unexpected var, use let or const instead                                   no-var
+  3387:15  error  Unexpected var, use let or const instead                                   no-var
+  3392:15  error  Unexpected var, use let or const instead                                   no-var
+  3406:45  error  'error' is defined but never used                                          @typescript-eslint/no-unused-vars
+  3419:11  error  Unexpected var, use let or const instead                                   no-var
+  3424:11  error  Unexpected var, use let or const instead                                   no-var
+  3450:11  error  Unexpected var, use let or const instead                                   no-var
+  3466:11  error  Unexpected var, use let or const instead                                   no-var
+  3484:20  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  3492:11  error  Unexpected var, use let or const instead                                   no-var
+  3495:15  error  Unexpected var, use let or const instead                                   no-var
+  3513:11  error  Unexpected var, use let or const instead                                   no-var
+  3514:11  error  Unexpected var, use let or const instead                                   no-var
+  3515:11  error  Unexpected var, use let or const instead                                   no-var
+  3516:11  error  Unexpected var, use let or const instead                                   no-var
+  3517:11  error  Unexpected var, use let or const instead                                   no-var
+  3523:13  error  Unexpected var, use let or const instead                                   no-var
+  3536:7   error  Unexpected var, use let or const instead                                   no-var
+  3545:7   error  Unexpected var, use let or const instead                                   no-var
+  3546:12  error  Unexpected var, use let or const instead                                   no-var
+  3547:9   error  Unexpected var, use let or const instead                                   no-var
+  3557:7   error  Unexpected var, use let or const instead                                   no-var
+  3558:7   error  Unexpected var, use let or const instead                                   no-var
+  3559:7   error  Unexpected var, use let or const instead                                   no-var
+  3561:7   error  Unexpected var, use let or const instead                                   no-var
+  3639:5   error  Unexpected var, use let or const instead                                   no-var
+  3642:9   error  Unexpected var, use let or const instead                                   no-var
+  3650:9   error  Unexpected var, use let or const instead                                   no-var
+  3654:11  error  Unexpected var, use let or const instead                                   no-var
+  3669:52  error  'flags' is defined but never used                                          @typescript-eslint/no-unused-vars
+  3669:59  error  'd1' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3669:63  error  'd2' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3671:9   error  Unexpected var, use let or const instead                                   no-var
+  3672:9   error  Unexpected var, use let or const instead                                   no-var
+  3674:11  error  Unexpected var, use let or const instead                                   no-var
+  3674:15  error  'errno' is assigned a value but never used                                 @typescript-eslint/no-unused-vars
+  3700:7   error  Unexpected var, use let or const instead                                   no-var
+  3701:7   error  Unexpected var, use let or const instead                                   no-var
+  3702:7   error  Unexpected var, use let or const instead                                   no-var
+  3703:7   error  Unexpected var, use let or const instead                                   no-var
+  3704:7   error  Unexpected var, use let or const instead                                   no-var
+  3705:7   error  Unexpected var, use let or const instead                                   no-var
+  3706:7   error  Unexpected var, use let or const instead                                   no-var
+  3707:7   error  Unexpected var, use let or const instead                                   no-var
+  3717:7   error  Unexpected var, use let or const instead                                   no-var
+  3718:7   error  Unexpected var, use let or const instead                                   no-var
+  3769:7   error  Unexpected var, use let or const instead                                   no-var
+  3770:7   error  Unexpected var, use let or const instead                                   no-var
+  3771:7   error  Unexpected var, use let or const instead                                   no-var
+  3799:7   error  Unexpected var, use let or const instead                                   no-var
+  3804:49  error  'd1' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3804:53  error  'd2' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3804:57  error  'd3' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3806:9   error  Unexpected var, use let or const instead                                   no-var
+  3807:9   error  Unexpected var, use let or const instead                                   no-var
+  3815:52  error  'd1' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3815:56  error  'd2' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3815:60  error  'd3' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3817:9   error  Unexpected var, use let or const instead                                   no-var
+  3818:9   error  Unexpected var, use let or const instead                                   no-var
+  3826:55  error  'flags' is defined but never used                                          @typescript-eslint/no-unused-vars
+  3833:9   error  Unexpected var, use let or const instead                                   no-var
+  3834:9   error  Unexpected var, use let or const instead                                   no-var
+  3838:9   error  Unexpected var, use let or const instead                                   no-var
+  3854:9   error  Unexpected var, use let or const instead                                   no-var
+  3857:13  error  Unexpected var, use let or const instead                                   no-var
+  3861:13  error  Unexpected var, use let or const instead                                   no-var
+  3871:13  error  Unexpected var, use let or const instead                                   no-var
+  3876:13  error  Unexpected var, use let or const instead                                   no-var
+  3877:13  error  Unexpected var, use let or const instead                                   no-var
+  3901:9   error  Unexpected var, use let or const instead                                   no-var
+  3913:9   error  Unexpected var, use let or const instead                                   no-var
+  3917:9   error  Unexpected var, use let or const instead                                   no-var
+  3918:9   error  Unexpected var, use let or const instead                                   no-var
+  3919:9   error  Unexpected var, use let or const instead                                   no-var
+  3920:9   error  Unexpected var, use let or const instead                                   no-var
+  3922:11  error  Unexpected var, use let or const instead                                   no-var
+  3923:11  error  Unexpected var, use let or const instead                                   no-var
+  3924:11  error  Unexpected var, use let or const instead                                   no-var
+  3929:13  error  Unexpected var, use let or const instead                                   no-var
+  3933:13  error  Unexpected var, use let or const instead                                   no-var
+  3958:56  error  'd1' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3958:60  error  'd2' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3958:64  error  'd3' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3960:9   error  Unexpected var, use let or const instead                                   no-var
+  3964:9   error  Unexpected var, use let or const instead                                   no-var
+  3964:13  error  'errno' is assigned a value but never used                                 @typescript-eslint/no-unused-vars
+  3977:56  error  'd1' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3977:60  error  'd2' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3977:64  error  'd3' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3979:9   error  Unexpected var, use let or const instead                                   no-var
+  3980:9   error  Unexpected var, use let or const instead                                   no-var
+  3980:13  error  'errno' is assigned a value but never used                                 @typescript-eslint/no-unused-vars
+  3993:72  error  'd1' is defined but never used                                             @typescript-eslint/no-unused-vars
+  3995:9   error  Unexpected var, use let or const instead                                   no-var
+  4013:9   error  Unexpected var, use let or const instead                                   no-var
+  4031:13  error  Unexpected var, use let or const instead                                   no-var
+  4040:13  error  Unexpected var, use let or const instead                                   no-var
+  4061:9   error  Unexpected var, use let or const instead                                   no-var
+  4095:9   error  Unexpected var, use let or const instead                                   no-var
+  4096:9   error  Unexpected var, use let or const instead                                   no-var
+  4110:9   error  Unexpected var, use let or const instead                                   no-var
+  4117:41  error  'timeout' is defined but never used                                        @typescript-eslint/no-unused-vars
+  4119:9   error  Unexpected var, use let or const instead                                   no-var
+  4120:14  error  Unexpected var, use let or const instead                                   no-var
+  4121:11  error  Unexpected var, use let or const instead                                   no-var
+  4122:11  error  Unexpected var, use let or const instead                                   no-var
+  4123:11  error  Unexpected var, use let or const instead                                   no-var
+  4124:11  error  Unexpected var, use let or const instead                                   no-var
+  4125:11  error  Unexpected var, use let or const instead                                   no-var
+  4144:9   error  Unexpected var, use let or const instead                                   no-var
+  4145:9   error  Unexpected var, use let or const instead                                   no-var
+  4148:11  error  Unexpected var, use let or const instead                                   no-var
+  4148:15  error  'errno' is assigned a value but never used                                 @typescript-eslint/no-unused-vars
+  4188:9   error  Unexpected var, use let or const instead                                   no-var
+  4189:9   error  Unexpected var, use let or const instead                                   no-var
+  4208:9   error  Unexpected var, use let or const instead                                   no-var
+  4241:5   error  Unexpected var, use let or const instead                                   no-var
+  4252:7   error  Unexpected var, use let or const instead                                   no-var
+  4260:7   error  Unexpected var, use let or const instead                                   no-var
+  4261:7   error  Unexpected var, use let or const instead                                   no-var
+  4267:5   error  Unexpected var, use let or const instead                                   no-var
+  4270:5   error  Unexpected var, use let or const instead                                   no-var
+  4274:7   error  Unexpected var, use let or const instead                                   no-var
+  4275:7   error  Unexpected var, use let or const instead                                   no-var
+  4278:7   error  Unexpected var, use let or const instead                                   no-var
+  4282:7   error  Unexpected var, use let or const instead                                   no-var
+  4290:7   error  Unexpected var, use let or const instead                                   no-var
+  4293:7   error  Unexpected var, use let or const instead                                   no-var
+  4294:7   error  Unexpected var, use let or const instead                                   no-var
+  4295:7   error  Unexpected var, use let or const instead                                   no-var
+  4296:7   error  Unexpected var, use let or const instead                                   no-var
+  4302:7   error  Unexpected var, use let or const instead                                   no-var
+  4311:7   error  Unexpected var, use let or const instead                                   no-var
+  4312:7   error  Unexpected var, use let or const instead                                   no-var
+  4313:7   error  Unexpected var, use let or const instead                                   no-var
+  4314:7   error  Unexpected var, use let or const instead                                   no-var
+  4315:7   error  Unexpected var, use let or const instead                                   no-var
+  4316:7   error  Unexpected var, use let or const instead                                   no-var
+  4322:9   error  Unexpected var, use let or const instead                                   no-var
+  4323:9   error  Unexpected var, use let or const instead                                   no-var
+  4327:7   error  Unexpected var, use let or const instead                                   no-var
+  4339:9   error  Unexpected var, use let or const instead                                   no-var
+  4340:9   error  Unexpected var, use let or const instead                                   no-var
+  4341:9   error  Unexpected var, use let or const instead                                   no-var
+  4352:9   error  Unexpected var, use let or const instead                                   no-var
+  4363:7   error  Unexpected var, use let or const instead                                   no-var
+  4364:7   error  Unexpected var, use let or const instead                                   no-var
+  4369:7   error  Unexpected var, use let or const instead                                   no-var
+  4370:7   error  Unexpected var, use let or const instead                                   no-var
+  4371:7   error  Unexpected var, use let or const instead                                   no-var
+  4372:7   error  Unexpected var, use let or const instead                                   no-var
+  4373:7   error  Unexpected var, use let or const instead                                   no-var
+  4374:7   error  Unexpected var, use let or const instead                                   no-var
+  4378:9   error  Unexpected var, use let or const instead                                   no-var
+  4381:7   error  Unexpected var, use let or const instead                                   no-var
+  4382:7   error  Unexpected var, use let or const instead                                   no-var
+  4383:7   error  Unexpected var, use let or const instead                                   no-var
+  4384:7   error  Unexpected var, use let or const instead                                   no-var
+  4397:22  error  'handle' is defined but never used                                         @typescript-eslint/no-unused-vars
+  4400:5   error  Unexpected var, use let or const instead                                   no-var
+  4403:7   error  Unexpected var, use let or const instead                                   no-var
+  4415:7   error  Unexpected var, use let or const instead                                   no-var
+  4430:5   error  Unexpected var, use let or const instead                                   no-var
+  4432:28  error  A `require()` style import is forbidden                                    @typescript-eslint/no-require-imports
+  4439:7   error  Unexpected var, use let or const instead                                   no-var
+  4444:16  error  'e' is defined but never used                                              @typescript-eslint/no-unused-vars
+  4444:19  error  Empty block statement                                                      no-empty
+  4447:7   error  Unexpected var, use let or const instead                                   no-var
+  4449:7   error  Unexpected var, use let or const instead                                   no-var
+  4453:7   error  Unexpected var, use let or const instead                                   no-var
+  4455:12  error  Unexpected var, use let or const instead                                   no-var
+  4456:9   error  Unexpected var, use let or const instead                                   no-var
+  4461:9   error  Unexpected var, use let or const instead                                   no-var
+  4465:9   error  Unexpected var, use let or const instead                                   no-var
+  4472:5   error  Unexpected var, use let or const instead                                   no-var
+  4478:9   error  Unexpected var, use let or const instead                                   no-var
+  4485:9   error  Unexpected var, use let or const instead                                   no-var
+  4494:14  error  Unexpected var, use let or const instead                                   no-var
+  4498:9   error  Unexpected var, use let or const instead                                   no-var
+  4499:14  error  Unexpected var, use let or const instead                                   no-var
+  4507:12  error  Unexpected var, use let or const instead                                   no-var
+  4513:7   error  Unexpected var, use let or const instead                                   no-var
+  4515:9   error  Unexpected var, use let or const instead                                   no-var
+  4523:7   error  Unexpected var, use let or const instead                                   no-var
+  4525:7   error  Unexpected var, use let or const instead                                   no-var
+  4540:29  error  'implicit' is defined but never used                                       @typescript-eslint/no-unused-vars
+  4544:5   error  Unexpected var, use let or const instead                                   no-var
+  4547:9   error  Unexpected var, use let or const instead                                   no-var
+  4557:9   error  Unexpected var, use let or const instead                                   no-var
+  4558:9   error  Unexpected var, use let or const instead                                   no-var
+  4559:9   error  Unexpected var, use let or const instead                                   no-var
+  4561:11  error  Unexpected var, use let or const instead                                   no-var
+  4562:11  error  Unexpected var, use let or const instead                                   no-var
+  4581:7   error  Unexpected var, use let or const instead                                   no-var
+  4582:12  error  Unexpected var, use let or const instead                                   no-var
+  4583:9   error  Unexpected var, use let or const instead                                   no-var
+  4584:9   error  Unexpected var, use let or const instead                                   no-var
+  4586:9   error  Unexpected var, use let or const instead                                   no-var
+  4598:9   error  Unexpected var, use let or const instead                                   no-var
+  4599:9   error  Unexpected var, use let or const instead                                   no-var
+  4607:5   error  Unexpected var, use let or const instead                                   no-var
+  4608:5   error  Unexpected var, use let or const instead                                   no-var
+  4616:9   error  Unexpected var, use let or const instead                                   no-var
+  4628:7   error  Unexpected var, use let or const instead                                   no-var
+  4629:12  error  Unexpected var, use let or const instead                                   no-var
+  4630:9   error  Unexpected var, use let or const instead                                   no-var
+  4631:9   error  Unexpected var, use let or const instead                                   no-var
+  4633:9   error  Unexpected var, use let or const instead                                   no-var
+  4644:9   error  Unexpected var, use let or const instead                                   no-var
+  4645:9   error  Unexpected var, use let or const instead                                   no-var
+  4654:7   error  Unexpected var, use let or const instead                                   no-var
+  4655:7   error  Unexpected var, use let or const instead                                   no-var
+  4656:7   error  Unexpected var, use let or const instead                                   no-var
+  4657:7   error  Unexpected var, use let or const instead                                   no-var
+  4658:7   error  Unexpected var, use let or const instead                                   no-var
+  4659:7   error  Unexpected var, use let or const instead                                   no-var
+  4660:7   error  Unexpected var, use let or const instead                                   no-var
+  4662:9   error  Unexpected var, use let or const instead                                   no-var
+  4663:9   error  Unexpected var, use let or const instead                                   no-var
+  4785:7   error  Unexpected var, use let or const instead                                   no-var
+  4789:7   error  Unexpected var, use let or const instead                                   no-var
+  4790:7   error  Unexpected var, use let or const instead                                   no-var
+  4791:7   error  Unexpected var, use let or const instead                                   no-var
+  4793:9   error  Unexpected var, use let or const instead                                   no-var
+  4801:9   error  Unexpected var, use let or const instead                                   no-var
+  4808:9   error  Unexpected var, use let or const instead                                   no-var
+  4819:7   error  Unexpected var, use let or const instead                                   no-var
+  4820:12  error  Unexpected var, use let or const instead                                   no-var
+  4820:54  error  Empty block statement                                                      no-empty
+  4823:5   error  Unexpected var, use let or const instead                                   no-var
+  4824:5   error  Unexpected var, use let or const instead                                   no-var
+  4826:7   error  Unexpected var, use let or const instead                                   no-var
+  4828:9   error  Unexpected var, use let or const instead                                   no-var
+  4829:9   error  Unexpected var, use let or const instead                                   no-var
+  4830:9   error  Unexpected var, use let or const instead                                   no-var
+  4853:7   error  Unexpected var, use let or const instead                                   no-var
+  4854:7   error  Unexpected var, use let or const instead                                   no-var
+  4867:7   error  Unexpected var, use let or const instead                                   no-var
+  4868:7   error  Unexpected var, use let or const instead                                   no-var
+  4898:12  error  Unexpected var, use let or const instead                                   no-var
+  4904:7   error  Unexpected var, use let or const instead                                   no-var
+  4913:7   error  Unexpected var, use let or const instead                                   no-var
+  4928:9   error  Unexpected var, use let or const instead                                   no-var
+  4941:9   error  Unexpected var, use let or const instead                                   no-var
+  4968:9   error  Unexpected var, use let or const instead                                   no-var
+  4972:9   error  Unexpected var, use let or const instead                                   no-var
+  4973:9   error  Unexpected var, use let or const instead                                   no-var
+  4974:9   error  Unexpected var, use let or const instead                                   no-var
+  4975:9   error  Unexpected var, use let or const instead                                   no-var
+  4984:7   error  Unexpected var, use let or const instead                                   no-var
+  4998:11  error  Unexpected var, use let or const instead                                   no-var
+  5017:11  error  Unexpected var, use let or const instead                                   no-var
+  5059:11  error  Unexpected var, use let or const instead                                   no-var
+  5063:11  error  Unexpected var, use let or const instead                                   no-var
+  5071:13  error  Unexpected var, use let or const instead                                   no-var
+  5079:13  error  Unexpected var, use let or const instead                                   no-var
+  5088:11  error  Unexpected var, use let or const instead                                   no-var
+  5098:11  error  Unexpected var, use let or const instead                                   no-var
+  5099:11  error  Unexpected var, use let or const instead                                   no-var
+  5112:12  error  Unexpected var, use let or const instead                                   no-var
+  5121:7   error  Unexpected var, use let or const instead                                   no-var
+  5128:5   error  Unexpected var, use let or const instead                                   no-var
+  5130:9   error  Unexpected aliasing of 'this' to local variable                            @typescript-eslint/no-this-alias
+  5142:5   error  Unexpected var, use let or const instead                                   no-var
+  5143:5   error  Unexpected var, use let or const instead                                   no-var
+  5150:11  error  Expected an assignment or function call and instead saw an expression      @typescript-eslint/no-unused-expressions
+  5158:11  error  Expected an assignment or function call and instead saw an expression      @typescript-eslint/no-unused-expressions
+  5175:5   error  Unexpected var, use let or const instead                                   no-var
+  5247:5   error  Unexpected var, use let or const instead                                   no-var
+  5247:9   error  'asm' is assigned a value but never used                                   @typescript-eslint/no-unused-vars
+  5248:5   error  Unexpected var, use let or const instead                                   no-var
+  5248:9   error  '___wasm_call_ctors' is assigned a value but never used                    @typescript-eslint/no-unused-vars
+  5249:14  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  5249:69  error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  5251:5   error  Unexpected var, use let or const instead                                   no-var
+  5252:14  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  5254:9   error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  5257:5   error  Unexpected var, use let or const instead                                   no-var
+  5258:14  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  5258:68  error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  5260:5   error  Unexpected var, use let or const instead                                   no-var
+  5261:14  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  5261:57  error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  5263:5   error  Unexpected var, use let or const instead                                   no-var
+  5264:14  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  5264:57  error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  5266:5   error  Unexpected var, use let or const instead                                   no-var
+  5266:9   error  '_ffmpeg' is assigned a value but never used                               @typescript-eslint/no-unused-vars
+  5267:14  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  5269:9   error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  5272:5   error  Unexpected var, use let or const instead                                   no-var
+  5273:14  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  5273:57  error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  5275:5   error  Unexpected var, use let or const instead                                   no-var
+  5276:14  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  5278:9   error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  5281:5   error  Unexpected var, use let or const instead                                   no-var
+  5282:14  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  5282:60  error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  5284:5   error  Unexpected var, use let or const instead                                   no-var
+  5285:14  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  5285:60  error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  5287:5   error  Unexpected var, use let or const instead                                   no-var
+  5288:14  error  Use the spread operator instead of '.apply()'                              prefer-spread
+  5288:63  error  Use the rest parameters instead of 'arguments'                             prefer-rest-params
+  5290:5   error  Unexpected var, use let or const instead                                   no-var
+  5290:9   error  '_ff_h264_cabac_tables' is assigned a value but never used                 @typescript-eslint/no-unused-vars
+  5291:5   error  Unexpected var, use let or const instead                                   no-var
+  5291:9   error  '___start_em_js' is assigned a value but never used                        @typescript-eslint/no-unused-vars
+  5292:5   error  Unexpected var, use let or const instead                                   no-var
+  5292:9   error  '___stop_em_js' is assigned a value but never used                         @typescript-eslint/no-unused-vars
+  5294:7   error  Unexpected var, use let or const instead                                   no-var
+  5304:7   error  Unexpected var, use let or const instead                                   no-var
+  5314:7   error  Unexpected var, use let or const instead                                   no-var
+  5324:7   error  Unexpected var, use let or const instead                                   no-var
+  5334:7   error  Unexpected var, use let or const instead                                   no-var
+  5344:7   error  Unexpected var, use let or const instead                                   no-var
+  5354:7   error  Unexpected var, use let or const instead                                   no-var
+  5364:7   error  Unexpected var, use let or const instead                                   no-var
+  5374:7   error  Unexpected var, use let or const instead                                   no-var
+  5384:7   error  Unexpected var, use let or const instead                                   no-var
+  5394:7   error  Unexpected var, use let or const instead                                   no-var
+  5404:7   error  Unexpected var, use let or const instead                                   no-var
+  5414:7   error  Unexpected var, use let or const instead                                   no-var
+  5424:7   error  Unexpected var, use let or const instead                                   no-var
+  5439:5   error  Unexpected var, use let or const instead                                   no-var
+
+/Users/aramb-dev/Github/transcriptr/src/App.tsx
+   1:10  error  'Suspense' is defined but never used               @typescript-eslint/no-unused-vars
+   3:10  error  'motion' is defined but never used                 @typescript-eslint/no-unused-vars
+   5:10  error  'LoadingFallback' is defined but never used        @typescript-eslint/no-unused-vars
+   7:3   error  'TermsOfService' is defined but never used         @typescript-eslint/no-unused-vars
+   8:3   error  'PrivacyPolicy' is defined but never used          @typescript-eslint/no-unused-vars
+   9:3   error  'Changelog' is defined but never used              @typescript-eslint/no-unused-vars
+  10:3   error  'Feedback' is defined but never used               @typescript-eslint/no-unused-vars
+  11:3   error  'Documentation' is defined but never used          @typescript-eslint/no-unused-vars
+  15:7   error  'pageVariants' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  31:9   error  'location' is assigned a value but never used      @typescript-eslint/no-unused-vars
+
+/Users/aramb-dev/Github/transcriptr/src/app/api/cleanup/route.ts
+  25:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/app/api/convert/audio/route.ts
+  4:28  error  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/aramb-dev/Github/transcriptr/src/app/api/convert/cloud/route.ts
+  4:28  error  'request' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/aramb-dev/Github/transcriptr/src/app/api/firebase-proxy/route.ts
+  47:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/app/api/predict/route.ts
+  37:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/app/api/prediction/[id]/route.ts
+  46:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/app/api/printerz-proxy/route.ts
+  84:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/app/api/transcribe/route.ts
+   15:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   49:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   78:32  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  110:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  119:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/app/layout.tsx
+   5:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  37:14  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/aramb-dev/Github/transcriptr/src/app/page.tsx
+    3:30  error  'useEffect' is defined but never used                        @typescript-eslint/no-unused-vars
+   17:3   error  'fadeOutDown' is defined but never used                      @typescript-eslint/no-unused-vars
+   33:22  error  'setShowResult' is assigned a value but never used           @typescript-eslint/no-unused-vars
+   42:31  error  'setTranscriptionResult' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  106:43  error  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  135:43  error  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  191:45  error  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+  207:45  error  Unexpected any. Specify a different type                     @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/components/UploadAudio.tsx
+  22:12  error  'e' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/aramb-dev/Github/transcriptr/src/components/layout/Header.tsx
+  2:8  error  'Link' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/aramb-dev/Github/transcriptr/src/components/layout/MainLayout.tsx
+   1:30  error  'useEffect' is defined but never used               @typescript-eslint/no-unused-vars
+  15:3   error  'fadeOutDown' is defined but never used             @typescript-eslint/no-unused-vars
+  29:22  error  'setShowResult' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  30:21  error  'setShowError' is assigned a value but never used   @typescript-eslint/no-unused-vars
+
+/Users/aramb-dev/Github/transcriptr/src/components/transcription/TranscriptionForm.tsx
+    1:20  error  'useRef' is defined but never used                           @typescript-eslint/no-unused-vars
+    5:3   error  'UseSessionPersistenceResult' is defined but never used      @typescript-eslint/no-unused-vars
+   34:3   error  'onShowSuccess' is defined but never used                    @typescript-eslint/no-unused-vars
+   50:10  error  'isLoadingState' is assigned a value but never used          @typescript-eslint/no-unused-vars
+   50:26  error  'setIsLoadingState' is assigned a value but never used       @typescript-eslint/no-unused-vars
+  296:11  error  'firebaseFilePath' is never reassigned. Use 'const' instead  prefer-const
+  423:18  error  'e' is defined but never used                                @typescript-eslint/no-unused-vars
+
+/Users/aramb-dev/Github/transcriptr/src/components/transcription/TranscriptionProcessing.tsx
+  19:3  error  'getProgressColor' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/aramb-dev/Github/transcriptr/src/components/transcription/TranscriptionResult.tsx
+  272:6   warning  React Hook useEffect has a missing dependency: 'pdfTitle'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  562:56  error    Unexpected any. Specify a different type                                                                     @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/components/ui/animated-list.tsx
+  6:24  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/components/ui/button.tsx
+  59:18  warning  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+/Users/aramb-dev/Github/transcriptr/src/components/ui/scroll-reveal-section.tsx
+   1:17  error  'forwardRef' is defined but never used    @typescript-eslint/no-unused-vars
+   2:18  error  'useInView' is defined but never used     @typescript-eslint/no-unused-vars
+  10:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/components/ui/sequential-reveal-list.tsx
+  10:23  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  11:18  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/hooks/useScrollAnimation.tsx
+  1:10  error  'useEffect' is defined but never used  @typescript-eslint/no-unused-vars
+  1:29  error  'useState' is defined but never used   @typescript-eslint/no-unused-vars
+
+/Users/aramb-dev/Github/transcriptr/src/hooks/useSessionPersistence.ts
+  9:10  error  'TranscriptionStatus' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/aramb-dev/Github/transcriptr/src/hooks/useTranscriptionPolling.ts
+   1:10  error    'useState' is defined but never used                                                                             @typescript-eslint/no-unused-vars
+   6:23  error    Unexpected any. Specify a different type                                                                         @typescript-eslint/no-explicit-any
+  46:6   warning  React Hook useEffect has a missing dependency: 'startPolling'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+/Users/aramb-dev/Github/transcriptr/src/lib/animations.ts
+  1:25  error  'Target' is defined but never used               @typescript-eslint/no-unused-vars
+  1:33  error  'TargetAndTransition' is defined but never used  @typescript-eslint/no-unused-vars
+
+/Users/aramb-dev/Github/transcriptr/src/lib/firebase-proxy.ts
+  39:9  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/lib/firebase-utils.ts
+  67:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/lib/pdf-generation.ts
+    8:9   error  Unexpected any. Specify a different type                      @typescript-eslint/no-explicit-any
+   16:7   error  'generatePdfWithPrinterz' is assigned a value but never used  @typescript-eslint/no-unused-vars
+   18:9   error  Unexpected any. Specify a different type                      @typescript-eslint/no-explicit-any
+   52:16  error  'e' is defined but never used                                 @typescript-eslint/no-unused-vars
+  169:41  error  Unexpected any. Specify a different type                      @typescript-eslint/no-explicit-any
+
+/Users/aramb-dev/Github/transcriptr/src/lib/replicate-client.ts
+   24:16  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   26:12  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+   44:7   error  'maxRetries' is never reassigned. Use 'const' instead                                                                prefer-const
+   79:9   error  Use "@ts-expect-error" instead of "@ts-ignore", as "@ts-ignore" will do nothing if the following line is error-free  @typescript-eslint/ban-ts-comment
+   92:20  error  'e' is defined but never used                                                                                        @typescript-eslint/no-unused-vars
+  127:27  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+  163:21  error  Unexpected any. Specify a different type                                                                             @typescript-eslint/no-explicit-any
+
+✖ 860 problems (855 errors, 5 warnings)
+  592 errors and 0 warnings potentially fixable with the `--fix` option.
+
