@@ -31,7 +31,7 @@ Transcriptr is a modern web application that converts audio files to text using 
 ### Prerequisites
 
 - Node.js (v18 or later)
-- npm or yarn
+- bun
 - Replicate API token (for AI transcription)
 
 ### Installation
@@ -46,7 +46,7 @@ Transcriptr is a modern web application that converts audio files to text using 
 2. Install dependencies:
 
    ```bash
-   npm install
+   bun install
    ```
 
 3. Create a .env.local file in the root directory with your Replicate API token:
@@ -58,7 +58,7 @@ Transcriptr is a modern web application that converts audio files to text using 
 4. Start the development server:
 
    ```bash
-   npm run dev
+   bun run dev
    ```
 
 5. Open your browser to `http://localhost:3000` to see the application.
@@ -118,7 +118,7 @@ NEXT_PUBLIC_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
 To build the application for production:
 
 ```bash
-npm run build
+bun run build
 ```
 
 This command creates an optimized production build in the `.next` directory.
@@ -129,7 +129,7 @@ This command creates an optimized production build in the `.next` directory.
 2. Set the environment variable `NODE_ENV` to `production`
 3. Start the server:
    ```bash
-   npm run start
+   bun run start
    ```
 
 The server will run on port 3000 by default, but you can override this by setting the `PORT` environment variable.
@@ -144,17 +144,17 @@ FROM node:18-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN bun install
 
 COPY . .
-RUN npm run build
+RUN bun run build
 
 ENV NODE_ENV=production
 ENV PORT=3000
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+CMD ["bun", "run", "start"]
 ```
 
 Build and run the Docker container:
