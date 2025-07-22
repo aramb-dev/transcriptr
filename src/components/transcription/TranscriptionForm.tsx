@@ -731,7 +731,16 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         ) : (
           // Default: show upload form when idle or if something unexpected happened
           <div className="mobile:p-6 p-8">
-            <UploadAudio onUpload={handleUpload} />
+            <UploadAudio 
+              onUpload={handleUpload}
+              onConversionStart={() => setTransStatus("converting")}
+              onConversionComplete={() => console.log("Conversion completed, starting transcription...")}
+              onConversionError={(error) => {
+                console.error("Conversion failed:", error);
+                setError(`Audio conversion failed: ${error}`);
+                setTransStatus("failed");
+              }}
+            />
           </div>
         )}
       </div>
