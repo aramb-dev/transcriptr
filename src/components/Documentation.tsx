@@ -70,8 +70,9 @@ export function Documentation() {
               <ul className="list-disc space-y-2 pl-5 text-gray-700 dark:text-gray-300">
                 <li>
                   <strong>Upload Errors:</strong> Ensure your file is a
-                  supported audio format (MP3, WAV, FLAC, OGG) and within size
-                  limits.
+                  supported audio format. We support MP3, WAV, FLAC, and OGG directly,
+                  plus M4A, AAC, MP4, WMA, AIFF, and CAF (which are automatically
+                  converted to MP3). Files should be within size limits.
                 </li>
                 <li>
                   <strong>Transcription Failures:</strong> Check your internet

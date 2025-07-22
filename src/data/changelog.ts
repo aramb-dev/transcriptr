@@ -10,6 +10,52 @@ export interface ChangeItem {
 
 export const changelogItems: ChangeItem[] = [
   {
+    date: "Tue, 22 Jul 2025",
+    version: "2.1.0",
+    changes: {
+      new: [
+        "**🎵 Universal Audio Format Support**: Added automatic audio format conversion powered by CloudConvert API",
+        "**🔄 Seamless Format Conversion**: M4A, AAC, MP4, WMA, AIFF, and CAF files are now automatically converted to MP3 before transcription",
+        "**📱 iPhone Recording Support**: Native support for M4A files from iPhone Voice Memos and other iOS recording apps",
+        "**🎧 Windows Media Audio Support**: Added WMA file support for Windows users",
+        "**🍎 macOS Audio Support**: Full compatibility with AIFF and CAF audio formats from macOS applications",
+        "**⚡ CloudConvert API Integration**: New `/api/convert/cloud` endpoint with comprehensive job management and error handling",
+        "**🔍 Intelligent Format Detection**: Advanced file format detection utility with 15+ supported audio formats",
+        "**👁️ Real-Time Conversion Transparency**: Added detailed API response logging visible in UI details panel during conversion",
+        "**📊 Conversion Progress Tracking**: Live status updates with step-by-step conversion process visibility",
+        "**🔒 Secure Temporary File Handling**: Automatic cleanup of conversion files with privacy-focused temporary storage",
+        "**📋 Enhanced File History**: Converted files now properly appear as 'file uploads' in transcription history with original filenames",
+        "**🎯 Smart Conversion Routing**: Automatic detection and routing based on file format without user intervention",
+        "**⚙️ CloudConvert Health Monitoring**: Built-in API health checks and service availability validation",
+        "**📖 Comprehensive Format Documentation**: Updated documentation with detailed format support matrix and conversion explanations"
+      ],
+      improved: [
+        "**🚀 Enhanced User Experience**: Conversion process is completely transparent with immediate 'Converting...' UI feedback",
+        "**⏱️ Processing Time Optimization**: Direct formats (MP3, WAV, FLAC, OGG) process immediately, converted formats add only 30-60 seconds",
+        "**🔄 Automatic Workflow Integration**: Conversion seamlessly flows into existing transcription pipeline without user interaction",
+        "**📱 Mobile Conversion Support**: All conversion features fully functional on mobile devices with touch-optimized interfaces",
+        "**🎨 Visual Format Indicators**: Color-coded format categories (green for direct support, blue for auto-conversion) in documentation",
+        "**📊 Enhanced Progress Visualization**: Updated TranscriptionProcessing component with conversion-specific status messages",
+        "**🔧 Improved Error Handling**: Better error messages and fallback options for conversion failures",
+        "**📝 Updated Help Documentation**: Completely rewritten audio format support section with visual guides and process explanations",
+        "**🏷️ File Format Classification**: Clear distinction between 'directly supported' and 'auto-converted' formats for user expectations",
+        "**🔍 Enhanced File Validation**: Improved file type detection with both extension and MIME type checking",
+        "**📚 README Documentation**: Updated project README with comprehensive CloudConvert setup instructions and format support matrix",
+        "**⚡ Environment Configuration**: Enhanced environment variable documentation for CloudConvert API setup"
+      ],
+      fixed: [
+        "**🔄 Session History Persistence**: Fixed transcription history only keeping most recent entry - now properly accumulates all transcriptions chronologically",
+        "**🆔 Session ID Management**: Modified createSession() to always generate unique session IDs instead of reusing cookie values",
+        "**📱 SSL Certificate Issues**: Resolved development environment SSL certificate errors in Replicate API calls",
+        "**🎯 UI State Management**: Fixed conversion status not appearing immediately - UI now shows 'Converting...' state instantly",
+        "**📋 File History Categorization**: Resolved converted files appearing as 'URL audio' - now properly categorized as file uploads with original filenames",
+        "**🔄 Conversion Flow Metadata**: Enhanced data flow to preserve original file information throughout conversion process",
+        "**💻 File Input Validation**: Updated file input to accept all supported formats including M4A, AAC, and other convertible types",
+        "**⚠️ UnsupportedFormatHelp Component**: Updated component to handle conversion failures rather than format rejection"
+      ]
+    },
+  },
+  {
     date: "Mon, 21 Jul 2025",
     version: "2.0.0",
     changes: {

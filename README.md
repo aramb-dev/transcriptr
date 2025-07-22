@@ -83,11 +83,11 @@ Transcriptr requires several environment variables to function properly. Create 
 
 ### Optional Environment Variables
 
-| Variable                           | Description                                                            | Default       |
-| ---------------------------------- | ---------------------------------------------------------------------- | ------------- |
-| `NEXT_PUBLIC_CLOUDCONVERT_API_KEY` | API key for CloudConvert services (for additional file format support) | None          |
-| `PORT`                             | Port for the server to listen on                                       | `3000`        |
-| `NODE_ENV`                         | Environment mode (`development` or `production`)                       | `development` |
+| Variable                           | Description                                                                      | Default       |
+| ---------------------------------- | -------------------------------------------------------------------------------- | ------------- |
+| `NEXT_PUBLIC_CLOUDCONVERT_API_KEY` | CloudConvert API key for automatic audio format conversion (M4A, AAC, WMA → MP3) | None          |
+| `PORT`                             | Port for the server to listen on                                                 | `3000`        |
+| `NODE_ENV`                         | Environment mode (`development` or `production`)                                 | `development` |
 
 ### Example .env.local file
 
@@ -109,7 +109,7 @@ NEXT_PUBLIC_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
 - **Replicate API Token**: Sign up at [Replicate](https://replicate.com/) and create an API token
 - **Firebase**: Set up a project in [Firebase Console](https://console.firebase.google.com/) and get your credentials
 - **Printerz**: Create an account at [Printerz](https://printerz.dev/) and get your API key
-- **CloudConvert** (optional): Register at [CloudConvert](https://cloudconvert.com/) for additional file format conversion capabilities
+- **CloudConvert** (optional): Register at [CloudConvert](https://cloudconvert.com/) to enable automatic conversion of M4A, AAC, WMA, and other formats to MP3
 
 ## Build and Deployment
 
@@ -191,16 +191,32 @@ Next.js API Routes are used for the backend. The API endpoints are located in th
 
 ## Audio Format Support
 
-Transcriptr currently supports the following audio formats:
+Transcriptr supports a wide range of audio formats with **automatic conversion**:
 
-- MP3 (.mp3)
-- WAV (.wav)
-- FLAC (.flac)
-- OGG (.ogg)
+### 🚀 Directly Supported (Fastest Processing)
 
-For other formats like M4A, AAC, or WMA, please convert your files to one of the supported formats before uploading. You can use online tools like [CloudConvert](https://cloudconvert.com/m4a-to-mp3) for this purpose.
+- MP3 (.mp3) - Most common format
+- WAV (.wav) - Uncompressed audio
+- FLAC (.flac) - Lossless compression
+- OGG (.ogg) - Open-source format
 
-We're working on adding native support for more audio formats. Contributions are welcome!
+### 🔄 Auto-Converted Formats (Slightly Longer Processing)
+
+- M4A (.m4a) - iPhone/macOS recordings
+- AAC (.aac) - Advanced Audio Coding
+- MP4 (.mp4) - Video files with audio
+- WMA (.wma) - Windows Media Audio
+- AIFF (.aiff) - Apple format
+- CAF (.caf) - Core Audio Format
+
+### How It Works
+
+1. **Upload any supported format** - No manual conversion needed!
+2. **Automatic detection** - System identifies if conversion is required
+3. **Seamless processing** - Unsupported formats are converted to MP3 automatically
+4. **Transparent progress** - View conversion status in real-time
+
+> **Note**: To enable automatic conversion, you need to set up the `CLOUDCONVERT_API_KEY` environment variable. See the [Environment Variables](#environment-variables) section for details.
 
 ## Contributing
 
