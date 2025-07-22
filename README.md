@@ -4,6 +4,8 @@
 
 Transcriptr is a modern web application that converts audio files to text using artificial intelligence. It provides a clean, intuitive interface for uploading audio files and receiving high-quality transcriptions powered by Replicate's Incredibly Fast Whisper model.
 
+Visit the live demo at [Transcriptr Demo](https://transcriptr.aramb.dev).
+
 ![Transcriptr Screenshot](https://hc-cdn.hel1.your-objectstorage.com/s/v3/45e4e8138906a0b9ee7229c575d5ff7cd8226ca8_image.png)
 
 ## Features
