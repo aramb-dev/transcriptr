@@ -86,7 +86,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Conversio
     if (completedJob.status === 'finished') {
       // Get the export task to retrieve the converted file URL
       const exportTask = completedJob.tasks?.find(
-        (task: any) => task.name === 'export-file'
+        (task) => task.name === 'export-file'
       );
 
       if (exportTask?.result?.files?.[0]?.url) {
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Conversio
     } else {
       console.error(`CloudConvert job failed with status: ${completedJob.status}`, {
         jobId: job.id,
-        tasks: completedJob.tasks?.map((task: any) => ({
+        tasks: completedJob.tasks?.map((task) => ({
           name: task.name,
           status: task.status,
           message: task.message

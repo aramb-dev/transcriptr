@@ -129,7 +129,6 @@ export function validateFileFormat(file: File | string): {
   requiresConversion?: boolean;
 } {
   const extension = getFileExtension(file);
-  const filename = typeof file === 'string' ? file : file.name;
 
   if (!extension) {
     return {

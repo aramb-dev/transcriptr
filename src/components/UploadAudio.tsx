@@ -19,7 +19,7 @@ interface UploadAudioProps {
   onConversionStart?: () => void;
   onConversionComplete?: () => void;
   onConversionError?: (error: string) => void;
-  onApiResponse?: (response: { timestamp: Date; data: any }) => void;
+  onApiResponse?: (response: { timestamp: Date; data: Record<string, unknown> }) => void;
 }
 
 // --- URL Validation Helpers (can be moved to a util file if needed elsewhere) ---
@@ -252,6 +252,7 @@ export function UploadAudio({
     onConversionStart,
     onConversionComplete,
     onConversionError,
+    onApiResponse,
     transcriptionOptions,
   ]);
 
