@@ -249,7 +249,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
   };
 
   const handleUpload = async (
-    data: FormData | { audioUrl: string },
+    data: FormData | { audioUrl: string; originalFile?: { name: string; size: number } },
     options: { language: string; diarize: boolean },
   ) => {
     // --- Reset State ---
@@ -284,10 +284,20 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         };
       }
     } else if ("audioUrl" in data) {
-      audioSource = {
-        type: "url",
-        url: data.audioUrl,
-      };
+      // Check if this is a converted file (has originalFile metadata)
+      if (data.originalFile) {
+        audioSource = {
+          type: "file", // Treat converted files as file uploads in history
+          name: data.originalFile.name,
+          size: data.originalFile.size,
+        };
+      } else {
+        // Regular URL input
+        audioSource = {
+          type: "url",
+          url: data.audioUrl,
+        };
+      }
     }
 
     // Create new session and store in state

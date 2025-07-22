@@ -205,3 +205,13 @@ CLOUDCONVERT_API_KEY=your_cloudconvert_api_key_here
   - Added immediate state callback with small delay to ensure UI updates
   - Updated file input to accept all supported formats (M4A, AAC, etc.)
 - **Status**: UI now immediately shows "Converting..." state
+
+### ✅ Issue 3: Converted Files Saved as URL Audio in History
+
+- **Problem**: M4A files after CloudConvert conversion were saved as "URL audio" instead of file uploads
+- **Root Cause**: Converted files passed only the CloudConvert URL, losing original file metadata
+- **Fix**: Enhanced data flow to preserve original file information:
+  - Updated `UploadAudio` interface to include `originalFile` metadata
+  - Modified conversion flow to pass original file name and size
+  - Updated `TranscriptionForm.handleUpload()` to detect converted files and save them as file uploads
+- **Status**: Converted M4A files now appear in history with original filename, marked as file uploads

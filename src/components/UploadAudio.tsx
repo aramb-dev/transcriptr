@@ -11,7 +11,7 @@ import { uploadLargeFile } from "@/lib/storage-service";
 
 interface UploadAudioProps {
   onUpload: (
-    data: FormData | { audioUrl: string },
+    data: FormData | { audioUrl: string; originalFile?: { name: string; size: number } },
     options: { language: string; diarize: boolean },
   ) => void;
   onConversionStart?: () => void;
@@ -155,8 +155,11 @@ export function UploadAudio({
 
           onConversionComplete?.();
 
-          // Now submit the converted file URL for transcription
-          onUpload({ audioUrl: conversionResult.convertedUrl }, transcriptionOptions);
+          // Now submit the converted file URL for transcription WITH original file metadata
+          onUpload({ 
+            audioUrl: conversionResult.convertedUrl,
+            originalFile: { name: file.name, size: file.size }
+          }, transcriptionOptions);
 
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Conversion failed';
