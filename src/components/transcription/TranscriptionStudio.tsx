@@ -270,7 +270,7 @@ const ExportControls: React.FC<{ transcription: string }> = ({ transcription }) 
 
       setTimeout(() => URL.revokeObjectURL(url), 100);
       toast.success(`${selectedFormat.toUpperCase()} file downloaded!`);
-    } catch (error) {
+    } catch {
       toast.error("Download failed");
     } finally {
       setIsDownloading(false);
@@ -353,7 +353,7 @@ const ActionButtons: React.FC<{ transcription: string }> = ({ transcription }) =
       setCopySuccess(true);
       toast.success("Copied to clipboard!");
       setTimeout(() => setCopySuccess(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy");
     }
   };
@@ -442,7 +442,7 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription
       setCopySuccess(true);
       toast.success("Transcript copied to clipboard!");
       setTimeout(() => setCopySuccess(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy transcript");
     }
   };

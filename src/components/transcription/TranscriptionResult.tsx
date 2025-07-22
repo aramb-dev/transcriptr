@@ -32,7 +32,7 @@ export default function TranscriptionResult({
     try {
       const parsed = typeof transcription === "string" ? JSON.parse(transcription) : transcription;
       return parsed?.text || transcription;
-    } catch (e) {
+    } catch {
       return transcription;
     }
   }, [transcription]);
@@ -50,7 +50,7 @@ export default function TranscriptionResult({
       setCopySuccess(true);
       toast.success("Copied to clipboard!");
       setTimeout(() => setCopySuccess(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy");
     }
   };
@@ -69,7 +69,7 @@ export default function TranscriptionResult({
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 100);
       toast.success("Downloaded as TXT!");
-    } catch (error) {
+    } catch {
       toast.error("Download failed");
     } finally {
       setIsDownloading(false);
@@ -92,7 +92,7 @@ export default function TranscriptionResult({
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 100);
       toast.success("Downloaded as Markdown!");
-    } catch (error) {
+    } catch {
       toast.error("Download failed");
     } finally {
       setIsDownloading(false);
@@ -141,7 +141,7 @@ export default function TranscriptionResult({
       document.body.removeChild(a);
       setTimeout(() => URL.revokeObjectURL(url), 100);
       toast.success("Downloaded as DOCX!");
-    } catch (error) {
+    } catch {
       toast.error("Download failed");
     } finally {
       setIsDownloading(false);
@@ -171,7 +171,7 @@ export default function TranscriptionResult({
       // Save the PDF
       pdf.save("transcription.pdf");
       toast.success("Downloaded as PDF!");
-    } catch (error) {
+    } catch {
       toast.error("Download failed");
     } finally {
       setIsDownloading(false);
