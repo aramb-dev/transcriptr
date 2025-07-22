@@ -5,8 +5,15 @@ import { UploadAudio } from "../UploadAudio";
 import { TranscriptionProcessing } from "./TranscriptionProcessing";
 import { TranscriptionError } from "./TranscriptionError";
 import { MobileTranscriptionResult } from "./MobileTranscriptionResult";
+import TranscriptionResult from "./TranscriptionResult";
 import { TranscriptionStudio } from "./TranscriptionStudio";
 import SessionRecoveryPrompt from "./SessionRecoveryPrompt";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import {
   TranscriptionStatus,
   statusMessages,
@@ -42,6 +49,9 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
 
   // Mobile detection hook
   const [isMobile, setIsMobile] = useState(false);
+
+  // Studio modal state
+  const [isStudioModalOpen, setIsStudioModalOpen] = useState(false);
 
   useEffect(() => {
     const checkIsMobile = () => {
@@ -656,12 +666,35 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
               onNewTranscription={handleReset}
             />
           ) : (
-            // Desktop Studio view - Enhanced transcription workspace
-            <TranscriptionStudio
-              transcription={transcription}
-              audioSource={activeSession?.audioSource}
-              onNewTranscription={handleReset}
-            />
+            // Desktop result view with studio modal option
+            <>
+              <TranscriptionResult
+                transcription={transcription}
+                onNewTranscription={handleReset}
+                onOpenStudio={() => setIsStudioModalOpen(true)}
+              />
+
+              {/* Studio Modal */}
+              <Dialog open={isStudioModalOpen} onOpenChange={setIsStudioModalOpen}>
+                <DialogContent className="max-w-[90vw] w-[90vw] max-h-[90vh] h-[90vh] p-0 overflow-hidden bg-gray-50">
+                  <DialogHeader className="sr-only">
+                    <DialogTitle>Transcription Studio</DialogTitle>
+                  </DialogHeader>
+                  <div className="h-full overflow-auto">
+                    <div className="min-h-full">
+                      <TranscriptionStudio
+                        transcription={transcription}
+                        audioSource={activeSession?.audioSource}
+                        onNewTranscription={() => {
+                          setIsStudioModalOpen(false);
+                          handleReset();
+                        }}
+                      />
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
           )
         ) : (
           // Default: show upload form when idle or if something unexpected happened

@@ -519,7 +519,7 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription
             )}
           </Button>
         </div>
-        
+
         <div className="border border-gray-200 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700">
           <div className="max-h-96 overflow-y-auto p-6">
             <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap font-mono">
@@ -625,10 +625,10 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
   onNewTranscription
 }) => {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6">
+    <div className="h-full bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto px-4 py-6 h-full flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 flex-shrink-0">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Transcription Studio
@@ -649,21 +649,21 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
         </div>
 
         {/* Two-Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
           {/* Left Panel - Transcript */}
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
+          <div className="lg:col-span-2 flex flex-col">
+            <Card className="flex-1 flex flex-col">
+              <CardHeader className="flex-shrink-0">
                 <h2 className="text-lg font-semibold">Transcript</h2>
               </CardHeader>
-              <CardContent className="p-6">
+              <CardContent className="p-6 flex-1 overflow-hidden">
                 <EnhancedTranscript transcription={transcription} />
               </CardContent>
             </Card>
           </div>
 
           {/* Right Panel - Controls */}
-          <div className="space-y-4">
+          <div className="space-y-4 max-h-full overflow-y-auto">
             {/* Audio Player */}
             <AudioPlayer audioSource={audioSource} />
 

@@ -27,7 +27,14 @@ export const changelogItems: ChangeItem[] = [
         "**📋 Enhanced File History**: Converted files now properly appear as 'file uploads' in transcription history with original filenames",
         "**🎯 Smart Conversion Routing**: Automatic detection and routing based on file format without user intervention",
         "**⚙️ CloudConvert Health Monitoring**: Built-in API health checks and service availability validation",
-        "**📖 Comprehensive Format Documentation**: Updated documentation with detailed format support matrix and conversion explanations"
+        "**📖 Comprehensive Format Documentation**: Updated documentation with detailed format support matrix and conversion explanations",
+        "**📄 Multi-Format Download System**: Complete download dropdown with support for TXT, Markdown, DOCX, and PDF formats",
+        "**📝 Professional Document Generation**: Real DOCX files using the docx library with proper formatting, titles, and paragraph structure",
+        "**🔴 PDF Export with Text Wrapping**: PDF generation using jsPDF with automatic text wrapping and professional layout",
+        "**📋 Enhanced Markdown Export**: Structured Markdown files with proper headings and formatting",
+        "**🏷️ Arabic Language Detection**: Automatic detection of Arabic text using comprehensive Unicode character ranges",
+        "**⚠️ Arabic Format Beta Warnings**: Clear beta ribbons on DOCX and PDF downloads for Arabic content with explanatory notices",
+        "**📢 Format Compatibility Notices**: User-friendly warnings explaining format limitations for Arabic text with recommendations"
       ],
       improved: [
         "**🚀 Enhanced User Experience**: Conversion process is completely transparent with immediate 'Converting...' UI feedback",
@@ -41,7 +48,12 @@ export const changelogItems: ChangeItem[] = [
         "**🏷️ File Format Classification**: Clear distinction between 'directly supported' and 'auto-converted' formats for user expectations",
         "**🔍 Enhanced File Validation**: Improved file type detection with both extension and MIME type checking",
         "**📚 README Documentation**: Updated project README with comprehensive CloudConvert setup instructions and format support matrix",
-        "**⚡ Environment Configuration**: Enhanced environment variable documentation for CloudConvert API setup"
+        "**⚡ Environment Configuration**: Enhanced environment variable documentation for CloudConvert API setup",
+        "**🎨 Unified Transcription Results UI**: Complete redesign with mobile-inspired card layout replacing complex tabs system",
+        "**🔄 Streamlined Download Interface**: Single dropdown button with organized format options and visual icons",
+        "**📱 Improved Dropdown Visibility**: Solid backgrounds with proper shadows and borders for better readability",
+        "**⚡ Enhanced Download Performance**: Optimized file generation with proper memory cleanup and blob URL management",
+        "**🌍 Internationalization Awareness**: Smart language detection with format-specific recommendations for non-Latin scripts"
       ],
       fixed: [
         "**🔄 Session History Persistence**: Fixed transcription history only keeping most recent entry - now properly accumulates all transcriptions chronologically",
