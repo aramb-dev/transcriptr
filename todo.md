@@ -190,16 +190,18 @@ CLOUDCONVERT_API_KEY=your_cloudconvert_api_key_here
 ## Recent Fixes (2025-07-22)
 
 ### ✅ Issue 1: SSL Certificate Error in Replicate API
-- **Problem**: `TypeError: fetch failed` with `UNABLE_TO_VERIFY_LEAF_SIGNATURE` 
+
+- **Problem**: `TypeError: fetch failed` with `UNABLE_TO_VERIFY_LEAF_SIGNATURE`
 - **Fix**: Updated HTTPS agent configuration in `replicate-client.ts`
 - **Status**: Resolved with `NODE_TLS_REJECT_UNAUTHORIZED=0` for development
 
 ### ✅ Issue 2: UI Not Showing Conversion State
+
 - **Problem**: UI remained static during CloudConvert processing
 - **Root Cause**: `isLoading` condition didn't include `"converting"` status
 - **Fixes Applied**:
   - Updated `isLoading` condition to include `"converting"` state
-  - Updated `TranscriptionProcessing` component to handle converting status  
+  - Updated `TranscriptionProcessing` component to handle converting status
   - Added immediate state callback with small delay to ensure UI updates
   - Updated file input to accept all supported formats (M4A, AAC, etc.)
 - **Status**: UI now immediately shows "Converting..." state

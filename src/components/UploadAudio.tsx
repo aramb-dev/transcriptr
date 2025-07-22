@@ -122,7 +122,7 @@ export function UploadAudio({
         try {
           // Start conversion state IMMEDIATELY before any async operations
           onConversionStart?.();
-          
+
           // Add a small delay to ensure state updates are processed
           await new Promise(resolve => setTimeout(resolve, 100));
 
