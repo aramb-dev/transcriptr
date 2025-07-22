@@ -750,6 +750,10 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
                 setError(`Audio conversion failed: ${error}`);
                 setTransStatus("failed");
               }}
+              onApiResponse={(response) => {
+                console.log("API Response:", response.data);
+                setApiResponses(prev => [...prev, response]);
+              }}
             />
           </div>
         )}
