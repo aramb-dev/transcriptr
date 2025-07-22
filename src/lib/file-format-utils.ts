@@ -181,6 +181,6 @@ export function getAcceptedMimeTypes(): string {
     '.amr',
     '.webm'
   ];
-  
+
   return audioTypes.join(',');
 }

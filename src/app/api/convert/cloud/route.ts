@@ -22,14 +22,14 @@ interface ConversionResponse {
 export async function POST(request: NextRequest): Promise<NextResponse<ConversionResponse>> {
   try {
     console.log('CloudConvert conversion request received');
-    
+
     // Validate API key
     if (!process.env.CLOUDCONVERT_API_KEY) {
       console.error('CLOUDCONVERT_API_KEY not found in environment variables');
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'CloudConvert API key not configured' 
+        {
+          success: false,
+          error: 'CloudConvert API key not configured'
         },
         { status: 500 }
       );
@@ -43,9 +43,9 @@ export async function POST(request: NextRequest): Promise<NextResponse<Conversio
     if (!fileUrl || !originalFormat) {
       console.error('Missing required fields:', { fileUrl: !!fileUrl, originalFormat: !!originalFormat });
       return NextResponse.json(
-        { 
-          success: false, 
-          error: 'Missing required fields: fileUrl and originalFormat' 
+        {
+          success: false,
+          error: 'Missing required fields: fileUrl and originalFormat'
         },
         { status: 400 }
       );
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Conversio
 
     // Wait for job completion
     const completedJob = await cloudConvert.jobs.wait(job.id);
-    
+
     if (completedJob.status === 'finished') {
       // Get the export task to retrieve the converted file URL
       const exportTask = completedJob.tasks?.find(
@@ -92,7 +92,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<Conversio
       if (exportTask?.result?.files?.[0]?.url) {
         const convertedUrl = exportTask.result.files[0].url;
         console.log(`Conversion successful: ${convertedUrl}`);
-        
+
         return NextResponse.json({
           success: true,
           convertedUrl,
@@ -103,16 +103,16 @@ export async function POST(request: NextRequest): Promise<NextResponse<Conversio
       } else {
         console.error('Export task did not produce a valid file URL', { exportTask });
         return NextResponse.json(
-          { 
-            success: false, 
+          {
+            success: false,
             error: 'Conversion completed but no output file was generated',
-            jobId: job.id 
+            jobId: job.id
           },
           { status: 500 }
         );
       }
     } else {
-      console.error(`CloudConvert job failed with status: ${completedJob.status}`, { 
+      console.error(`CloudConvert job failed with status: ${completedJob.status}`, {
         jobId: job.id,
         tasks: completedJob.tasks?.map((task: any) => ({
           name: task.name,
@@ -120,12 +120,12 @@ export async function POST(request: NextRequest): Promise<NextResponse<Conversio
           message: task.message
         }))
       });
-      
+
       return NextResponse.json(
-        { 
-          success: false, 
+        {
+          success: false,
           error: `Conversion failed: ${completedJob.status}`,
-          jobId: job.id 
+          jobId: job.id
         },
         { status: 500 }
       );
@@ -133,22 +133,22 @@ export async function POST(request: NextRequest): Promise<NextResponse<Conversio
 
   } catch (error) {
     console.error('CloudConvert conversion error:', error);
-    
+
     // Handle specific CloudConvert errors
     if (error instanceof Error) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: `Conversion service error: ${error.message}` 
+        {
+          success: false,
+          error: `Conversion service error: ${error.message}`
         },
         { status: 500 }
       );
     }
 
     return NextResponse.json(
-      { 
-        success: false, 
-        error: 'Unknown conversion error occurred' 
+      {
+        success: false,
+        error: 'Unknown conversion error occurred'
       },
       { status: 500 }
     );
@@ -160,9 +160,9 @@ export async function GET(): Promise<NextResponse> {
   try {
     if (!process.env.CLOUDCONVERT_API_KEY) {
       return NextResponse.json(
-        { 
-          status: 'error', 
-          message: 'CloudConvert API key not configured' 
+        {
+          status: 'error',
+          message: 'CloudConvert API key not configured'
         },
         { status: 500 }
       );
@@ -170,7 +170,7 @@ export async function GET(): Promise<NextResponse> {
 
     // Simple health check - verify we can authenticate
     const user = await cloudConvert.users.me();
-    
+
     return NextResponse.json({
       status: 'healthy',
       service: 'CloudConvert',
@@ -181,9 +181,9 @@ export async function GET(): Promise<NextResponse> {
   } catch (error) {
     console.error('CloudConvert health check failed:', error);
     return NextResponse.json(
-      { 
-        status: 'error', 
-        message: 'CloudConvert service unavailable' 
+      {
+        status: 'error',
+        message: 'CloudConvert service unavailable'
       },
       { status: 500 }
     );

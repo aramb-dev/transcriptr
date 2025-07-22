@@ -36,11 +36,11 @@ const hasAudioExtension = (url: string) => {
 };
 // --- End URL Validation Helpers ---
 
-export function UploadAudio({ 
-  onUpload, 
+export function UploadAudio({
+  onUpload,
   onConversionStart,
   onConversionComplete,
-  onConversionError 
+  onConversionError
 }: UploadAudioProps) {
   const [file, setFile] = useState<File | null>(null);
   const [audioUrl, setAudioUrl] = useState<string>("");
@@ -121,11 +121,11 @@ export function UploadAudio({
       if (requiresConversion) {
         try {
           onConversionStart?.();
-          
+
           // First upload the file to Firebase to get a public URL
           const uploadResult = await uploadLargeFile(file);
           const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
-          
+
           // Call conversion endpoint with the uploaded file URL
           const response = await fetch('/api/convert/cloud', {
             method: 'POST',
@@ -138,22 +138,22 @@ export function UploadAudio({
               targetFormat: 'mp3'
             }),
           });
-          
+
           if (!response.ok) {
             throw new Error(`Conversion failed: ${response.statusText}`);
           }
-          
+
           const conversionResult = await response.json();
-          
+
           if (!conversionResult.success) {
             throw new Error(conversionResult.error || 'Conversion failed');
           }
-          
+
           onConversionComplete?.();
-          
+
           // Now submit the converted file URL for transcription
           onUpload({ audioUrl: conversionResult.convertedUrl }, transcriptionOptions);
-          
+
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Conversion failed';
           onConversionError?.(errorMessage);

@@ -21,7 +21,7 @@ export function useFileInput({
     (file: File): { error: string | null; requiresConversion: boolean } => {
       // Check file size first
       if (file.size > maxSize * 1024 * 1024) {
-        return { 
+        return {
           error: `File size exceeds the ${maxSize}MB limit.`,
           requiresConversion: false
         };
@@ -29,9 +29,9 @@ export function useFileInput({
 
       // Check file format support
       const formatValidation = validateFileFormat(file);
-      
+
       if (!formatValidation.valid) {
-        return { 
+        return {
           error: formatValidation.error || "Unsupported file format",
           requiresConversion: false
         };
@@ -39,13 +39,13 @@ export function useFileInput({
 
       // If conversion is required but not allowed
       if (formatValidation.requiresConversion && !allowConversion) {
-        return { 
+        return {
           error: "This file format requires conversion, but conversion is not enabled.",
           requiresConversion: false
         };
       }
 
-      return { 
+      return {
         error: null,
         requiresConversion: formatValidation.requiresConversion || false
       };
