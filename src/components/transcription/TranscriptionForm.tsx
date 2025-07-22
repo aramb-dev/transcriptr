@@ -4,8 +4,8 @@ import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { UploadAudio } from "../UploadAudio";
 import { TranscriptionProcessing } from "./TranscriptionProcessing";
 import { TranscriptionError } from "./TranscriptionError";
-import TranscriptionResult from "./TranscriptionResult";
 import { MobileTranscriptionResult } from "./MobileTranscriptionResult";
+import { TranscriptionStudio } from "./TranscriptionStudio";
 import SessionRecoveryPrompt from "./SessionRecoveryPrompt";
 import {
   TranscriptionStatus,
@@ -18,7 +18,6 @@ import { trackEvent } from "../../lib/analytics";
 import { isLargeFile, uploadLargeFile } from "../../lib/storage-service";
 
 import { cleanupFirebaseFile } from "../../lib/cleanup-service";
-import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 import { fadeInUp, springTransition } from "../../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
@@ -36,7 +35,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
   >([]);
   const [showApiDetails, setShowApiDetails] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [copySuccess, setCopySuccess] = useState(false);
   const [currentPredictionId, setCurrentPredictionId] = useState<string | null>(
     null,
   );
@@ -232,21 +230,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
   };
 
   const isLoading = transStatus === "converting" || transStatus === "starting" || transStatus === "processing";
-
-  const handleCopyToClipboard = async () => {
-    if (transcription) {
-      try {
-        await navigator.clipboard.writeText(transcription);
-        setCopySuccess(true);
-
-        setTimeout(() => {
-          setCopySuccess(false);
-        }, 2000);
-      } catch (err) {
-        console.error("Failed to copy text: ", err);
-      }
-    }
-  };
 
   const handleUpload = async (
     data: FormData | { audioUrl: string; originalFile?: { name: string; size: number } },
@@ -673,70 +656,12 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
               onNewTranscription={handleReset}
             />
           ) : (
-            // Desktop result view with existing layout
-            <div className="p-8">
-              <TranscriptionResult transcription={transcription} />
-              {/* Buttons moved outside TranscriptionResult */}
-              <div className="mt-4 flex justify-center gap-4 border-t border-gray-100 bg-gray-50 px-8 py-4 dark:border-gray-700 dark:bg-gray-800/80">
-                <Button
-                  variant="outline"
-                  onClick={handleReset}
-                  className="bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                >
-                  New Transcription
-                </Button>
-                <Button
-                  onClick={handleCopyToClipboard}
-                  className="gap-2 bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                  disabled={copySuccess}
-                >
-                  {copySuccess ? (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-green-500"
-                      >
-                        <path d="M20 6L9 17l-5-5"></path>
-                      </svg>
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect
-                          x="9"
-                          y="9"
-                          width="13"
-                          height="13"
-                          rx="2"
-                          ry="2"
-                        ></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                      </svg>
-                      Copy to Clipboard
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
+            // Desktop Studio view - Enhanced transcription workspace
+            <TranscriptionStudio
+              transcription={transcription}
+              audioSource={activeSession?.audioSource}
+              onNewTranscription={handleReset}
+            />
           )
         ) : (
           // Default: show upload form when idle or if something unexpected happened
@@ -752,7 +677,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
               }}
               onApiResponse={(response) => {
                 console.log("API Response:", response.data);
-                setApiResponses(prev => [...prev, response]);
+                setApiResponses(prev => [...prev, response as { timestamp: Date; data: Record<string, unknown> }]);
               }}
             />
           </div>
