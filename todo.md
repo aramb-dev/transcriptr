@@ -140,9 +140,10 @@ Implement CloudConvert integration to automatically convert unsupported audio fo
 - **Phase 3**: ✅ Complete (Frontend integration with conversion states)
 - **Phase 4**: ✅ Complete (File format detection utilities)
 - **Phase 5**: ✅ Complete (API response logging and transparency)
-- **Overall Progress**: 85%
+- **Phase 6**: ✅ Complete (History persistence bug fix)
+- **Overall Progress**: 90%
 
-**Ready for Testing**: Core conversion functionality with transparent user feedback is now complete!
+**Ready for Production**: Core conversion functionality with transparent user feedback and proper history management is now complete!
 
 ---
 
@@ -231,3 +232,13 @@ CLOUDCONVERT_API_KEY=your_cloudconvert_api_key_here
     - Job completion and success status
   - Connected logging to UI details panel via `TranscriptionForm`
 - **Status**: All conversion steps now visible in UI details section with timestamps
+
+### ✅ Issue 5: Transcription History Only Keeping Most Recent Entry
+
+- **Problem**: Transcription history functionality was only retaining the most recent transcription, replacing previous entries instead of accumulating a chronological list
+- **Root Cause**: `createSession()` function in `persistence-service.ts` was reusing the same session ID from cookies instead of creating unique IDs for each transcription
+- **Fix**: Modified `createSession()` to always generate a new unique session ID:
+  - Changed `const sessionId = getSessionId() || createSessionId();` to `const sessionId = createSessionId();`
+  - This ensures each transcription gets its own database entry instead of overwriting previous ones
+  - Session cookie tracking still works correctly for active session management
+- **Status**: History now properly accumulates all transcriptions chronologically

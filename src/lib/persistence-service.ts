@@ -161,8 +161,8 @@ export const createSession = async (
     url?: string;
   },
 ): Promise<TranscriptionSession> => {
-  // Create a new session ID or use existing one from cookie
-  const sessionId = getSessionId() || createSessionId();
+  // Always create a new unique session ID for each transcription
+  const sessionId = createSessionId();
 
   const now = Date.now();
   const expiryHours = DEFAULT_SESSION_EXPIRY_HOURS;

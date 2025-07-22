@@ -39,8 +39,8 @@ const hasAudioExtension = (url: string) => {
 };
 // --- End URL Validation Helpers ---
 
-export function UploadAudio({ 
-  onUpload, 
+export function UploadAudio({
+  onUpload,
   onConversionStart,
   onConversionComplete,
   onConversionError,
@@ -126,11 +126,11 @@ export function UploadAudio({
         try {
           // Start conversion state IMMEDIATELY before any async operations
           onConversionStart?.();
-          
+
           // Log conversion start
           onApiResponse?.({
             timestamp: new Date(),
-            data: { 
+            data: {
               message: `Starting conversion: ${file.name} (${file.type || 'unknown type'}) → MP3`,
               originalFile: file.name,
               originalFormat: file.name.split('.').pop()?.toLowerCase() || 'unknown',
@@ -147,18 +147,18 @@ export function UploadAudio({
             timestamp: new Date(),
             data: { message: `Uploading ${file.name} to Firebase for conversion...` }
           });
-          
+
           const uploadResult = await uploadLargeFile(file);
-          
+
           onApiResponse?.({
             timestamp: new Date(),
-            data: { 
+            data: {
               message: `File uploaded successfully`,
               firebaseUrl: uploadResult.url,
               firebasePath: uploadResult.path
             }
           });
-          
+
           const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
 
           // Call conversion endpoint with the uploaded file URL
@@ -166,7 +166,7 @@ export function UploadAudio({
             timestamp: new Date(),
             data: { message: `Calling CloudConvert API for ${fileExtension.toUpperCase()} → MP3 conversion...` }
           });
-          
+
           const response = await fetch('/api/convert/cloud', {
             method: 'POST',
             headers: {
@@ -184,10 +184,10 @@ export function UploadAudio({
           }
 
           const conversionResult = await response.json();
-          
+
           onApiResponse?.({
             timestamp: new Date(),
-            data: { 
+            data: {
               message: `CloudConvert API response received`,
               success: conversionResult.success,
               jobId: conversionResult.jobId,
@@ -200,33 +200,33 @@ export function UploadAudio({
           }
 
           onConversionComplete?.();
-          
+
           onApiResponse?.({
             timestamp: new Date(),
-            data: { 
+            data: {
               message: `Conversion completed successfully! Proceeding to transcription...`,
               convertedUrl: conversionResult.convertedUrl
             }
           });
 
           // Now submit the converted file URL for transcription WITH original file metadata
-          onUpload({ 
+          onUpload({
             audioUrl: conversionResult.convertedUrl,
             originalFile: { name: file.name, size: file.size }
           }, transcriptionOptions);
 
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Conversion failed';
-          
+
           onApiResponse?.({
             timestamp: new Date(),
-            data: { 
+            data: {
               message: `Conversion failed: ${errorMessage}`,
               error: errorMessage,
               step: 'conversion'
             }
           });
-          
+
           onConversionError?.(errorMessage);
           console.error('Conversion error:', error);
         }
