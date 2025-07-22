@@ -23,7 +23,7 @@ export function useFileInput({
       if (file.size > maxSize * 1024 * 1024) {
         return {
           error: `File size exceeds the ${maxSize}MB limit.`,
-          requiresConversion: false
+          requiresConversion: false,
         };
       }
 
@@ -33,21 +33,22 @@ export function useFileInput({
       if (!formatValidation.valid) {
         return {
           error: formatValidation.error || "Unsupported file format",
-          requiresConversion: false
+          requiresConversion: false,
         };
       }
 
       // If conversion is required but not allowed
       if (formatValidation.requiresConversion && !allowConversion) {
         return {
-          error: "This file format requires conversion, but conversion is not enabled.",
-          requiresConversion: false
+          error:
+            "This file format requires conversion, but conversion is not enabled.",
+          requiresConversion: false,
         };
       }
 
       return {
         error: null,
-        requiresConversion: formatValidation.requiresConversion || false
+        requiresConversion: formatValidation.requiresConversion || false,
       };
     },
     [maxSize, allowConversion],

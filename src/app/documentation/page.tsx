@@ -165,7 +165,8 @@ export default function DocumentationPage() {
                     </h3>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Supports 10+ audio formats with automatic conversion for M4A, AAC, WMA, and more
+                    Supports 10+ audio formats with automatic conversion for
+                    M4A, AAC, WMA, and more
                   </p>
                 </div>
               </div>
@@ -178,15 +179,16 @@ export default function DocumentationPage() {
               </h2>
               <div className="rounded-lg bg-gray-50 p-6 dark:bg-gray-900/50">
                 <div className="mb-6 rounded-md bg-green-50 p-4 dark:bg-green-900/20">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="mb-2 flex items-center gap-2">
                     <span className="text-2xl">🔄</span>
                     <h4 className="font-semibold text-green-800 dark:text-green-200">
                       Automatic Format Conversion
                     </h4>
                   </div>
                   <p className="text-sm text-green-700 dark:text-green-300">
-                    <strong>New!</strong> Transcriptr now automatically converts unsupported formats (M4A, AAC, MP4, WMA, etc.)
-                    to MP3 before transcription. No manual conversion needed!
+                    <strong>New!</strong> Transcriptr now automatically converts
+                    unsupported formats (M4A, AAC, MP4, WMA, etc.) to MP3 before
+                    transcription. No manual conversion needed!
                   </p>
                 </div>
 
@@ -249,14 +251,16 @@ export default function DocumentationPage() {
                 <div className="mt-6 space-y-3">
                   <div className="rounded-md bg-blue-50 p-3 dark:bg-blue-900/20">
                     <p className="text-sm text-blue-800 dark:text-blue-200">
-                      💡 <strong>Tip:</strong> Directly supported formats (MP3, WAV, FLAC, OGG)
-                      process immediately, while other formats are automatically converted first.
+                      💡 <strong>Tip:</strong> Directly supported formats (MP3,
+                      WAV, FLAC, OGG) process immediately, while other formats
+                      are automatically converted first.
                     </p>
                   </div>
                   <div className="rounded-md bg-yellow-50 p-3 dark:bg-yellow-900/20">
                     <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                      ⏱️ <strong>Processing Time:</strong> Auto-converted files take 30-60 seconds longer
-                      due to the conversion step, but the process is fully automated.
+                      ⏱️ <strong>Processing Time:</strong> Auto-converted files
+                      take 30-60 seconds longer due to the conversion step, but
+                      the process is fully automated.
                     </p>
                   </div>
                 </div>
@@ -270,7 +274,8 @@ export default function DocumentationPage() {
               </h2>
               <div className="rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 p-6 dark:from-purple-900/20 dark:to-pink-900/20">
                 <p className="mb-4 text-gray-700 dark:text-gray-300">
-                  When you upload unsupported formats like M4A or AAC, here's what happens automatically:
+                  When you upload unsupported formats like M4A or AAC, here's
+                  what happens automatically:
                 </p>
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-3">
@@ -333,14 +338,16 @@ export default function DocumentationPage() {
                 <div className="mt-4 space-y-2">
                   <div className="rounded-md bg-indigo-50 p-3 dark:bg-indigo-900/20">
                     <p className="text-sm text-indigo-800 dark:text-indigo-200">
-                      🔒 <strong>Privacy:</strong> All temporary files are automatically deleted after processing.
-                      Your original audio is never permanently stored.
+                      🔒 <strong>Privacy:</strong> All temporary files are
+                      automatically deleted after processing. Your original
+                      audio is never permanently stored.
                     </p>
                   </div>
                   <div className="rounded-md bg-green-50 p-3 dark:bg-green-900/20">
                     <p className="text-sm text-green-800 dark:text-green-200">
-                      👁️ <strong>Transparency:</strong> You can view detailed conversion progress in the "View Details"
-                      section during processing.
+                      👁️ <strong>Transparency:</strong> You can view detailed
+                      conversion progress in the "View Details" section during
+                      processing.
                     </p>
                   </div>
                 </div>
@@ -359,10 +366,12 @@ export default function DocumentationPage() {
                   </summary>
                   <div className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-400">
                     <p>
-                      • Most audio formats are now supported (MP3, WAV, FLAC, OGG, M4A, AAC, etc.)
+                      • Most audio formats are now supported (MP3, WAV, FLAC,
+                      OGG, M4A, AAC, etc.)
                     </p>
                     <p>
-                      • If your format isn't supported, try converting to MP3 or WAV first
+                      • If your format isn't supported, try converting to MP3 or
+                      WAV first
                     </p>
                     <p>
                       • Check that the file size doesn't exceed the upload limit
@@ -431,8 +440,9 @@ export default function DocumentationPage() {
                     What audio formats can I upload?
                   </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    You can upload almost any audio format! We support MP3, WAV, FLAC, OGG directly,
-                    and automatically convert M4A, AAC, MP4, WMA, AIFF, and CAF files to MP3 before transcription.
+                    You can upload almost any audio format! We support MP3, WAV,
+                    FLAC, OGG directly, and automatically convert M4A, AAC, MP4,
+                    WMA, AIFF, and CAF files to MP3 before transcription.
                   </p>
                 </div>
                 <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-900/50">

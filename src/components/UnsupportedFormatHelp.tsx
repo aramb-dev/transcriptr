@@ -28,8 +28,9 @@ export function UnsupportedFormatHelp({
       </p>
       <div className="mb-3 rounded-md bg-blue-50 p-3 dark:bg-blue-900/20">
         <p className="text-sm text-blue-800 dark:text-blue-200">
-          💡 <strong>What we support:</strong> Most common formats including M4A, AAC, MP4,
-          WMA are automatically converted. Directly supported: MP3, WAV, FLAC, OGG.
+          💡 <strong>What we support:</strong> Most common formats including
+          M4A, AAC, MP4, WMA are automatically converted. Directly supported:
+          MP3, WAV, FLAC, OGG.
         </p>
       </div>
       <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:gap-3">

@@ -20,7 +20,7 @@ import {
   Users,
   AlertCircle,
   Sparkles,
-  X
+  X,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -46,7 +46,7 @@ const formatDuration = (seconds?: number): string => {
   if (!seconds) return "--:--";
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
+  return `${mins}:${secs.toString().padStart(2, "0")}`;
 };
 
 // Format file size
@@ -57,7 +57,9 @@ const formatFileSize = (bytes?: number): string => {
 };
 
 // Audio Player Component
-const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({ audioSource }) => {
+const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
+  audioSource,
+}) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [volume, setVolume] = useState(1);
@@ -76,7 +78,10 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({ audioSource }) =
 
   const skip = (seconds: number) => {
     if (audioRef.current) {
-      audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime + seconds);
+      audioRef.current.currentTime = Math.max(
+        0,
+        audioRef.current.currentTime + seconds,
+      );
     }
   };
 
@@ -153,13 +158,13 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({ audioSource }) =
                   <span>{formatDuration(currentTime)}</span>
                   <span>{formatDuration(audioSource.duration)}</span>
                 </div>
-                <div className="h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-1 overflow-hidden rounded-full bg-gray-200">
                   <div
-                    className="h-full bg-blue-600 rounded-full transition-all duration-100"
+                    className="h-full rounded-full bg-blue-600 transition-all duration-100"
                     style={{
                       width: audioSource.duration
                         ? `${(currentTime / audioSource.duration) * 100}%`
-                        : '0%'
+                        : "0%",
                     }}
                   />
                 </div>
@@ -175,15 +180,15 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({ audioSource }) =
                   step="0.1"
                   value={volume}
                   onChange={handleVolumeChange}
-                  className="flex-1 h-1"
+                  className="h-1 flex-1"
                   aria-label="Volume control"
                 />
               </div>
             </div>
           </>
         ) : (
-          <div className="text-center py-8 text-gray-500">
-            <FileAudio className="h-8 w-8 mx-auto mb-2 opacity-50" />
+          <div className="py-8 text-center text-gray-500">
+            <FileAudio className="mx-auto mb-2 h-8 w-8 opacity-50" />
             <p className="text-sm">Audio player will be available soon</p>
           </div>
         )}
@@ -193,7 +198,9 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({ audioSource }) =
 };
 
 // File Details Component
-const FileDetails: React.FC<{ audioSource?: AudioSource }> = ({ audioSource }) => {
+const FileDetails: React.FC<{ audioSource?: AudioSource }> = ({
+  audioSource,
+}) => {
   return (
     <Card className="mb-4">
       <CardHeader className="pb-3">
@@ -205,7 +212,7 @@ const FileDetails: React.FC<{ audioSource?: AudioSource }> = ({ audioSource }) =
       <CardContent className="space-y-3">
         <div className="flex items-start justify-between">
           <span className="text-sm text-gray-600">Filename</span>
-          <span className="text-sm font-medium text-right max-w-[200px] truncate">
+          <span className="max-w-[200px] truncate text-right text-sm font-medium">
             {audioSource?.name || "Unknown"}
           </span>
         </div>
@@ -214,7 +221,9 @@ const FileDetails: React.FC<{ audioSource?: AudioSource }> = ({ audioSource }) =
           <span className="text-sm text-gray-600">Duration</span>
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3 text-gray-500" />
-            <span className="text-sm">{formatDuration(audioSource?.duration)}</span>
+            <span className="text-sm">
+              {formatDuration(audioSource?.duration)}
+            </span>
           </div>
         </div>
 
@@ -235,8 +244,12 @@ const FileDetails: React.FC<{ audioSource?: AudioSource }> = ({ audioSource }) =
 };
 
 // Export Controls Component
-const ExportControls: React.FC<{ transcription: string }> = ({ transcription }) => {
-  const [selectedFormat, setSelectedFormat] = useState<"txt" | "docx" | "srt">("txt");
+const ExportControls: React.FC<{ transcription: string }> = ({
+  transcription,
+}) => {
+  const [selectedFormat, setSelectedFormat] = useState<"txt" | "docx" | "srt">(
+    "txt",
+  );
   const [includeTimestamps, setIncludeTimestamps] = useState(true);
   const [includeSpeakers, setIncludeSpeakers] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -245,7 +258,7 @@ const ExportControls: React.FC<{ transcription: string }> = ({ transcription }) 
     setIsDownloading(true);
     try {
       // Simulate download process
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const timestamp = new Date().toISOString().split("T")[0];
       const filename = `transcription_${timestamp}.${selectedFormat}`;
@@ -253,11 +266,17 @@ const ExportControls: React.FC<{ transcription: string }> = ({ transcription }) 
       let content = transcription;
       if (selectedFormat === "srt") {
         // Convert to SRT format (placeholder)
-        content = "1\n00:00:01,000 --> 00:00:05,000\n" + transcription.substring(0, 50) + "...";
+        content =
+          "1\n00:00:01,000 --> 00:00:05,000\n" +
+          transcription.substring(0, 50) +
+          "...";
       }
 
       const blob = new Blob([content], {
-        type: selectedFormat === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : "text/plain"
+        type:
+          selectedFormat === "docx"
+            ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            : "text/plain",
       });
       const url = URL.createObjectURL(blob);
 
@@ -288,7 +307,7 @@ const ExportControls: React.FC<{ transcription: string }> = ({ transcription }) 
       <CardContent className="space-y-4">
         {/* Format Selection */}
         <div>
-          <label className="text-xs text-gray-600 mb-2 block">Format</label>
+          <label className="mb-2 block text-xs text-gray-600">Format</label>
           <div className="flex gap-2">
             {(["txt", "docx", "srt"] as const).map((format) => (
               <Button
@@ -313,7 +332,7 @@ const ExportControls: React.FC<{ transcription: string }> = ({ transcription }) 
                 type="checkbox"
                 checked={includeTimestamps}
                 onChange={(e) => setIncludeTimestamps(e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                className="h-4 w-4 rounded border-gray-300 text-blue-600"
               />
               <span className="text-sm">Timestamps</span>
             </label>
@@ -322,7 +341,7 @@ const ExportControls: React.FC<{ transcription: string }> = ({ transcription }) 
                 type="checkbox"
                 checked={includeSpeakers}
                 onChange={(e) => setIncludeSpeakers(e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                className="h-4 w-4 rounded border-gray-300 text-blue-600"
               />
               <span className="text-sm">Speaker names</span>
             </label>
@@ -336,7 +355,9 @@ const ExportControls: React.FC<{ transcription: string }> = ({ transcription }) 
           className="w-full"
           size="sm"
         >
-          {isDownloading ? "Downloading..." : `Download ${selectedFormat.toUpperCase()}`}
+          {isDownloading
+            ? "Downloading..."
+            : `Download ${selectedFormat.toUpperCase()}`}
         </Button>
       </CardContent>
     </Card>
@@ -344,7 +365,9 @@ const ExportControls: React.FC<{ transcription: string }> = ({ transcription }) 
 };
 
 // Copy/Download Actions Component
-const ActionButtons: React.FC<{ transcription: string }> = ({ transcription }) => {
+const ActionButtons: React.FC<{ transcription: string }> = ({
+  transcription,
+}) => {
   const [copySuccess, setCopySuccess] = useState(false);
 
   const handleCopy = async () => {
@@ -398,28 +421,31 @@ const ActionButtons: React.FC<{ transcription: string }> = ({ transcription }) =
 };
 
 // Coming Soon Banner Component
-const ComingSoonBanner: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) => {
+const ComingSoonBanner: React.FC<{ onDismiss: () => void }> = ({
+  onDismiss,
+}) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="mb-4 p-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg relative"
+      className="relative mb-4 rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50 p-3"
     >
       <div className="flex items-start gap-2 pr-8">
-        <Sparkles className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
+        <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" />
         <div>
           <p className="text-sm font-medium text-blue-900">
             ✨ <strong>Coming Soon:</strong> Interactive Transcript!
           </p>
-          <p className="text-xs text-blue-700 mt-1">
-            You'll be able to click any word to play the audio from that point, navigate with timestamps, and more.
+          <p className="mt-1 text-xs text-blue-700">
+            You'll be able to click any word to play the audio from that point,
+            navigate with timestamps, and more.
           </p>
         </div>
       </div>
       <button
         onClick={onDismiss}
-        className="absolute top-2 right-2 p-1 hover:bg-blue-100 rounded-full transition-colors"
+        className="absolute top-2 right-2 rounded-full p-1 transition-colors hover:bg-blue-100"
         title="Dismiss notification"
       >
         <X className="h-3 w-3 text-blue-600" />
@@ -429,7 +455,9 @@ const ComingSoonBanner: React.FC<{ onDismiss: () => void }> = ({ onDismiss }) =>
 };
 
 // Enhanced Transcript Display Component
-const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription }) => {
+const EnhancedTranscript: React.FC<{ transcription: string }> = ({
+  transcription,
+}) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<number[]>([]);
   const [copySuccess, setCopySuccess] = useState(false);
@@ -452,8 +480,8 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription
     // Split into paragraphs (looking for natural breaks)
     const paragraphs = text
       .split(/\n\n|\. (?=[A-Z])/g)
-      .filter(p => p.trim().length > 0)
-      .map(p => p.trim());
+      .filter((p) => p.trim().length > 0)
+      .map((p) => p.trim());
 
     return paragraphs;
   };
@@ -461,8 +489,9 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription
   // Add mock timestamps and speakers for demonstration
   const addMockTimestamps = (text: string, index: number) => {
     // Mock timestamps every ~30 seconds
-    const mockTime = `[${String(Math.floor(index * 0.5)).padStart(2, '0')}:${String((index * 30) % 60).padStart(2, '0')}]`;
-    const mockSpeaker = index % 3 === 0 ? "Speaker 1:" : index % 3 === 1 ? "Speaker 2:" : "";
+    const mockTime = `[${String(Math.floor(index * 0.5)).padStart(2, "0")}:${String((index * 30) % 60).padStart(2, "0")}]`;
+    const mockSpeaker =
+      index % 3 === 0 ? "Speaker 1:" : index % 3 === 1 ? "Speaker 2:" : "";
 
     return { timestamp: mockTime, speaker: mockSpeaker, text };
   };
@@ -495,7 +524,7 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription
 
       {/* Full Transcript Container */}
       <div>
-        <div className="flex items-center justify-between mb-3">
+        <div className="mb-3 flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900 dark:text-white">
             Full Transcript
           </h3>
@@ -520,9 +549,9 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription
           </Button>
         </div>
 
-        <div className="border border-gray-200 rounded-lg bg-white dark:bg-gray-800 dark:border-gray-700">
+        <div className="rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
           <div className="max-h-96 overflow-y-auto p-6">
-            <div className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap font-mono">
+            <div className="font-mono text-sm leading-relaxed whitespace-pre-wrap text-gray-800 dark:text-gray-200">
               {transcription || "No transcript available"}
             </div>
           </div>
@@ -532,7 +561,7 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription
       {/* Search Bar */}
       <div>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
           <Input
             placeholder="Search transcript..."
             value={searchTerm}
@@ -541,21 +570,25 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription
           />
         </div>
         {searchResults.length > 0 && (
-          <p className="text-xs text-gray-500 mt-1">
-            Found {searchResults.length} result{searchResults.length !== 1 ? 's' : ''}
+          <p className="mt-1 text-xs text-gray-500">
+            Found {searchResults.length} result
+            {searchResults.length !== 1 ? "s" : ""}
           </p>
         )}
       </div>
 
       {/* Enhanced Preview with Mock Features */}
       <div>
-        <h4 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-3 uppercase tracking-wide">
+        <h4 className="mb-3 text-sm font-medium tracking-wide text-gray-600 uppercase dark:text-gray-400">
           Preview: Enhanced Features (Coming Soon)
         </h4>
         <div className="max-h-96 overflow-y-auto">
           <div className="space-y-3 pr-2">
             {paragraphs.map((paragraph, index) => {
-              const { timestamp, speaker, text } = addMockTimestamps(paragraph, index);
+              const { timestamp, speaker, text } = addMockTimestamps(
+                paragraph,
+                index,
+              );
               const isHighlighted = searchResults.includes(index);
 
               return (
@@ -565,16 +598,16 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
                   className={cn(
-                    "p-3 rounded-lg border transition-all duration-200 hover:shadow-sm cursor-pointer opacity-75 hover:opacity-90",
+                    "cursor-pointer rounded-lg border p-3 opacity-75 transition-all duration-200 hover:opacity-90 hover:shadow-sm",
                     isHighlighted
-                      ? "bg-yellow-50 border-yellow-200 shadow-sm"
-                      : "bg-gray-50 border-gray-200 dark:bg-gray-800 dark:border-gray-700"
+                      ? "border-yellow-200 bg-yellow-50 shadow-sm"
+                      : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800",
                   )}
                   title="Interactive features coming soon - click to play audio from this point"
                 >
                   {/* Timestamp and Speaker (Static for now) */}
-                  <div className="flex items-center gap-3 mb-2 text-xs text-gray-500">
-                    <span className="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded font-mono text-xs">
+                  <div className="mb-2 flex items-center gap-3 text-xs text-gray-500">
+                    <span className="rounded bg-gray-200 px-2 py-1 font-mono text-xs dark:bg-gray-700">
                       {timestamp}
                     </span>
                     {speaker && (
@@ -586,28 +619,31 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription
                   </div>
 
                   {/* Transcript Text */}
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
-                    {searchTerm && isHighlighted ? (
-                      text.split(new RegExp(`(${searchTerm})`, 'gi')).map((part, partIndex) => (
-                        part.toLowerCase() === searchTerm.toLowerCase() ? (
-                          <mark key={partIndex} className="bg-yellow-200 px-1 rounded">
-                            {part}
-                          </mark>
-                        ) : (
-                          part
-                        )
-                      ))
-                    ) : (
-                      text
-                    )}
+                  <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                    {searchTerm && isHighlighted
+                      ? text
+                          .split(new RegExp(`(${searchTerm})`, "gi"))
+                          .map((part, partIndex) =>
+                            part.toLowerCase() === searchTerm.toLowerCase() ? (
+                              <mark
+                                key={partIndex}
+                                className="rounded bg-yellow-200 px-1"
+                              >
+                                {part}
+                              </mark>
+                            ) : (
+                              part
+                            ),
+                          )
+                      : text}
                   </p>
                 </motion.div>
               );
             })}
 
             {paragraphs.length === 0 && (
-              <div className="text-center py-12 text-gray-500">
-                <AlertCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <div className="py-12 text-center text-gray-500">
+                <AlertCircle className="mx-auto mb-2 h-8 w-8 opacity-50" />
                 <p>No transcript content available</p>
               </div>
             )}
@@ -622,13 +658,13 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({ transcription
 export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
   transcription,
   audioSource,
-  onNewTranscription
+  onNewTranscription,
 }) => {
   return (
     <div className="h-full bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-6 h-full flex flex-col">
+      <div className="container mx-auto flex h-full flex-col px-4 py-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 flex-shrink-0">
+        <div className="mb-6 flex flex-shrink-0 items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
               Transcription Studio
@@ -649,21 +685,21 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
         </div>
 
         {/* Two-Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
+        <div className="grid flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-3">
           {/* Left Panel - Transcript */}
-          <div className="lg:col-span-2 flex flex-col">
-            <Card className="flex-1 flex flex-col">
+          <div className="flex flex-col lg:col-span-2">
+            <Card className="flex flex-1 flex-col">
               <CardHeader className="flex-shrink-0">
                 <h2 className="text-lg font-semibold">Transcript</h2>
               </CardHeader>
-              <CardContent className="p-6 flex-1 overflow-hidden">
+              <CardContent className="flex-1 overflow-hidden p-6">
                 <EnhancedTranscript transcription={transcription} />
               </CardContent>
             </Card>
           </div>
 
           {/* Right Panel - Controls */}
-          <div className="space-y-4 max-h-full overflow-y-auto">
+          <div className="max-h-full space-y-4 overflow-y-auto">
             {/* Audio Player */}
             <AudioPlayer audioSource={audioSource} />
 

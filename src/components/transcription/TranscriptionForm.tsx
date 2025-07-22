@@ -8,12 +8,7 @@ import { MobileTranscriptionResult } from "./MobileTranscriptionResult";
 import TranscriptionResult from "./TranscriptionResult";
 import { TranscriptionStudio } from "./TranscriptionStudio";
 import SessionRecoveryPrompt from "./SessionRecoveryPrompt";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import {
   TranscriptionStatus,
   statusMessages,
@@ -239,10 +234,15 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     }
   };
 
-  const isLoading = transStatus === "converting" || transStatus === "starting" || transStatus === "processing";
+  const isLoading =
+    transStatus === "converting" ||
+    transStatus === "starting" ||
+    transStatus === "processing";
 
   const handleUpload = async (
-    data: FormData | { audioUrl: string; originalFile?: { name: string; size: number } },
+    data:
+      | FormData
+      | { audioUrl: string; originalFile?: { name: string; size: number } },
     options: { language: string; diarize: boolean },
   ) => {
     // --- Reset State ---
@@ -639,7 +639,9 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         ) : isLoading ? (
           <TranscriptionProcessing
             progress={progress}
-            transStatus={transStatus as "converting" | "starting" | "processing"}
+            transStatus={
+              transStatus as "converting" | "starting" | "processing"
+            }
             getProgressColor={getProgressColor}
             statusMessages={statusMessages}
             showApiDetails={showApiDetails}
@@ -675,8 +677,11 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
               />
 
               {/* Studio Modal */}
-              <Dialog open={isStudioModalOpen} onOpenChange={setIsStudioModalOpen}>
-                <DialogContent className="max-w-[90vw] w-[90vw] max-h-[90vh] h-[90vh] p-0 overflow-hidden bg-gray-50">
+              <Dialog
+                open={isStudioModalOpen}
+                onOpenChange={setIsStudioModalOpen}
+              >
+                <DialogContent className="h-[90vh] max-h-[90vh] w-[90vw] max-w-[90vw] overflow-hidden bg-gray-50 p-0">
                   <DialogHeader className="sr-only">
                     <DialogTitle>Transcription Studio</DialogTitle>
                   </DialogHeader>
@@ -702,7 +707,9 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
             <UploadAudio
               onUpload={handleUpload}
               onConversionStart={() => setTransStatus("converting")}
-              onConversionComplete={() => console.log("Conversion completed, starting transcription...")}
+              onConversionComplete={() =>
+                console.log("Conversion completed, starting transcription...")
+              }
               onConversionError={(error) => {
                 console.error("Conversion failed:", error);
                 setError(`Audio conversion failed: ${error}`);
@@ -710,7 +717,13 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
               }}
               onApiResponse={(response) => {
                 console.log("API Response:", response.data);
-                setApiResponses(prev => [...prev, response as { timestamp: Date; data: Record<string, unknown> }]);
+                setApiResponses((prev) => [
+                  ...prev,
+                  response as {
+                    timestamp: Date;
+                    data: Record<string, unknown>;
+                  },
+                ]);
               }}
             />
           </div>

@@ -34,7 +34,7 @@ export const changelogItems: ChangeItem[] = [
         "**📋 Enhanced Markdown Export**: Structured Markdown files with proper headings and formatting",
         "**🏷️ Arabic Language Detection**: Automatic detection of Arabic text using comprehensive Unicode character ranges",
         "**⚠️ Arabic Format Beta Warnings**: Clear beta ribbons on DOCX and PDF downloads for Arabic content with explanatory notices",
-        "**📢 Format Compatibility Notices**: User-friendly warnings explaining format limitations for Arabic text with recommendations"
+        "**📢 Format Compatibility Notices**: User-friendly warnings explaining format limitations for Arabic text with recommendations",
       ],
       improved: [
         "**🚀 Enhanced User Experience**: Conversion process is completely transparent with immediate 'Converting...' UI feedback",
@@ -53,7 +53,7 @@ export const changelogItems: ChangeItem[] = [
         "**🔄 Streamlined Download Interface**: Single dropdown button with organized format options and visual icons",
         "**📱 Improved Dropdown Visibility**: Solid backgrounds with proper shadows and borders for better readability",
         "**⚡ Enhanced Download Performance**: Optimized file generation with proper memory cleanup and blob URL management",
-        "**🌍 Internationalization Awareness**: Smart language detection with format-specific recommendations for non-Latin scripts"
+        "**🌍 Internationalization Awareness**: Smart language detection with format-specific recommendations for non-Latin scripts",
       ],
       fixed: [
         "**🔄 Session History Persistence**: Fixed transcription history only keeping most recent entry - now properly accumulates all transcriptions chronologically",
@@ -63,8 +63,8 @@ export const changelogItems: ChangeItem[] = [
         "**📋 File History Categorization**: Resolved converted files appearing as 'URL audio' - now properly categorized as file uploads with original filenames",
         "**🔄 Conversion Flow Metadata**: Enhanced data flow to preserve original file information throughout conversion process",
         "**💻 File Input Validation**: Updated file input to accept all supported formats including M4A, AAC, and other convertible types",
-        "**⚠️ UnsupportedFormatHelp Component**: Updated component to handle conversion failures rather than format rejection"
-      ]
+        "**⚠️ UnsupportedFormatHelp Component**: Updated component to handle conversion failures rather than format rejection",
+      ],
     },
   },
   {

@@ -9,7 +9,7 @@ const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN;
 const httpsAgent = new https.Agent({
   rejectUnauthorized: process.env.NODE_TLS_REJECT_UNAUTHORIZED !== "0",
   // Add additional SSL configuration for development
-  ...(process.env.NODE_ENV === 'development' && {
+  ...(process.env.NODE_ENV === "development" && {
     checkServerIdentity: () => undefined,
   }),
 });
