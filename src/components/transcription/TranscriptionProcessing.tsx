@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 
 interface TranscriptionProcessingProps {
   progress: number;
-  transStatus: "starting" | "processing";
+  transStatus: "converting" | "starting" | "processing";
   getProgressColor: () => string;
   statusMessages: Record<string, string>;
   showApiDetails: boolean;

@@ -120,7 +120,11 @@ export function UploadAudio({
       // Check if the file requires conversion
       if (requiresConversion) {
         try {
+          // Start conversion state IMMEDIATELY before any async operations
           onConversionStart?.();
+          
+          // Add a small delay to ensure state updates are processed
+          await new Promise(resolve => setTimeout(resolve, 100));
 
           // First upload the file to Firebase to get a public URL
           const uploadResult = await uploadLargeFile(file);

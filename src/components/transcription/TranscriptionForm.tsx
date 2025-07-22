@@ -231,7 +231,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     }
   };
 
-  const isLoading = transStatus === "starting" || transStatus === "processing";
+  const isLoading = transStatus === "converting" || transStatus === "starting" || transStatus === "processing";
 
   const handleCopyToClipboard = async () => {
     if (transcription) {
@@ -636,7 +636,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         ) : isLoading ? (
           <TranscriptionProcessing
             progress={progress}
-            transStatus={transStatus as "starting" | "processing"}
+            transStatus={transStatus as "converting" | "starting" | "processing"}
             getProgressColor={getProgressColor}
             statusMessages={statusMessages}
             showApiDetails={showApiDetails}
