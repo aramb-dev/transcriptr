@@ -195,7 +195,7 @@ export default function TermsPage() {
                 >
                   contact@aramb.dev
                 </a>
-                .
+                {"."}
               </p>
             </section>
           </div>
