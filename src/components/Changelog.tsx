@@ -7,8 +7,8 @@ import { MobileChangelog } from "./MobileChangelog";
 import { changelogItems } from "../data/changelog";
 
 interface ChangelogProps {
-  isModal?: boolean;
-  onClose?: () => void;
+  readonly isModal?: boolean;
+  readonly onClose?: () => void;
 }
 
 export function Changelog({ isModal = false, onClose }: ChangelogProps) {
@@ -61,7 +61,7 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
         {/* Timeline */}
         <div className="relative space-y-8">
           {changelogItems.map((item, index) => (
-            <div key={index} className="relative flex items-start sm:space-x-4">
+            <div key={`${item.version}-${item.date}`} className="relative flex items-start sm:space-x-4">
               {/* Date and Version */}
               <div className="w-24 shrink-0 pr-4 text-right sm:w-32 sm:pr-0 sm:text-left">
                 <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -83,9 +83,9 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
                       New
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
-                      {item.changes.new.map((change, i) => (
+                      {item.changes.new.map((change) => (
                         <li
-                          key={i}
+                          key={`new-${change.slice(0, 50)}`}
                           dangerouslySetInnerHTML={parseMarkdown(change)}
                         />
                       ))}
@@ -99,9 +99,9 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
                       Improved
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
-                      {item.changes.improved.map((change, i) => (
+                      {item.changes.improved.map((change) => (
                         <li
-                          key={i}
+                          key={`improved-${change.slice(0, 50)}`}
                           dangerouslySetInnerHTML={parseMarkdown(change)}
                         />
                       ))}
@@ -115,9 +115,9 @@ export function Changelog({ isModal = false, onClose }: ChangelogProps) {
                       Fixed
                     </h3>
                     <ul className="list-disc space-y-1 pl-5 text-gray-700 dark:text-gray-300">
-                      {item.changes.fixed.map((change, i) => (
+                      {item.changes.fixed.map((change) => (
                         <li
-                          key={i}
+                          key={`fixed-${change.slice(0, 50)}`}
                           dangerouslySetInnerHTML={parseMarkdown(change)}
                         />
                       ))}
