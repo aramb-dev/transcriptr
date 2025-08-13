@@ -504,7 +504,7 @@ export default function DocumentationPage() {
                   >
                     feedback
                   </button>
-                  .
+                  {"."}
                 </p>
                 <Link href="/">
                   <Button variant="outline" className="gap-2">
