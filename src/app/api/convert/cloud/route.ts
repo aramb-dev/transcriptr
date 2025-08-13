@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import CloudConvert from "cloudconvert";
 
-// Initialize CloudConvert client
-const cloudConvert = new CloudConvert(process.env.CLOUDCONVERT_API_KEY!);
+
 
 interface ConversionRequest {
   fileUrl: string;
@@ -22,6 +21,7 @@ interface ConversionResponse {
 export async function POST(
   request: NextRequest,
 ): Promise<NextResponse<ConversionResponse>> {
+  let cloudConvert: CloudConvert;
   try {
     console.log("CloudConvert conversion request received");
 
@@ -60,6 +60,9 @@ export async function POST(
       fileUrl,
     });
 
+    // Initialize CloudConvert client after API key check
+    cloudConvert = new CloudConvert(process.env.CLOUDCONVERT_API_KEY as string);
+
     // Create CloudConvert job with import, convert, and export tasks
     const job = await cloudConvert.jobs.create({
       tasks: {
@@ -96,8 +99,9 @@ export async function POST(
         (task) => task.name === "export-file",
       );
 
-      if (exportTask?.result?.files?.[0]?.url) {
-        const convertedUrl = exportTask.result.files[0].url;
+      const fileUrl = exportTask?.result?.files?.[0]?.url;
+      if (typeof fileUrl === "string" && fileUrl.length > 0) {
+        const convertedUrl = fileUrl;
         console.log(`Conversion successful: ${convertedUrl}`);
 
         return NextResponse.json({
@@ -168,6 +172,7 @@ export async function POST(
 
 // GET endpoint to check CloudConvert service health
 export async function GET(): Promise<NextResponse> {
+  let cloudConvert: CloudConvert;
   try {
     if (!process.env.CLOUDCONVERT_API_KEY) {
       return NextResponse.json(
@@ -178,6 +183,8 @@ export async function GET(): Promise<NextResponse> {
         { status: 500 },
       );
     }
+
+    cloudConvert = new CloudConvert(process.env.CLOUDCONVERT_API_KEY as string);
 
     // Simple health check - verify we can authenticate
     const user = await cloudConvert.users.me();
