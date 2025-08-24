@@ -1,19 +1,45 @@
-import { ExternalLink } from "lucide-react";
+import React, { useState } from "react";
+import { ExternalLink, MessageSquare } from "lucide-react";
 import { Button } from "./ui/button";
+import { ConversionErrorReporter } from "./issue-reporting";
 
 interface UnsupportedFormatHelpProps {
   fileName: string;
   fileType: string;
+  errorMessage?: string;
+  cloudConvertJobId?: string;
+  fileSize?: number;
 }
 
 export function UnsupportedFormatHelp({
   fileName,
   fileType,
+  errorMessage = "Conversion failed",
+  cloudConvertJobId,
+  fileSize,
 }: UnsupportedFormatHelpProps) {
+  const [showReporter, setShowReporter] = useState(false);
+
   const fileExtension =
     fileName.split(".").pop()?.toLowerCase() ||
     fileType.split("/").pop() ||
     "unknown";
+
+  if (showReporter) {
+    return (
+      <div className="mt-4">
+        <ConversionErrorReporter
+          fileName={fileName}
+          originalFormat={fileExtension}
+          targetFormat="mp3"
+          fileSize={fileSize}
+          cloudConvertJobId={cloudConvertJobId}
+          errorMessage={errorMessage}
+          onClose={() => setShowReporter(false)}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mt-4 rounded-lg border border-yellow-300 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-950/50">
@@ -51,11 +77,10 @@ export function UnsupportedFormatHelp({
           variant="outline"
           size="sm"
           className="text-xs"
-          onClick={() =>
-            window.open("https://github.com/aramb-dev/transcriptr", "_blank")
-          }
+          onClick={() => setShowReporter(true)}
         >
-          Report Issue <ExternalLink className="ml-1.5 h-3 w-3" />
+          <MessageSquare className="mr-1.5 h-3 w-3" />
+          Report Issue
         </Button>
       </div>
     </div>
