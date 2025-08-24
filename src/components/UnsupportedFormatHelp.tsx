@@ -4,11 +4,11 @@ import { Button } from "./ui/button";
 import { ConversionErrorReporter } from "./issue-reporting";
 
 interface UnsupportedFormatHelpProps {
-  fileName: string;
-  fileType: string;
-  errorMessage?: string;
-  cloudConvertJobId?: string;
-  fileSize?: number;
+  readonly fileName: string;
+  readonly fileType: string;
+  readonly errorMessage?: string;
+  readonly cloudConvertJobId?: string;
+  readonly fileSize?: number;
 }
 
 export function UnsupportedFormatHelp({
