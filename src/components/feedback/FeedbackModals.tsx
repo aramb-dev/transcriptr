@@ -3,6 +3,7 @@ import { FeedbackForm } from "./FeedbackForm";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { AnimatedBackdrop } from "../ui/animated-backdrop";
+import { IssueReportManager } from "../issue-reporting";
 
 type FeedbackType = "general" | "issue" | "feature";
 
@@ -58,10 +59,14 @@ export function FeedbackModals() {
                 </button>
               </div>
 
-              <FeedbackForm
-                initialType={activeModal}
-                onClose={() => setActiveModal(null)}
-              />
+              {activeModal === "issue" ? (
+                <IssueReportManager onClose={() => setActiveModal(null)} />
+              ) : (
+                <FeedbackForm
+                  initialType={activeModal}
+                  onClose={() => setActiveModal(null)}
+                />
+              )}
             </div>
           </motion.div>
         </AnimatedBackdrop>
