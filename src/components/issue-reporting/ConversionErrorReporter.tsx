@@ -4,8 +4,7 @@ import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { AlertCircle, CheckCircle2, Send } from 'lucide-react';
-import { ConversionErrorData } from './types';
-import { generateIssueTemplate, getSystemInfo } from './issue-templates';
+import { getSystemInfo } from './issue-templates';
 
 interface ConversionErrorReporterProps {
   fileName: string;
@@ -42,38 +41,38 @@ export function ConversionErrorReporter({
     try {
       const systemInfo = getSystemInfo();
       
-      const issueData: ConversionErrorData = {
-        type: 'conversion-error',
-        title: `Conversion Error: ${originalFormat.toUpperCase()} → ${targetFormat.toUpperCase()}`,
-        description: additionalDetails || 'User reported conversion error without additional details.',
-        userEmail: userEmail || undefined,
-        userName: userName || undefined,
-        timestamp: systemInfo.timestamp,
-        userAgent: systemInfo.userAgent,
-        url: systemInfo.url,
-        originalFormat,
-        targetFormat,
-        fileSize,
-        fileName,
-        cloudConvertJobId,
-        errorMessage,
-        errorCode,
-      };
+      // Submit to Netlify Forms (works without GitHub account)
+      const formData = new FormData();
+      formData.append('form-name', 'conversion-error-report');
+      formData.append('title', `Conversion Error: ${originalFormat.toUpperCase()} → ${targetFormat.toUpperCase()}`);
+      formData.append('description', additionalDetails || 'User reported conversion error without additional details.');
+      formData.append('file-name', fileName);
+      formData.append('original-format', originalFormat);
+      formData.append('target-format', targetFormat);
+      formData.append('file-size', fileSize?.toString() || '');
+      formData.append('cloud-convert-job-id', cloudConvertJobId || '');
+      formData.append('error-message', errorMessage);
+      formData.append('error-code', errorCode || '');
+      formData.append('user-name', userName);
+      formData.append('user-email', userEmail);
+      formData.append('additional-details', additionalDetails);
+      formData.append('timestamp', systemInfo.timestamp.toISOString());
+      formData.append('user-agent', systemInfo.userAgent);
+      formData.append('url', systemInfo.url);
 
-      const template = generateIssueTemplate(issueData);
-      
-      // Create GitHub issue URL with pre-filled template
-      const githubUrl = new URL('https://github.com/aramb-dev/transcriptr/issues/new');
-      githubUrl.searchParams.set('title', template.title);
-      githubUrl.searchParams.set('body', template.body);
-      githubUrl.searchParams.set('labels', template.labels.join(','));
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData as unknown as Record<string, string>).toString()
+      });
 
-      // Open GitHub in new tab
-      window.open(githubUrl.toString(), '_blank');
-      
-      setSubmitStatus('success');
+      if (response.ok) {
+        setSubmitStatus('success');
+      } else {
+        throw new Error('Failed to submit conversion error report');
+      }
     } catch (error) {
-      console.error('Error creating issue report:', error);
+      console.error('Error submitting conversion error report:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -98,7 +97,7 @@ export function ConversionErrorReporter({
               Issue Report Created!
             </p>
             <p className="mt-1 text-sm text-green-600 dark:text-green-400">
-              A GitHub issue has been opened with your conversion error details. The development team will investigate this issue.
+              Your conversion error report has been submitted successfully. The development team will investigate this issue.
             </p>
           </div>
         </div>
@@ -186,7 +185,7 @@ export function ConversionErrorReporter({
                 Failed to create issue report
               </p>
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                Please try again or report this issue manually on GitHub.
+                Please try again or contact support directly.
               </p>
             </div>
           </div>
@@ -222,7 +221,7 @@ export function ConversionErrorReporter({
 
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
         <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-          This will open a GitHub issue with your error details and system information.
+          Your error report will be submitted directly to the development team.
         </p>
       </div>
     </div>

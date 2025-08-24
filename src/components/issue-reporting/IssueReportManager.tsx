@@ -5,8 +5,7 @@ import { Textarea } from '../ui/textarea';
 import { Label } from '../ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { AlertCircle, CheckCircle2, Send, Bug, Zap, MessageSquare } from 'lucide-react';
-import { GeneralIssueData } from './types';
-import { generateIssueTemplate, getSystemInfo } from './issue-templates';
+import { getSystemInfo } from './issue-templates';
 
 interface IssueReportManagerProps {
   initialCategory?: 'ui-bug' | 'feature-request' | 'accessibility' | 'mobile' | 'other';
@@ -33,35 +32,34 @@ export function IssueReportManager({ initialCategory = 'other', onClose }: Issue
     try {
       const systemInfo = getSystemInfo();
       
-      const issueData: GeneralIssueData = {
-        type: 'general-issue',
-        title,
-        description,
-        userEmail: userEmail || undefined,
-        userName: userName || undefined,
-        timestamp: systemInfo.timestamp,
-        userAgent: systemInfo.userAgent,
-        url: systemInfo.url,
-        category,
-        severity,
-        reproducible,
-        stepsToReproduce: stepsToReproduce ? stepsToReproduce.split('\n').filter(step => step.trim()) : undefined,
-      };
+      // Submit to Netlify Forms (works without GitHub account)
+      const formData = new FormData();
+      formData.append('form-name', 'issue-report');
+      formData.append('title', title);
+      formData.append('description', description);
+      formData.append('category', category);
+      formData.append('severity', severity);
+      formData.append('reproducible', reproducible.toString());
+      formData.append('user-name', userName);
+      formData.append('user-email', userEmail);
+      formData.append('steps-to-reproduce', stepsToReproduce);
+      formData.append('timestamp', systemInfo.timestamp.toISOString());
+      formData.append('user-agent', systemInfo.userAgent);
+      formData.append('url', systemInfo.url);
 
-      const template = generateIssueTemplate(issueData);
-      
-      // Create GitHub issue URL with pre-filled template
-      const githubUrl = new URL('https://github.com/aramb-dev/transcriptr/issues/new');
-      githubUrl.searchParams.set('title', template.title);
-      githubUrl.searchParams.set('body', template.body);
-      githubUrl.searchParams.set('labels', template.labels.join(','));
+      const response = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData as unknown as Record<string, string>).toString()
+      });
 
-      // Open GitHub in new tab
-      window.open(githubUrl.toString(), '_blank');
-      
-      setSubmitStatus('success');
+      if (response.ok) {
+        setSubmitStatus('success');
+      } else {
+        throw new Error('Failed to submit issue report');
+      }
     } catch (error) {
-      console.error('Error creating issue report:', error);
+      console.error('Error submitting issue report:', error);
       setSubmitStatus('error');
     } finally {
       setIsSubmitting(false);
@@ -89,7 +87,7 @@ export function IssueReportManager({ initialCategory = 'other', onClose }: Issue
               Issue Report Created!
             </p>
             <p className="mt-1 text-sm text-green-600 dark:text-green-400">
-              Your issue has been submitted to GitHub. The development team will review it and respond as soon as possible.
+              Your issue has been submitted successfully. The development team will review it and respond as soon as possible.
             </p>
           </div>
         </div>
@@ -286,7 +284,7 @@ export function IssueReportManager({ initialCategory = 'other', onClose }: Issue
                 Failed to create issue report
               </p>
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                Please try again or report this issue manually on GitHub.
+                Please try again or contact support directly.
               </p>
             </div>
           </div>
@@ -322,7 +320,7 @@ export function IssueReportManager({ initialCategory = 'other', onClose }: Issue
 
       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
         <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-          This will open a GitHub issue with your report details and system information.
+          Your issue report will be submitted directly to the development team.
         </p>
       </div>
     </div>
