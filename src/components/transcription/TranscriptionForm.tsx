@@ -133,12 +133,21 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       setTransStatus("succeeded");
       setProgress(100);
 
-      // Parse the output to extract the transcription text
+      // Parse the output to extract the transcription text and segments
       let finalTranscription = "Error: Could not parse transcription.";
+      let segments = undefined;
+
       if (typeof output === "string") {
         finalTranscription = output;
       } else if (output && typeof output === "object") {
-        if ("text" in output && typeof output.text === "string") {
+        // OpenAI Whisper model returns { transcription: string, segments: array, ... }
+        if ("transcription" in output && typeof output.transcription === "string") {
+          finalTranscription = output.transcription;
+          // Extract segments if available
+          if ("segments" in output && Array.isArray(output.segments)) {
+            segments = output.segments;
+          }
+        } else if ("text" in output && typeof output.text === "string") {
           finalTranscription = output.text;
         } else if (
           Array.isArray(output) &&
@@ -153,12 +162,13 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       }
       setTranscription(finalTranscription);
 
-      // Update session with completed result
+      // Update session with completed result and segments
       if (activeSession) {
         updateSessionData({
           status: "succeeded",
           progress: 100,
           result: finalTranscription,
+          segments: segments,
         });
       }
 

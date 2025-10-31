@@ -77,25 +77,21 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Set up base parameters
+    // Set up base parameters for OpenAI Whisper model
     interface TranscriptionParams {
-      task: string;
-      batch_size: number;
-      return_timestamps: boolean;
-      diarize: boolean;
       audio?: string;
       language?: string;
+      translate?: boolean;
+      temperature?: number;
+      transcription?: string; // "plain text", "srt", or "vtt"
       [key: string]: unknown;
     }
 
     const transcriptionParams: TranscriptionParams = {
-      task: options.task || "transcribe",
-      batch_size: options.batch_size || 8,
-      return_timestamps:
-        options.return_timestamps !== undefined
-          ? options.return_timestamps
-          : true,
-      diarize: options.diarize || false,
+      language: "auto", // Default to auto-detect
+      translate: options.translate || false,
+      temperature: options.temperature || 0,
+      transcription: "plain text", // Default format, needed to get segments
     };
 
     // Process audio input
@@ -105,7 +101,7 @@ export async function POST(request: Request) {
     );
     Object.assign(transcriptionParams, inputParams);
 
-    // Add language if specified and not "None"
+    // Add language if specified and not "None" or "auto"
     if (options.language && options.language !== "None") {
       transcriptionParams.language = options.language;
     }

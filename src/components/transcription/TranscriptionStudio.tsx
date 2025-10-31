@@ -35,9 +35,17 @@ interface AudioSource {
   type: "file" | "url";
 }
 
+interface TranscriptionSegment {
+  id: number;
+  start: number;
+  end: number;
+  text: string;
+}
+
 interface TranscriptionStudioProps {
   transcription: string;
   audioSource?: AudioSource;
+  segments?: TranscriptionSegment[];
   onNewTranscription: () => void;
 }
 
@@ -62,6 +70,7 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -70,7 +79,10 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        audioRef.current.play().catch((error) => {
+          console.error("Audio playback failed:", error);
+          toast.error("Failed to play audio");
+        });
       }
       setIsPlaying(!isPlaying);
     }
@@ -80,7 +92,7 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
     if (audioRef.current) {
       audioRef.current.currentTime = Math.max(
         0,
-        audioRef.current.currentTime + seconds,
+        Math.min(duration, audioRef.current.currentTime + seconds),
       );
     }
   };
@@ -88,6 +100,25 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
   const handleTimeUpdate = () => {
     if (audioRef.current) {
       setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleDurationChange = () => {
+    if (audioRef.current && audioRef.current.duration) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleProgressBarClick = (
+    e: React.MouseEvent<HTMLDivElement>,
+  ) => {
+    const progressBar = e.currentTarget;
+    const clickX = e.clientX - progressBar.getBoundingClientRect().left;
+    const percentage = clickX / progressBar.clientWidth;
+    const newTime = percentage * duration;
+
+    if (audioRef.current) {
+      audioRef.current.currentTime = Math.max(0, Math.min(duration, newTime));
     }
   };
 
@@ -114,8 +145,10 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
               ref={audioRef}
               src={audioSource.url}
               onTimeUpdate={handleTimeUpdate}
+              onLoadedMetadata={handleDurationChange}
               onEnded={() => setIsPlaying(false)}
               preload="metadata"
+              crossOrigin="anonymous"
             />
 
             <div className="space-y-4">
@@ -126,6 +159,7 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
                   size="sm"
                   onClick={() => skip(-10)}
                   className="h-8 w-8 p-0"
+                  title="Skip back 10 seconds"
                 >
                   <SkipBack className="h-4 w-4" />
                 </Button>
@@ -134,6 +168,7 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
                   onClick={togglePlay}
                   size="sm"
                   className="h-10 w-10 rounded-full p-0"
+                  title={isPlaying ? "Pause" : "Play"}
                 >
                   {isPlaying ? (
                     <Pause className="h-4 w-4" />
@@ -147,6 +182,7 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
                   size="sm"
                   onClick={() => skip(10)}
                   className="h-8 w-8 p-0"
+                  title="Skip forward 10 seconds"
                 >
                   <SkipForward className="h-4 w-4" />
                 </Button>
@@ -156,15 +192,24 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
               <div className="space-y-1">
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>{formatDuration(currentTime)}</span>
-                  <span>{formatDuration(audioSource.duration)}</span>
+                  <span>{formatDuration(duration || audioSource.duration)}</span>
                 </div>
-                <div className="h-1 overflow-hidden rounded-full bg-gray-200">
+                <div
+                  className="h-1 cursor-pointer overflow-hidden rounded-full bg-gray-200 transition-all duration-100 hover:h-2"
+                  onClick={handleProgressBarClick}
+                  role="slider"
+                  aria-label="Audio progress"
+                  aria-valuemin={0}
+                  aria-valuemax={duration || 0}
+                  aria-valuenow={currentTime}
+                >
                   <div
                     className="h-full rounded-full bg-blue-600 transition-all duration-100"
                     style={{
-                      width: audioSource.duration
-                        ? `${(currentTime / audioSource.duration) * 100}%`
-                        : "0%",
+                      width:
+                        duration && duration > 0
+                          ? `${(currentTime / duration) * 100}%`
+                          : "0%",
                     }}
                   />
                 </div>
@@ -189,7 +234,7 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
         ) : (
           <div className="py-8 text-center text-gray-500">
             <FileAudio className="mx-auto mb-2 h-8 w-8 opacity-50" />
-            <p className="text-sm">Audio player will be available soon</p>
+            <p className="text-sm">No audio file available for playback</p>
           </div>
         )}
       </CardContent>
@@ -244,40 +289,93 @@ const FileDetails: React.FC<{ audioSource?: AudioSource }> = ({
 };
 
 // Export Controls Component
-const ExportControls: React.FC<{ transcription: string }> = ({
+interface ExportControlsProps {
+  transcription: string;
+  segments?: TranscriptionSegment[];
+}
+
+const ExportControls: React.FC<ExportControlsProps> = ({
   transcription,
+  segments,
 }) => {
-  const [selectedFormat, setSelectedFormat] = useState<"txt" | "docx" | "srt">(
+  const [selectedFormat, setSelectedFormat] = useState<"txt" | "docx" | "srt" | "vtt">(
     "txt",
   );
-  const [includeTimestamps, setIncludeTimestamps] = useState(true);
-  const [includeSpeakers, setIncludeSpeakers] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  // Helper to format time for SRT (HH:MM:SS,mmm)
+  const formatTimeForSRT = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const milliseconds = Math.round((seconds % 1) * 1000);
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")},${milliseconds.toString().padStart(3, "0")}`;
+  };
+
+  // Helper to format time for VTT (HH:MM:SS.mmm)
+  const formatTimeForVTT = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const milliseconds = Math.round((seconds % 1) * 1000);
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
+  };
+
+  // Generate SRT content from segments
+  const generateSRT = (): string => {
+    if (!segments || segments.length === 0) {
+      return "1\n00:00:00,000 --> 00:00:00,100\n" + transcription;
+    }
+
+    return segments
+      .map((segment, index) => {
+        const startTime = formatTimeForSRT(segment.start);
+        const endTime = formatTimeForSRT(segment.end);
+        return `${segment.id + 1}\n${startTime} --> ${endTime}\n${segment.text.trim()}\n`;
+      })
+      .join("\n");
+  };
+
+  // Generate VTT content from segments
+  const generateVTT = (): string => {
+    if (!segments || segments.length === 0) {
+      return "WEBVTT\n\n00:00:00.000 --> 00:00:00.100\n" + transcription;
+    }
+
+    let vtt = "WEBVTT\n\n";
+    vtt += segments
+      .map((segment) => {
+        const startTime = formatTimeForVTT(segment.start);
+        const endTime = formatTimeForVTT(segment.end);
+        return `${startTime} --> ${endTime}\n${segment.text.trim()}\n`;
+      })
+      .join("\n");
+    return vtt;
+  };
 
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
       // Simulate download process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const timestamp = new Date().toISOString().split("T")[0];
-      const filename = `transcription_${timestamp}.${selectedFormat}`;
-
+      let filename = `transcription_${timestamp}.${selectedFormat}`;
       let content = transcription;
+      let mimeType = "text/plain";
+
       if (selectedFormat === "srt") {
-        // Convert to SRT format (placeholder)
-        content =
-          "1\n00:00:01,000 --> 00:00:05,000\n" +
-          transcription.substring(0, 50) +
-          "...";
+        content = generateSRT();
+        mimeType = "text/plain";
+      } else if (selectedFormat === "vtt") {
+        content = generateVTT();
+        mimeType = "text/vtt";
+      } else if (selectedFormat === "docx") {
+        mimeType =
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
       }
 
-      const blob = new Blob([content], {
-        type:
-          selectedFormat === "docx"
-            ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            : "text/plain",
-      });
+      const blob = new Blob([content], { type: mimeType });
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
@@ -308,8 +406,8 @@ const ExportControls: React.FC<{ transcription: string }> = ({
         {/* Format Selection */}
         <div>
           <label className="mb-2 block text-xs text-gray-600">Format</label>
-          <div className="flex gap-2">
-            {(["txt", "docx", "srt"] as const).map((format) => (
+          <div className="grid grid-cols-2 gap-2">
+            {(["txt", "srt", "vtt", "docx"] as const).map((format) => (
               <Button
                 key={format}
                 variant={selectedFormat === format ? "default" : "outline"}
@@ -323,30 +421,16 @@ const ExportControls: React.FC<{ transcription: string }> = ({
           </div>
         </div>
 
-        {/* Options */}
-        <div className="space-y-2">
-          <label className="text-xs text-gray-600">Include</label>
-          <div className="space-y-2">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={includeTimestamps}
-                onChange={(e) => setIncludeTimestamps(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600"
-              />
-              <span className="text-sm">Timestamps</span>
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={includeSpeakers}
-                onChange={(e) => setIncludeSpeakers(e.target.checked)}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600"
-              />
-              <span className="text-sm">Speaker names</span>
-            </label>
+        {/* Format Info */}
+        {segments && (
+          <div className="rounded-md bg-blue-50 p-2 text-xs text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+            {selectedFormat === "srt"
+              ? "SRT format with timestamps from transcription segments"
+              : selectedFormat === "vtt"
+                ? "WebVTT format with timestamps from transcription segments"
+                : "Plain text transcription"}
           </div>
-        </div>
+        )}
 
         {/* Download Button */}
         <Button
@@ -420,48 +504,23 @@ const ActionButtons: React.FC<{ transcription: string }> = ({
   );
 };
 
-// Coming Soon Banner Component
-const ComingSoonBanner: React.FC<{ onDismiss: () => void }> = ({
-  onDismiss,
-}) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      className="relative mb-4 rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-purple-50 p-3"
-    >
-      <div className="flex items-start gap-2 pr-8">
-        <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" />
-        <div>
-          <p className="text-sm font-medium text-blue-900">
-            ✨ <strong>Coming Soon:</strong> Interactive Transcript!
-          </p>
-          <p className="mt-1 text-xs text-blue-700">
-            You'll be able to click any word to play the audio from that point,
-            navigate with timestamps, and more.
-          </p>
-        </div>
-      </div>
-      <button
-        onClick={onDismiss}
-        className="absolute top-2 right-2 rounded-full p-1 transition-colors hover:bg-blue-100"
-        title="Dismiss notification"
-      >
-        <X className="h-3 w-3 text-blue-600" />
-      </button>
-    </motion.div>
-  );
-};
-
 // Enhanced Transcript Display Component
-const EnhancedTranscript: React.FC<{ transcription: string }> = ({
+interface EnhancedTranscriptProps {
+  transcription: string;
+  segments?: TranscriptionSegment[];
+  onSegmentClick?: (startTime: number) => void;
+  currentTime?: number;
+}
+
+const EnhancedTranscript: React.FC<EnhancedTranscriptProps> = ({
   transcription,
+  segments,
+  onSegmentClick,
+  currentTime = 0,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<number[]>([]);
   const [copySuccess, setCopySuccess] = useState(false);
-  const [showComingSoonBanner, setShowComingSoonBanner] = useState(true);
 
   // Copy transcript to clipboard
   const handleCopyTranscript = async () => {
@@ -475,53 +534,41 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({
     }
   };
 
-  // Format transcription with better readability
-  const formatTranscription = (text: string) => {
-    // Split into paragraphs (looking for natural breaks)
-    const paragraphs = text
-      .split(/\n\n|\. (?=[A-Z])/g)
-      .filter((p) => p.trim().length > 0)
-      .map((p) => p.trim());
-
-    return paragraphs;
-  };
-
-  // Add mock timestamps and speakers for demonstration
-  const addMockTimestamps = (text: string, index: number) => {
-    // Mock timestamps every ~30 seconds
-    const mockTime = `[${String(Math.floor(index * 0.5)).padStart(2, "0")}:${String((index * 30) % 60).padStart(2, "0")}]`;
-    const mockSpeaker =
-      index % 3 === 0 ? "Speaker 1:" : index % 3 === 1 ? "Speaker 2:" : "";
-
-    return { timestamp: mockTime, speaker: mockSpeaker, text };
-  };
-
-  // Handle search
+  // Handle search in segments or transcription
   const handleSearch = (term: string) => {
     setSearchTerm(term);
-    if (term.trim()) {
-      // Simple search implementation
+    if (term.trim() && segments) {
+      // Search in segments
       const results: number[] = [];
-      const paragraphs = formatTranscription(transcription);
-      paragraphs.forEach((paragraph, index) => {
-        if (paragraph.toLowerCase().includes(term.toLowerCase())) {
+      segments.forEach((segment, index) => {
+        if (segment.text.toLowerCase().includes(term.toLowerCase())) {
           results.push(index);
         }
       });
       setSearchResults(results);
+    } else if (term.trim()) {
+      // Fallback: search in full transcription
+      setSearchResults([]);
     } else {
       setSearchResults([]);
     }
   };
 
-  const paragraphs = formatTranscription(transcription);
+  // Determine if a segment is currently playing
+  const getCurrentSegmentIndex = (): number | null => {
+    if (!segments) return null;
+    return (
+      segments.findIndex(
+        (seg) =>
+          currentTime >= seg.start && currentTime < seg.end,
+      ) ?? null
+    );
+  };
+
+  const currentSegmentIndex = getCurrentSegmentIndex();
 
   return (
     <div className="space-y-6">
-      {showComingSoonBanner && (
-        <ComingSoonBanner onDismiss={() => setShowComingSoonBanner(false)} />
-      )}
-
       {/* Full Transcript Container */}
       <div>
         <div className="mb-3 flex items-center justify-between">
@@ -577,79 +624,81 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({
         )}
       </div>
 
-      {/* Enhanced Preview with Mock Features */}
-      <div>
-        <h4 className="mb-3 text-sm font-medium tracking-wide text-gray-600 uppercase dark:text-gray-400">
-          Preview: Enhanced Features (Coming Soon)
-        </h4>
-        <div className="max-h-96 overflow-y-auto">
-          <div className="space-y-3 pr-2">
-            {paragraphs.map((paragraph, index) => {
-              const { timestamp, speaker, text } = addMockTimestamps(
-                paragraph,
-                index,
-              );
-              const isHighlighted = searchResults.includes(index);
+      {/* Segments View (if available) */}
+      {segments && segments.length > 0 ? (
+        <div>
+          <h4 className="mb-3 text-sm font-medium tracking-wide text-gray-600 uppercase dark:text-gray-400">
+            Interactive Segments
+          </h4>
+          <div className="max-h-96 overflow-y-auto">
+            <div className="space-y-3 pr-2">
+              {segments.map((segment, index) => {
+                const isHighlighted = searchResults.includes(index);
+                const isCurrentSegment = currentSegmentIndex === index;
 
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={cn(
-                    "cursor-pointer rounded-lg border p-3 opacity-75 transition-all duration-200 hover:opacity-90 hover:shadow-sm",
-                    isHighlighted
-                      ? "border-yellow-200 bg-yellow-50 shadow-sm"
-                      : "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800",
-                  )}
-                  title="Interactive features coming soon - click to play audio from this point"
-                >
-                  {/* Timestamp and Speaker (Static for now) */}
-                  <div className="mb-2 flex items-center gap-3 text-xs text-gray-500">
-                    <span className="rounded bg-gray-200 px-2 py-1 font-mono text-xs dark:bg-gray-700">
-                      {timestamp}
-                    </span>
-                    {speaker && (
-                      <div className="flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        <span className="font-medium">{speaker}</span>
-                      </div>
+                return (
+                  <motion.div
+                    key={segment.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.02 }}
+                    onClick={() => onSegmentClick?.(segment.start)}
+                    className={cn(
+                      "cursor-pointer rounded-lg border p-3 transition-all duration-200 hover:shadow-md",
+                      isCurrentSegment
+                        ? "border-blue-400 bg-blue-50 shadow-md dark:border-blue-600 dark:bg-blue-900/20"
+                        : isHighlighted
+                          ? "border-yellow-200 bg-yellow-50 dark:border-yellow-600 dark:bg-yellow-900/20"
+                          : "border-gray-200 bg-gray-50 hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-750",
                     )}
-                  </div>
+                    title="Click to play audio from this segment"
+                  >
+                    {/* Timestamp */}
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className="rounded bg-gray-200 px-2 py-1 font-mono text-xs dark:bg-gray-700">
+                        {formatDuration(segment.start)} -{" "}
+                        {formatDuration(segment.end)}
+                      </span>
+                      {isCurrentSegment && (
+                        <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          Now Playing
+                        </span>
+                      )}
+                    </div>
 
-                  {/* Transcript Text */}
-                  <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-                    {searchTerm && isHighlighted
-                      ? text
-                          .split(new RegExp(`(${searchTerm})`, "gi"))
-                          .map((part, partIndex) =>
-                            part.toLowerCase() === searchTerm.toLowerCase() ? (
-                              <mark
-                                key={partIndex}
-                                className="rounded bg-yellow-200 px-1"
-                              >
-                                {part}
-                              </mark>
-                            ) : (
-                              part
-                            ),
-                          )
-                      : text}
-                  </p>
-                </motion.div>
-              );
-            })}
-
-            {paragraphs.length === 0 && (
-              <div className="py-12 text-center text-gray-500">
-                <AlertCircle className="mx-auto mb-2 h-8 w-8 opacity-50" />
-                <p>No transcript content available</p>
-              </div>
-            )}
+                    {/* Transcript Text */}
+                    <p className="text-sm leading-relaxed text-gray-700 dark:text-gray-300">
+                      {searchTerm && isHighlighted
+                        ? segment.text
+                            .split(new RegExp(`(${searchTerm})`, "gi"))
+                            .map((part, partIndex) =>
+                              part.toLowerCase() === searchTerm.toLowerCase() ? (
+                                <mark
+                                  key={partIndex}
+                                  className="rounded bg-yellow-200 px-1"
+                                >
+                                  {part}
+                                </mark>
+                              ) : (
+                                part
+                              ),
+                            )
+                        : segment.text}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-center dark:border-gray-700 dark:bg-gray-800">
+          <AlertCircle className="mx-auto mb-2 h-8 w-8 text-gray-400" />
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Segment data not available. Showing full transcript above.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
@@ -658,8 +707,28 @@ const EnhancedTranscript: React.FC<{ transcription: string }> = ({
 export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
   transcription,
   audioSource,
+  segments,
   onNewTranscription,
 }) => {
+  const [currentTime, setCurrentTime] = useState(0);
+  const audioRefForStudio = useRef<HTMLAudioElement>(null);
+
+  // Handle segment click to seek to that point
+  const handleSegmentClick = (startTime: number) => {
+    if (audioRefForStudio.current) {
+      audioRefForStudio.current.currentTime = startTime;
+      audioRefForStudio.current.play().catch((error) => {
+        console.error("Audio playback failed:", error);
+        toast.error("Failed to play audio");
+      });
+    }
+  };
+
+  // Update current time for segment highlighting
+  const updateCurrentTime = (time: number) => {
+    setCurrentTime(time);
+  };
+
   return (
     <div className="h-full bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto flex h-full flex-col px-4 py-6">
@@ -693,7 +762,12 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
                 <h2 className="text-lg font-semibold">Transcript</h2>
               </CardHeader>
               <CardContent className="flex-1 overflow-hidden p-6">
-                <EnhancedTranscript transcription={transcription} />
+                <EnhancedTranscript
+                  transcription={transcription}
+                  segments={segments}
+                  onSegmentClick={handleSegmentClick}
+                  currentTime={currentTime}
+                />
               </CardContent>
             </Card>
           </div>
@@ -707,7 +781,7 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
             <FileDetails audioSource={audioSource} />
 
             {/* Export Controls */}
-            <ExportControls transcription={transcription} />
+            <ExportControls transcription={transcription} segments={segments} />
 
             {/* Action Buttons */}
             <ActionButtons transcription={transcription} />
