@@ -9,7 +9,7 @@ import { TranscriptionForm } from "../components/transcription/TranscriptionForm
 import { Toaster } from "sonner";
 import { FeedbackModals } from "../components/feedback/FeedbackModals";
 import { ChangelogModal } from "../components/ChangelogModal";
-import { V2AnnouncementModal } from "../components/V2AnnouncementModal";
+import { V3AnnouncementModal } from "../components/V3AnnouncementModal";
 import TranscriptionHistory from "../components/transcription/TranscriptionHistory";
 import { fadeInUp, expandCenter } from "../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
@@ -28,7 +28,7 @@ export default function Page() {
   const [showError, setShowError] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [showV2Modal, setShowV2Modal] = useState(false);
+  const [showV3Modal, setShowV3Modal] = useState(false);
   const [formKey, setFormKey] = useState(Date.now()); // Key to force re-render TranscriptionForm when needed
 
   // For handling session selection from history
@@ -51,12 +51,12 @@ export default function Page() {
     setShowChangelogModal(false);
   };
 
-  const openV2Modal = () => {
-    setShowV2Modal(true);
+  const openV3Modal = () => {
+    setShowV3Modal(true);
   };
 
-  const closeV2Modal = () => {
-    setShowV2Modal(false);
+  const closeV3Modal = () => {
+    setShowV3Modal(false);
   };
 
   const openHistoryModal = () => {
@@ -91,7 +91,7 @@ export default function Page() {
           onOpenChangelog={openChangelogModal}
           onShowHistory={openHistoryModal}
           onOpenFeedbackModal={openFeedbackModal}
-          onShowV2={openV2Modal}
+          onShowV3={openV3Modal}
         />
 
         <AnimatePresence mode="wait">
@@ -135,7 +135,7 @@ export default function Page() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {showV2Modal && <V2AnnouncementModal onClose={closeV2Modal} />}
+        {showV3Modal && <V3AnnouncementModal onClose={closeV3Modal} />}
       </AnimatePresence>
 
       <AnimatePresence>

@@ -10,6 +10,37 @@ export interface ChangeItem {
 
 export const changelogItems: ChangeItem[] = [
   {
+    date: "Fri, 31 Oct 2025",
+    version: "3.0.0",
+    changes: {
+      new: [
+        "**🎬 Transcription Studio**: Brand new interactive workspace for reviewing transcriptions with professional tools",
+        "**🎵 Audio Player Integration**: Full-featured audio player with play/pause, seek, skip (±10s), and volume controls",
+        "**⏱️ Interactive Transcript**: Click any segment to jump to that exact moment in the audio",
+        "**🔄 Real-time Segment Highlighting**: Current segment automatically highlights during playback",
+        "**🤖 OpenAI Whisper Model**: Upgraded to OpenAI's official Whisper model for better accuracy and timestamp precision",
+        "**📊 Timestamp-Based Segments**: Each transcription now includes precise start/end times for every segment",
+        "**📥 Enhanced Export Formats**: Download transcriptions in TXT, SRT, VTT, and DOCX with proper timestamps",
+        "**🎯 SRT/VTT Generation**: Professional subtitle file generation with accurate timestamps from API",
+        "**🔍 Transcript Search**: Search functionality with result highlighting in segments",
+        "**📱 Responsive Studio Layout**: Two-column design optimized for both desktop and mobile",
+      ],
+      improved: [
+        "**⚡ Better Timestamp Accuracy**: OpenAI Whisper provides more precise segment boundaries",
+        "**🎨 Streamlined UI**: Removed speaker diarization option to simplify the interface",
+        "**📦 Segment Data Storage**: All transcriptions now store segment arrays with timestamps",
+        "**🎬 Modal-Based Studio**: Studio opens in a dedicated modal for focused work without losing context",
+        "**🎯 Click-to-Seek**: Instant audio navigation by clicking transcript segments",
+        "**💾 Session Persistence**: Segments are saved in session history for later playback",
+      ],
+      fixed: [
+        "**🎵 Audio Playback**: Fixed audio player to properly connect with transcript",
+        "**⏱️ Time Synchronization**: Resolved timing issues between audio and transcript highlighting",
+        "**📝 Export Quality**: Improved SRT/VTT file format generation with proper timestamps",
+      ],
+    },
+  },
+  {
     date: "Tue, 22 Jul 2025",
     version: "2.1.0",
     changes: {
