@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 const LANGUAGES = [
-  { value: "None", label: "Auto Detect" },
+  { value: "auto", label: "Auto Detect" },
   { value: "english", label: "English" },
   { value: "spanish", label: "Spanish" },
   { value: "french", label: "French" },
@@ -21,7 +21,7 @@ export interface TranscriptionOptionsProps {
 }
 
 export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
-  const [language, setLanguage] = useState<string>("None");
+  const [language, setLanguage] = useState<string>("auto");
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLanguage = e.target.value;

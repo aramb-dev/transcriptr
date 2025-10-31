@@ -101,8 +101,8 @@ export async function POST(request: Request) {
     );
     Object.assign(transcriptionParams, inputParams);
 
-    // Add language if specified and not "None" or "auto"
-    if (options.language && options.language !== "None") {
+    // Add language if specified (auto is already the default)
+    if (options.language) {
       transcriptionParams.language = options.language;
     }
 

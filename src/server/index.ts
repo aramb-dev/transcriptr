@@ -68,8 +68,8 @@ app.post("/api/transcribe", (async (req: Request, res: Response) => {
       inputParams.audio = audioData;
     }
 
-    if (options.language !== "None") {
-      inputParams.language = options.language;
+    if (options.language) {
+      inputParams.language = options.language; // "auto" for auto-detect, or specific language
     }
 
     const response = await fetch("https://api.replicate.com/v1/predictions", {

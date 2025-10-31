@@ -55,7 +55,7 @@ export function UploadAudio({
     language: string;
     diarize: boolean;
   }>({
-    language: "None",
+    language: "auto",
     diarize: false,
   });
 

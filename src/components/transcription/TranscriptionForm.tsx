@@ -411,7 +411,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         task: "transcribe",
         batch_size: 64,
         return_timestamps: true,
-        language: options.language === "None" ? undefined : options.language, // Send undefined if "None"
+        language: options.language, // "auto" for auto-detect, or specific language
         diarize: options.diarize,
       };
       requestBody.options = apiOptions;
