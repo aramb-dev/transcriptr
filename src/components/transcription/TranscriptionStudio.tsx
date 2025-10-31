@@ -17,10 +17,7 @@ import {
   FileAudio,
   Clock,
   FileText,
-  Users,
   AlertCircle,
-  Sparkles,
-  X,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -339,7 +336,7 @@ const ExportControls: React.FC<ExportControlsProps> = ({
     }
 
     return segments
-      .map((segment, index) => {
+      .map((segment, _index) => {
         const startTime = formatTimeForSRT(segment.start);
         const endTime = formatTimeForSRT(segment.end);
         return `${segment.id + 1}\n${startTime} --> ${endTime}\n${segment.text.trim()}\n`;
@@ -371,7 +368,7 @@ const ExportControls: React.FC<ExportControlsProps> = ({
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       const timestamp = new Date().toISOString().split("T")[0];
-      let filename = `transcription_${timestamp}.${selectedFormat}`;
+      const filename = `transcription_${timestamp}.${selectedFormat}`;
       let content = transcription;
       let mimeType = "text/plain";
 
