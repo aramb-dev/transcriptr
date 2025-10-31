@@ -45,6 +45,13 @@ bun run format:check
 bun run setup-firebase-cors
 ```
 
+## Development Workflow
+
+**When working on tasks with multiple todos:**
+- Commit after every todo is completed
+- Write clear, concise commit messages that describe the changes
+- This keeps changes atomic and makes it easy to track progress
+
 ## High-Level Architecture
 
 ### Overview

@@ -3,8 +3,9 @@ import { uploadBase64ToFirebase } from "@/lib/firebase-utils";
 import { startReplicateTranscription } from "@/lib/replicate-client";
 
 // Default model ID, can be overridden by options
+// Using OpenAI's Whisper model which provides better timestamp accuracy and format support
 const DEFAULT_MODEL_ID =
-  "vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c";
+  "openai/whisper:8099696689d249cf8b122d833c36ac3f75505c666a395ca40ef26f68e7d3d16e";
 const LARGE_FILE_THRESHOLD_MB = 1; // Define threshold for direct base64 vs upload
 
 // Helper to prepare audio input for the transcription service
