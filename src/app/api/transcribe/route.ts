@@ -6,39 +6,32 @@ import { startReplicateTranscription } from "@/lib/replicate-client";
 // Using OpenAI's Whisper model which provides better timestamp accuracy and format support
 const DEFAULT_MODEL_ID =
   "openai/whisper:8099696689d249cf8b122d833c36ac3f75505c666a395ca40ef26f68e7d3d16e";
-const LARGE_FILE_THRESHOLD_MB = 1; // Define threshold for direct base64 vs upload
 
 // Helper to prepare audio input for the transcription service
+// Always uploads to Firebase to ensure Studio can access the audio
 async function prepareAudioInput(
   audioData: string | undefined,
   audioUrl: string | undefined,
 ) {
   const inputParams: { audio: string } = {} as { audio: string };
   let firebaseFilePath: string | null = null;
+  let firebaseUrl: string | null = null;
 
   if (audioUrl) {
     console.log("Using provided audio URL for Replicate input.");
     inputParams.audio = audioUrl;
+    firebaseUrl = audioUrl; // Save the URL for Studio
   } else if (audioData) {
-    // Estimate size (base64 is ~4/3 * original size)
-    const estimatedSizeInMB = (audioData.length * 0.75) / (1024 * 1024);
-    console.log(
-      `Estimated audio size from base64: ${estimatedSizeInMB.toFixed(2)}MB`,
-    );
-
-    if (estimatedSizeInMB > LARGE_FILE_THRESHOLD_MB) {
-      console.log("Audio data is large, uploading to Firebase...");
-      const uploadResult = await uploadBase64ToFirebase(audioData);
-      inputParams.audio = uploadResult.url;
-      firebaseFilePath = uploadResult.path;
-      console.log("Using Firebase URL for Replicate input:", inputParams.audio);
-    } else {
-      console.log("Using base64 data directly for Replicate input.");
-      inputParams.audio = audioData;
-    }
+    // Always upload to Firebase for Studio access
+    console.log("Uploading audio to Firebase for Studio access...");
+    const uploadResult = await uploadBase64ToFirebase(audioData);
+    inputParams.audio = uploadResult.url;
+    firebaseFilePath = uploadResult.path;
+    firebaseUrl = uploadResult.url;
+    console.log("Using Firebase URL for Replicate input:", inputParams.audio);
   }
 
-  return { inputParams, firebaseFilePath };
+  return { inputParams, firebaseFilePath, firebaseUrl };
 }
 
 export async function POST(request: Request) {
@@ -95,7 +88,7 @@ export async function POST(request: Request) {
     };
 
     // Process audio input
-    const { inputParams, firebaseFilePath } = await prepareAudioInput(
+    const { inputParams, firebaseFilePath, firebaseUrl } = await prepareAudioInput(
       audioData,
       audioUrl,
     );
@@ -114,11 +107,16 @@ export async function POST(request: Request) {
       modelId,
     );
 
-    // Add firebase path to response if a file was uploaded
+    // Add firebase path and URL to response
     if (firebaseFilePath) {
       (predictionData as Record<string, unknown>).firebaseFilePath =
         firebaseFilePath;
       console.log("Included Firebase path in response:", firebaseFilePath);
+    }
+
+    if (firebaseUrl) {
+      (predictionData as Record<string, unknown>).audioUrl = firebaseUrl;
+      console.log("Included audio URL in response:", firebaseUrl);
     }
 
     console.log(

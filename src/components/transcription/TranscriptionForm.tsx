@@ -479,6 +479,16 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         { timestamp: new Date(), data: resultData },
       ]);
 
+      // Save audio URL to session if provided (for Studio playback)
+      if (resultData.audioUrl && activeSession) {
+        updateSessionData({
+          audioSource: {
+            ...activeSession.audioSource,
+            url: resultData.audioUrl,
+          },
+        });
+      }
+
       // --- Check for Prediction ID and Start Polling ---
       if (resultData && resultData.id) {
         setCurrentPredictionId(resultData.id); // This will trigger the polling hook
