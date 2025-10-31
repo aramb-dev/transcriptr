@@ -52,6 +52,11 @@ bun run setup-firebase-cors
 - Write clear, concise commit messages that describe the changes
 - This keeps changes atomic and makes it easy to track progress
 
+**Command usage guidelines:**
+- Avoid using `head` or `tail` commands when running bash commands
+- Use dedicated tools instead (Read tool for viewing file contents with offset/limit)
+- This ensures better handling of output and avoids truncation issues
+
 ## High-Level Architecture
 
 ### Overview
