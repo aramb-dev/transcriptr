@@ -54,7 +54,7 @@ export default function DocumentationPage() {
                           Configure Options
                         </h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Select language, diarization, and other settings
+                          Select language and other settings
                         </p>
                       </div>
                     </div>
@@ -106,18 +106,6 @@ export default function DocumentationPage() {
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Transcribe audio in 100+ languages with high accuracy
-                  </p>
-                </div>
-
-                <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
-                  <div className="mb-3 flex items-center gap-2">
-                    <span className="text-2xl">👥</span>
-                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">
-                      Speaker Diarization
-                    </h3>
-                  </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Automatically identify and separate different speakers
                   </p>
                 </div>
 
