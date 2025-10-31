@@ -5,12 +5,14 @@ interface HeaderProps {
   onOpenChangelog: () => void;
   onShowHistory?: () => void;
   onOpenFeedbackModal?: (type: "general" | "issue" | "feature") => void;
+  onShowV2?: () => void;
 }
 
 export function Header({
   onOpenChangelog,
   onShowHistory,
   onOpenFeedbackModal,
+  onShowV2,
 }: HeaderProps) {
   return (
     <>
@@ -20,6 +22,7 @@ export function Header({
           onOpenChangelog={onOpenChangelog}
           onShowHistory={onShowHistory}
           onOpenFeedbackModal={onOpenFeedbackModal}
+          onShowV2={onShowV2}
         />
       )}
 
@@ -61,7 +64,19 @@ export function Header({
             </p>
           </div>
 
-          <div className="flex flex-1 justify-end">
+          <div className="flex flex-1 items-center justify-end gap-3">
+            {onShowV2 && (
+              <button
+                onClick={onShowV2}
+                className="group relative flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-3 py-1 text-sm font-medium text-white shadow-md transition-all hover:shadow-lg hover:scale-105"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
+                </span>
+                V2 is Here!
+              </button>
+            )}
             <a
               href="#changelog"
               onClick={(e) => {

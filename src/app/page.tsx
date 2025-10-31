@@ -10,7 +10,6 @@ import { Toaster } from "sonner";
 import { FeedbackModals } from "../components/feedback/FeedbackModals";
 import { ChangelogModal } from "../components/ChangelogModal";
 import { V2AnnouncementModal } from "../components/V2AnnouncementModal";
-import { useV2Announcement } from "../hooks/useV2Announcement";
 import TranscriptionHistory from "../components/transcription/TranscriptionHistory";
 import { fadeInUp, expandCenter } from "../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
@@ -29,13 +28,8 @@ export default function Page() {
   const [showError, setShowError] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showV2Modal, setShowV2Modal] = useState(false);
   const [formKey, setFormKey] = useState(Date.now()); // Key to force re-render TranscriptionForm when needed
-
-  // V2 Announcement modal logic
-  const {
-    shouldShow: shouldShowV2Announcement,
-    hideAnnouncement: hideV2Announcement,
-  } = useV2Announcement();
 
   // For handling session selection from history
   const [selectedSession, setSelectedSession] =
@@ -55,6 +49,14 @@ export default function Page() {
 
   const closeChangelogModal = () => {
     setShowChangelogModal(false);
+  };
+
+  const openV2Modal = () => {
+    setShowV2Modal(true);
+  };
+
+  const closeV2Modal = () => {
+    setShowV2Modal(false);
   };
 
   const openHistoryModal = () => {
@@ -89,6 +91,7 @@ export default function Page() {
           onOpenChangelog={openChangelogModal}
           onShowHistory={openHistoryModal}
           onOpenFeedbackModal={openFeedbackModal}
+          onShowV2={openV2Modal}
         />
 
         <AnimatePresence mode="wait">
@@ -132,9 +135,7 @@ export default function Page() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {shouldShowV2Announcement && (
-          <V2AnnouncementModal onClose={hideV2Announcement} />
-        )}
+        {showV2Modal && <V2AnnouncementModal onClose={closeV2Modal} />}
       </AnimatePresence>
 
       <AnimatePresence>

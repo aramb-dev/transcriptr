@@ -7,12 +7,14 @@ interface MobileHeaderProps {
   onOpenChangelog: () => void;
   onShowHistory?: () => void;
   onOpenFeedbackModal: (type: "general" | "issue" | "feature") => void;
+  onShowV2?: () => void;
 }
 
 export function MobileHeader({
   onOpenChangelog,
   onShowHistory,
   onOpenFeedbackModal,
+  onShowV2,
 }: MobileHeaderProps) {
   return (
     <header className="mb-6 md:hidden">
@@ -58,6 +60,7 @@ export function MobileHeader({
             onOpenChangelog={onOpenChangelog}
             onShowHistory={onShowHistory}
             onOpenFeedbackModal={onOpenFeedbackModal}
+            onShowV2={onShowV2}
           />
         </div>
       </div>

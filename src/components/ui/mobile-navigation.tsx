@@ -20,12 +20,14 @@ interface MobileNavigationProps {
   onOpenChangelog: () => void;
   onShowHistory?: () => void;
   onOpenFeedbackModal: (type: "general" | "issue" | "feature") => void;
+  onShowV2?: () => void;
 }
 
 export function MobileNavigation({
   onOpenChangelog,
   onShowHistory,
   onOpenFeedbackModal,
+  onShowV2,
 }: MobileNavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -67,6 +69,11 @@ export function MobileNavigation({
 
   const handleHistoryClick = () => {
     onShowHistory?.();
+    closeMenu();
+  };
+
+  const handleV2Click = () => {
+    onShowV2?.();
     closeMenu();
   };
 
@@ -150,6 +157,23 @@ export function MobileNavigation({
                     >
                       <Clock className="mr-3 h-5 w-5" />
                       View History
+                    </Button>
+                  </motion.div>
+                )}
+
+                {/* V2 Announcement */}
+                {onShowV2 && (
+                  <motion.div variants={itemVariants}>
+                    <Button
+                      variant="ghost"
+                      onClick={handleV2Click}
+                      className="mb-3 w-full justify-start bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-left font-medium text-white hover:from-blue-600 hover:to-purple-700"
+                    >
+                      <span className="relative mr-3 flex h-2 w-2">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-white"></span>
+                      </span>
+                      V2 is Here!
                     </Button>
                   </motion.div>
                 )}
