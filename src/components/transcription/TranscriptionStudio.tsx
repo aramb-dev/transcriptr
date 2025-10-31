@@ -65,14 +65,23 @@ const formatFileSize = (bytes?: number): string => {
 };
 
 // Audio Player Component
-const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
+interface AudioPlayerProps {
+  audioSource?: AudioSource;
+  audioRef?: React.RefObject<HTMLAudioElement>;
+  onTimeUpdate?: (time: number) => void;
+}
+
+const AudioPlayer: React.FC<AudioPlayerProps> = ({
   audioSource,
+  audioRef: externalAudioRef,
+  onTimeUpdate,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const internalAudioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = externalAudioRef || internalAudioRef;
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -99,7 +108,9 @@ const AudioPlayer: React.FC<{ audioSource?: AudioSource }> = ({
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
-      setCurrentTime(audioRef.current.currentTime);
+      const time = audioRef.current.currentTime;
+      setCurrentTime(time);
+      onTimeUpdate?.(time);
     }
   };
 
@@ -711,13 +722,13 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
   onNewTranscription,
 }) => {
   const [currentTime, setCurrentTime] = useState(0);
-  const audioRefForStudio = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   // Handle segment click to seek to that point
   const handleSegmentClick = (startTime: number) => {
-    if (audioRefForStudio.current) {
-      audioRefForStudio.current.currentTime = startTime;
-      audioRefForStudio.current.play().catch((error) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = startTime;
+      audioRef.current.play().catch((error) => {
         console.error("Audio playback failed:", error);
         toast.error("Failed to play audio");
       });
@@ -725,7 +736,7 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
   };
 
   // Update current time for segment highlighting
-  const updateCurrentTime = (time: number) => {
+  const handleTimeUpdate = (time: number) => {
     setCurrentTime(time);
   };
 
@@ -775,7 +786,11 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
           {/* Right Panel - Controls */}
           <div className="max-h-full space-y-4 overflow-y-auto">
             {/* Audio Player */}
-            <AudioPlayer audioSource={audioSource} />
+            <AudioPlayer
+              audioSource={audioSource}
+              audioRef={audioRef}
+              onTimeUpdate={handleTimeUpdate}
+            />
 
             {/* File Details */}
             <FileDetails audioSource={audioSource} />

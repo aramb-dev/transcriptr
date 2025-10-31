@@ -700,6 +700,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
                       <TranscriptionStudio
                         transcription={transcription}
                         audioSource={activeSession?.audioSource}
+                        segments={activeSession?.segments}
                         onNewTranscription={() => {
                           setIsStudioModalOpen(false);
                           handleReset();
