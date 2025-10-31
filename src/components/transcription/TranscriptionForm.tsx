@@ -407,12 +407,10 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       const apiOptions = {
         modelId:
           process.env.NEXT_PUBLIC_REPLICATE_MODEL_ID ||
-          "vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c",
-        task: "transcribe",
-        batch_size: 64,
-        return_timestamps: true,
+          "openai/whisper:8099696689d249cf8b122d833c36ac3f75505c666a395ca40ef26f68e7d3d16e",
         language: options.language, // "auto" for auto-detect, or specific language
-        diarize: options.diarize,
+        translate: options.translate || false,
+        temperature: options.temperature || 0,
       };
       requestBody.options = apiOptions;
 
