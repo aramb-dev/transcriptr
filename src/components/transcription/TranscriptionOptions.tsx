@@ -22,18 +22,12 @@ export interface TranscriptionOptionsProps {
 
 export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
   const [language, setLanguage] = useState<string>("None");
-  const [diarize, setDiarize] = useState<boolean>(false);
 
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLanguage = e.target.value;
     setLanguage(newLanguage);
-    onChange({ language: newLanguage, diarize });
-  };
-
-  const handleDiarizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newDiarize = e.target.checked;
-    setDiarize(newDiarize);
-    onChange({ language, diarize: newDiarize });
+    // Always pass diarize as false since we removed speaker diarization
+    onChange({ language: newLanguage, diarize: false });
   };
 
   return (
@@ -57,53 +51,32 @@ export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
         Advanced Options
       </h3>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div className="space-y-2">
-          <label
-            htmlFor="language"
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-          >
-            Language
-          </label>
-          <select
-            id="language"
-            value={language}
-            onChange={handleLanguageChange}
-            className="focus:border-primary focus:ring-primary dark:focus:border-primary w-full rounded-md border border-gray-300 bg-white py-2 pr-10 pl-3 text-sm text-gray-900 shadow-sm focus:ring-1 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
-          >
-            {LANGUAGES.map((lang) => (
-              <option
-                key={lang.value}
-                value={lang.value}
-                className="text-gray-900 dark:text-gray-100"
-              >
-                {lang.label}
-              </option>
-            ))}
-          </select>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            Select the language of the audio for better accuracy
-          </p>
-        </div>
-
-        <div className="space-y-2">
-          <label
-            htmlFor="diarize"
-            className="flex items-center space-x-3 text-gray-700 dark:text-gray-300"
-          >
-            <input
-              type="checkbox"
-              id="diarize"
-              checked={diarize}
-              onChange={handleDiarizeChange}
-              className="text-primary focus:ring-primary h-4 w-4 rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700"
-            />
-            <span className="text-sm font-medium">Speaker Diarization</span>
-          </label>
-          <p className="ml-7 text-xs text-gray-500 dark:text-gray-400">
-            Identify different speakers in the transcription
-          </p>
-        </div>
+      <div className="space-y-2">
+        <label
+          htmlFor="language"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
+          Language
+        </label>
+        <select
+          id="language"
+          value={language}
+          onChange={handleLanguageChange}
+          className="focus:border-primary focus:ring-primary dark:focus:border-primary w-full rounded-md border border-gray-300 bg-white py-2 pr-10 pl-3 text-sm text-gray-900 shadow-sm focus:ring-1 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100"
+        >
+          {LANGUAGES.map((lang) => (
+            <option
+              key={lang.value}
+              value={lang.value}
+              className="text-gray-900 dark:text-gray-100"
+            >
+              {lang.label}
+            </option>
+          ))}
+        </select>
+        <p className="text-xs text-gray-500 dark:text-gray-400">
+          Select the language of the audio for better accuracy
+        </p>
       </div>
       <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
         Note: Only MP3, WAV, FLAC, and OGG formats are currently supported for
