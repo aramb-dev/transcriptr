@@ -45,6 +45,13 @@ bun run format:check
 bun run setup-firebase-cors
 ```
 
+**Setup Firebase Storage Lifecycle (automatic deletion of old files):**
+```bash
+bun run setup-firebase-lifecycle
+```
+
+Note: This requires [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) to be installed. The lifecycle configuration automatically deletes files older than 1 day in `temp_audio/` and `test/` directories.
+
 ## Development Workflow
 
 **When working on tasks with multiple todos:**

@@ -10,7 +10,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "preview": "vite preview",
-    "setup-firebase-cors": "node scripts/setup-firebase-cors.js"
+    "setup-firebase-cors": "node scripts/setup-firebase-cors.js",
+    "setup-firebase-lifecycle": "bash scripts/setup-firebase-lifecycle.sh"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.16.0",
