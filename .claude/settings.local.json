@@ -5,7 +5,9 @@
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nfeat(studio): update data models and switch to OpenAI Whisper\n\n- Add TranscriptionSegment interface with timestamp support\n- Update TranscriptionSession to store segments array\n- Switch from incredibly-fast-whisper to OpenAI Whisper model\n- Add audio duration field to audioSource\n- Update CLAUDE.md with development workflow guidance\n\nThis enables the Studio feature to work with real timestamps\nfrom the Replicate API for interactive transcript playback.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
       "Bash(git commit:*)",
-      "Bash(bun run lint:*)"
+      "Bash(bun run lint:*)",
+      "Bash(perl -C -i -pe:*)",
+      "Bash(git checkout:*)"
     ]
   },
   "enableAllProjectMcpServers": false

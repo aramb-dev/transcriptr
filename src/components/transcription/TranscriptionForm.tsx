@@ -41,6 +41,11 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     null,
   );
   const [firebaseFilePath, setFirebaseFilePath] = useState<string | null>(null);
+  const [frameProgress, setFrameProgress] = useState<{
+    percentage: number;
+    current: number;
+    total: number;
+  } | null>(null);
 
   // Mobile detection hook
   const [isMobile, setIsMobile] = useState(false);
@@ -224,6 +229,9 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         ];
         updateSessionData({ apiResponses: updatedResponses });
       }
+    },
+    onFrameProgress: (progress) => {
+      setFrameProgress(progress);
     },
   });
 
@@ -667,6 +675,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
             apiResponses={apiResponses}
             formatTimestamp={formatTimestamp}
             onCancel={handleReset}
+            frameProgress={frameProgress}
           />
         ) : transStatus === "failed" || transStatus === "canceled" ? (
           <TranscriptionError
