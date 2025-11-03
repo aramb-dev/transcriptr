@@ -201,7 +201,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
               <div className="space-y-1">
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>{formatDuration(currentTime)}</span>
-                  <span>{formatDuration(duration || audioSource.duration)}</span>
+                  <span>{formatDuration(duration)}</span>
                 </div>
                 <div
                   className="h-1 cursor-pointer overflow-hidden rounded-full bg-gray-200 transition-all duration-100 hover:h-2"
