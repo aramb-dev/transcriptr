@@ -19,7 +19,6 @@ import {
 import { trackEvent } from "../../lib/analytics";
 import { isLargeFile, uploadLargeFile } from "../../lib/storage-service";
 
-import { cleanupFirebaseFile } from "../../lib/cleanup-service";
 import { motion } from "framer-motion";
 import { fadeInUp, springTransition } from "../../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
@@ -40,7 +39,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
   const [currentPredictionId, setCurrentPredictionId] = useState<string | null>(
     null,
   );
-  const [firebaseFilePath, setFirebaseFilePath] = useState<string | null>(null);
   const [frameProgress, setFrameProgress] = useState<{
     percentage: number;
     current: number;
@@ -86,7 +84,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       // Restore state from recovered session
       setTransStatus(session.status);
       setProgress(session.progress);
-      setFirebaseFilePath(session.firebaseFilePath);
       setCurrentPredictionId(session.predictionId);
 
       if (session.apiResponses) {
@@ -108,7 +105,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       // Set the correct state based on the session
       setTransStatus(initialSession.status);
       setProgress(initialSession.progress);
-      setFirebaseFilePath(initialSession.firebaseFilePath);
       setCurrentPredictionId(initialSession.predictionId);
 
       if (initialSession.apiResponses) {
@@ -174,21 +170,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
           progress: 100,
           result: finalTranscription,
           segments: segments,
-        });
-      }
-
-      // Cleanup Firebase file if exists when transcription is complete
-      if (firebaseFilePath) {
-        cleanupFirebaseFile(firebaseFilePath).then((success) => {
-          if (success) {
-            console.log("Temporary file cleaned up successfully");
-            setFirebaseFilePath(null);
-
-            // Update session to clear firebase path
-            if (activeSession) {
-              updateSessionData({ firebaseFilePath: null });
-            }
-          }
         });
       }
     },
@@ -332,7 +313,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     try {
       let file: File | null = null;
       let sourceDescription = "";
-      const firebaseFilePath: string | null = null; // Track Firebase path for potential cleanup
 
       // Check if data is FormData (file upload) or object (URL input)
       if (data instanceof FormData) {
@@ -356,7 +336,18 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
           try {
             const uploadResult = await uploadLargeFile(file);
             requestBody.audioUrl = uploadResult.url; // Use Firebase URL
-            setFirebaseFilePath(uploadResult.path); // Store the path for cleanup later
+
+            // Update session with audio URL for Studio playback
+            updateSessionData({
+              audioSource: {
+                type: "file",
+                name: file.name,
+                size: file.size,
+                url: uploadResult.url,
+              },
+            });
+            console.log("Updated session with upload URL:", uploadResult.url);
+
             setProgress(20);
             setApiResponses((prev) => [
               ...prev,
@@ -475,11 +466,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       const resultData = await response.json();
       console.log("API response data:", resultData);
 
-      // Add Firebase path to result if it exists, for potential cleanup later
-      if (firebaseFilePath) {
-        resultData.firebaseFilePath = firebaseFilePath;
-      }
-
       setApiResponses((prev) => [
         ...prev,
         { timestamp: new Date(), data: resultData },
@@ -546,21 +532,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
               result: finalTranscription,
             });
           }
-
-          // Cleanup Firebase file if exists when transcription is complete
-          if (firebaseFilePath) {
-            cleanupFirebaseFile(firebaseFilePath).then((success) => {
-              if (success) {
-                console.log("Temporary file cleaned up successfully");
-                setFirebaseFilePath(null);
-
-                // Update session to clear firebase path
-                if (activeSession) {
-                  updateSessionData({ firebaseFilePath: null });
-                }
-              }
-            });
-          }
         } else {
           throw new Error(
             "Invalid API response: Missing prediction ID or result.",
@@ -599,36 +570,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     if (activeSession) {
       discardSession();
     }
-
-    // Cleanup Firebase file if exists when resetting
-    if (firebaseFilePath) {
-      cleanupFirebaseFile(firebaseFilePath).then((success) => {
-        if (success) {
-          console.log("Temporary file cleaned up on reset");
-          setFirebaseFilePath(null);
-        }
-      });
-    }
   };
-
-  // Use effect to ensure we cleanup files when component unmounts
-  useEffect(() => {
-    return () => {
-      // Don't cleanup Firebase file automatically on unmount if we have an active session
-      if (
-        firebaseFilePath &&
-        (!activeSession ||
-          activeSession.status === "succeeded" ||
-          activeSession.status === "failed")
-      ) {
-        cleanupFirebaseFile(firebaseFilePath).then((success) => {
-          if (success) {
-            console.log("Temporary file cleaned up on component unmount");
-          }
-        });
-      }
-    };
-  }, [firebaseFilePath, activeSession]);
 
   // Run cleanup of expired sessions once on component mount
   useEffect(() => {

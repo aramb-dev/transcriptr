@@ -99,7 +99,6 @@ Transcriptr is a Next.js 15 web application that transcribes audio files using t
 - `analytics.ts` - Google Analytics wrapper
 - `animations.ts` - Reusable animation configurations (Framer Motion)
 - `storage-service.ts` - File upload/download helpers
-- `cleanup-service.ts` - Cleanup utilities for temporary files
 
 **`src/hooks/`** - Custom React hooks
 - `useTranscriptionPolling.ts` - Polls Replicate API for transcription status
@@ -155,8 +154,6 @@ Located in `src/app/api/`:
 
 - **`/api/printerz-proxy` (POST)** - PDF generation via Printerz API
   - Generates formatted PDF from transcription
-
-- **`/api/cleanup` (POST)** - Cleanup temporary files
 
 ### Key Technologies & Patterns
 
