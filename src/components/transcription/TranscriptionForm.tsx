@@ -252,7 +252,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     setCurrentPredictionId(null); // Clear previous prediction ID
     setTransStatus("starting"); // <--- SET STATUS TO STARTING HERE
     setProgress(5);
-    setFirebaseFilePath(null); // Reset Firebase file path
 
     // Create new session
     let audioSource: {
