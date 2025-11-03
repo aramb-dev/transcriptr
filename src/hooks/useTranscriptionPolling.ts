@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { TranscriptionStatus, getApiUrl } from "../services/transcription";
+import { getUserFriendlyErrorMessage } from "../lib/error-utils";
 
 interface UseTranscriptionPollingProps {
   predictionId: string | null;
@@ -192,14 +193,19 @@ export function useTranscriptionPolling({
         })
         .catch((error) => {
           console.error("Error during polling:", error);
+
+          // Get user-friendly error message
+          const errorInfo = getUserFriendlyErrorMessage(error);
+
           stopPolling();
-          onError(error instanceof Error ? error.message : String(error));
+          onError(errorInfo.userMessage);
           onStatusChange("failed");
           onProgress(0);
           onApiResponse({
             timestamp: new Date(),
             data: {
-              error: `Polling Error: ${error instanceof Error ? error.message : String(error)}`,
+              error: `Polling Error: ${errorInfo.userMessage}`,
+              isNetworkError: errorInfo.isNetworkError,
             },
           });
         });

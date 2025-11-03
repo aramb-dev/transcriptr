@@ -18,6 +18,7 @@ import {
 } from "../../services/transcription";
 import { trackEvent } from "../../lib/analytics";
 import { isLargeFile, uploadLargeFile } from "../../lib/storage-service";
+import { getUserFriendlyErrorMessage } from "../../lib/error-utils";
 
 import { motion } from "framer-motion";
 import { fadeInUp, springTransition } from "../../lib/animations";
@@ -242,7 +243,12 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     data:
       | FormData
       | { audioUrl: string; originalFile?: { name: string; size: number } },
-    options: { language: string; diarize: boolean },
+    options: {
+      language: string;
+      diarize: boolean;
+      translate?: boolean;
+      temperature?: number;
+    },
   ) => {
     // --- Reset State ---
     setError(null);
@@ -430,14 +436,22 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       );
       setProgress(25);
 
-      // --- API Call Logic (remains largely the same) ---
-      const response = await fetch(getApiUrl("transcribe"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+      // --- API Call Logic with network error handling ---
+      let response: Response;
+      try {
+        response = await fetch(getApiUrl("transcribe"), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
+      } catch {
+        // Network error during fetch
+        throw new Error(
+          "Lost internet connection. Please check your network and try again.",
+        );
+      }
 
       setProgress(40);
 
@@ -448,8 +462,13 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
           errorBody =
             errorJson.error || errorJson.message || JSON.stringify(errorJson);
         } catch {
-          errorBody = await response.text();
+          try {
+            errorBody = await response.text();
+          } catch {
+            errorBody = `Server error (${response.status})`;
+          }
         }
+
         setApiResponses((prev) => [
           ...prev,
           {
@@ -457,9 +476,11 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
             data: { error: `Server error: ${response.status} - ${errorBody}` },
           },
         ]);
-        throw new Error(
-          `Server responded with ${response.status}: ${errorBody}`,
-        );
+
+        // Create a more specific error for server errors
+        const error = new Error(errorBody) as Error & { status?: number };
+        error.status = response.status;
+        throw error;
       }
 
       const resultData = await response.json();
@@ -531,18 +552,25 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       // --- End Initial API Call & Polling Start ---
     } catch (err) {
       console.error("Transcription process failed:", err);
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      setError(errorMessage); // Set error state
+
+      // Get user-friendly error message
+      const errorInfo = getUserFriendlyErrorMessage(err);
+      const userMessage = errorInfo.userMessage;
+
+      setError(userMessage); // Set user-friendly error message
       setTransStatus("failed"); // Set status to failed
       setApiResponses((prev) => [
         ...prev,
         {
           timestamp: new Date(),
-          data: { error: `Transcription failed: ${errorMessage}` },
+          data: {
+            error: `Transcription failed: ${userMessage}`,
+            isNetworkError: errorInfo.isNetworkError,
+          },
         },
       ]);
       setProgress(0);
-      trackEvent("Transcription", "Error", errorMessage);
+      trackEvent("Transcription", "Error", userMessage);
     }
   };
 
