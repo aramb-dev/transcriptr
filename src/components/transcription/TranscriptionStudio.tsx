@@ -63,13 +63,13 @@ const formatFileSize = (bytes?: number): string => {
 
 // Audio Player Component
 interface AudioPlayerProps {
-  audioSource?: AudioSource;
+  audioUrl?: string;
   audioRef?: React.RefObject<HTMLAudioElement>;
   onTimeUpdate?: (time: number) => void;
 }
 
 const AudioPlayer: React.FC<AudioPlayerProps> = ({
-  audioSource,
+  audioUrl,
   audioRef: externalAudioRef,
   onTimeUpdate,
 }) => {
@@ -147,16 +147,17 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
         </div>
       </CardHeader>
       <CardContent>
-        {audioSource?.url ? (
+        {audioUrl ? (
           <>
             <audio
               ref={audioRef}
-              src={audioSource.url}
+              src={audioUrl}
               onTimeUpdate={handleTimeUpdate}
               onLoadedMetadata={handleDurationChange}
               onEnded={() => setIsPlaying(false)}
               preload="metadata"
               crossOrigin="anonymous"
+              controls
             />
 
             <div className="space-y-4">
@@ -721,6 +722,12 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  // Get audio URL from localStorage or prop
+  const audioUrl =
+    typeof window !== "undefined"
+      ? localStorage.getItem("studioAudioUrl") || audioSource?.url
+      : audioSource?.url;
+
   // Handle segment click to seek to that point
   const handleSegmentClick = (startTime: number) => {
     if (audioRef.current) {
@@ -784,7 +791,7 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
           <div className="max-h-full space-y-4 overflow-y-auto">
             {/* Audio Player */}
             <AudioPlayer
-              audioSource={audioSource}
+              audioUrl={audioUrl}
               audioRef={audioRef}
               onTimeUpdate={handleTimeUpdate}
             />

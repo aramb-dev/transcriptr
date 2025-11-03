@@ -341,6 +341,10 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
           const uploadResult = await uploadLargeFile(file);
           requestBody.audioUrl = uploadResult.url; // Use Firebase URL
 
+          // Save URL to localStorage for Studio access
+          localStorage.setItem("studioAudioUrl", uploadResult.url);
+          console.log("Saved audio URL to localStorage:", uploadResult.url);
+
           // Update session with audio URL for Studio playback
           updateSessionData({
             audioSource: {
