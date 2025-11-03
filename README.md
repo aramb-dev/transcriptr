@@ -81,7 +81,6 @@ Transcriptr requires several environment variables to function properly. Create 
 | `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID                                             |
 | `NEXT_PUBLIC_FIREBASE_APP_ID`              | Firebase application ID                                                  |
 | `NEXT_PUBLIC_PRINTERZ_API_KEY`             | API key for Printerz PDF generation services                             |
-| `NEXT_PUBLIC_LARGE_FILE_THRESHOLD`         | Threshold in MB for large file warnings                                  |
 
 ### Optional Environment Variables
 
@@ -102,7 +101,6 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789012
 NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789012:web:abcdef1234567890
 NEXT_PUBLIC_PRINTERZ_API_KEY=your_printerz_api_key
-NEXT_PUBLIC_LARGE_FILE_THRESHOLD=1
 NEXT_PUBLIC_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
 ```
 

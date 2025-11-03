@@ -13,11 +13,10 @@ import {
   TranscriptionStatus,
   statusMessages,
   getApiUrl,
-  fileToBase64,
   formatTimestamp,
 } from "../../services/transcription";
 import { trackEvent } from "../../lib/analytics";
-import { isLargeFile, uploadLargeFile } from "../../lib/storage-service";
+import { uploadLargeFile } from "../../lib/storage-service";
 import { getUserFriendlyErrorMessage } from "../../lib/error-utils";
 
 import { motion } from "framer-motion";
@@ -309,7 +308,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         language?: string;
         diarize?: boolean;
       } | null;
-      audioData?: string; // Base64 data
       audioUrl?: string; // URL from input or Firebase
     } = { options: null };
 
@@ -327,68 +325,57 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         }
         sourceDescription = `file: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB, Type: ${file.type}`;
 
-        if (isLargeFile(file)) {
-          setProgress(10);
+        // Always upload to Firebase (no more base64)
+        setProgress(10);
+        setApiResponses((prev) => [
+          ...prev,
+          {
+            timestamp: new Date(),
+            data: {
+              message: `Uploading to temporary storage...`,
+            },
+          },
+        ]);
+
+        try {
+          const uploadResult = await uploadLargeFile(file);
+          requestBody.audioUrl = uploadResult.url; // Use Firebase URL
+
+          // Update session with audio URL for Studio playback
+          updateSessionData({
+            audioSource: {
+              type: "file",
+              name: file.name,
+              size: file.size,
+              url: uploadResult.url,
+            },
+          });
+          console.log("Updated session with upload URL:", uploadResult.url);
+
+          setProgress(20);
           setApiResponses((prev) => [
             ...prev,
             {
               timestamp: new Date(),
               data: {
-                message: `Large file detected. Uploading to temporary storage...`,
+                message: "File uploaded to temporary storage.",
+                url: uploadResult.url,
               },
             },
           ]);
-          try {
-            const uploadResult = await uploadLargeFile(file);
-            requestBody.audioUrl = uploadResult.url; // Use Firebase URL
-
-            // Update session with audio URL for Studio playback
-            updateSessionData({
-              audioSource: {
-                type: "file",
-                name: file.name,
-                size: file.size,
-                url: uploadResult.url,
+        } catch (uploadError) {
+          setApiResponses((prev) => [
+            ...prev,
+            {
+              timestamp: new Date(),
+              data: {
+                error: `Firebase upload error: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`,
               },
-            });
-            console.log("Updated session with upload URL:", uploadResult.url);
-
-            setProgress(20);
-            setApiResponses((prev) => [
-              ...prev,
-              {
-                timestamp: new Date(),
-                data: {
-                  message: "File uploaded to temporary storage.",
-                  url: uploadResult.url,
-                },
-              },
-            ]);
-          } catch (uploadError) {
-            setApiResponses((prev) => [
-              ...prev,
-              {
-                timestamp: new Date(),
-                data: {
-                  error: `Firebase upload error: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`,
-                },
-              },
-            ]);
-            throw new Error(
-              `Failed to upload large file: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`,
-            );
-          }
-        } else {
-          // Convert smaller files to base64
-          try {
-            const base64Audio = await fileToBase64(file);
-            setProgress(15);
-            requestBody.audioData = base64Audio;
-          } catch (base64Error) {
-            throw new Error(
-              `Failed to prepare file: ${base64Error instanceof Error ? base64Error.message : String(base64Error)}`,
-            );
-          }
+            },
+          ]);
+          throw new Error(
+            `Failed to upload file: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`,
+          );
         }
         // --- End File processing logic ---
       } else {
@@ -418,22 +405,11 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       };
       requestBody.options = apiOptions;
 
-      // Ensure only one audio source is sent
-      if (requestBody.audioUrl && requestBody.audioData) {
-        console.warn(
-          "Both audioUrl and audioData present, preferring audioUrl.",
-        );
-        delete requestBody.audioData;
-      }
-
       console.log(
         "Sending request to server with options:",
         requestBody.options,
       );
-      console.log(
-        "Using method:",
-        requestBody.audioUrl ? "URL" : "base64 data",
-      );
+      console.log("Using Firebase URL for audio:", requestBody.audioUrl);
       setProgress(25);
 
       // --- API Call Logic with network error handling ---
