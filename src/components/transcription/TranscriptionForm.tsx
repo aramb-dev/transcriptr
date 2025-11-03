@@ -473,20 +473,11 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
 
       // Save audio URL to session if provided (for Studio playback)
       if (resultData.audioUrl && activeSession) {
-        console.log("Saving audioUrl to session:", resultData.audioUrl);
-        console.log("Current audioSource:", activeSession.audioSource);
         updateSessionData({
           audioSource: {
             ...activeSession.audioSource,
             url: resultData.audioUrl,
           },
-        });
-        console.log("Updated audioSource with url");
-      } else {
-        console.warn("Could not save audioUrl:", {
-          hasAudioUrl: !!resultData.audioUrl,
-          hasActiveSession: !!activeSession,
-          audioUrl: resultData.audioUrl,
         });
       }
 
