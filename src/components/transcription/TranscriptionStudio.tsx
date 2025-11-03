@@ -721,6 +721,12 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
   const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  // Debug: Log audioSource when component mounts or updates
+  React.useEffect(() => {
+    console.log("TranscriptionStudio - audioSource:", audioSource);
+    console.log("TranscriptionStudio - audioSource.url:", audioSource?.url);
+  }, [audioSource]);
+
   // Handle segment click to seek to that point
   const handleSegmentClick = (startTime: number) => {
     if (audioRef.current) {
