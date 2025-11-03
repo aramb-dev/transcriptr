@@ -8,7 +8,8 @@
       "Bash(bun run lint:*)",
       "Bash(perl -C -i -pe:*)",
       "Bash(git checkout:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(rm:*)"
     ]
   },
   "enableAllProjectMcpServers": false
