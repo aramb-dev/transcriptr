@@ -5,7 +5,7 @@ import { scaleDown } from "../lib/animations";
 import { AnimatedBackdrop } from "./ui/animated-backdrop";
 
 interface ChangelogModalProps {
-  onClose: () => void;
+  readonly onClose: () => void;
 }
 
 export function ChangelogModal({ onClose }: ChangelogModalProps) {

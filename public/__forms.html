@@ -24,5 +24,51 @@
       <input type="text" name="operatingSystem" />
       <textarea name="feedback"></textarea>
     </form>
+
+    <form
+      name="issue-report"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="issue-report" />
+      <input type="text" name="bot-field" />
+      <input type="text" name="title" />
+      <textarea name="description"></textarea>
+      <input type="text" name="category" />
+      <input type="text" name="severity" />
+      <input type="text" name="reproducible" />
+      <input type="text" name="user-name" />
+      <input type="email" name="user-email" />
+      <textarea name="steps-to-reproduce"></textarea>
+      <input type="text" name="timestamp" />
+      <input type="text" name="user-agent" />
+      <input type="text" name="url" />
+    </form>
+
+    <form
+      name="conversion-error-report"
+      data-netlify="true"
+      data-netlify-honeypot="bot-field"
+      hidden
+    >
+      <input type="hidden" name="form-name" value="conversion-error-report" />
+      <input type="text" name="bot-field" />
+      <input type="text" name="title" />
+      <textarea name="description"></textarea>
+      <input type="text" name="file-name" />
+      <input type="text" name="original-format" />
+      <input type="text" name="target-format" />
+      <input type="text" name="file-size" />
+      <input type="text" name="cloud-convert-job-id" />
+      <input type="text" name="error-message" />
+      <input type="text" name="error-code" />
+      <input type="text" name="user-name" />
+      <input type="email" name="user-email" />
+      <textarea name="additional-details"></textarea>
+      <input type="text" name="timestamp" />
+      <input type="text" name="user-agent" />
+      <input type="text" name="url" />
+    </form>
   </body>
 </html>

@@ -7,8 +7,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { changelogItems } from "../data/changelog";
 
 interface MobileChangelogProps {
-  isModal?: boolean;
-  onClose?: () => void;
+  readonly isModal?: boolean;
+  readonly onClose?: () => void;
 }
 
 export function MobileChangelog({
@@ -148,7 +148,7 @@ export function MobileChangelog({
                               <div className="space-y-2 px-4 py-3">
                                 {item.changes.new.map((change, changeIndex) => (
                                   <motion.div
-                                    key={changeIndex}
+                                    key={`${item.version}-new-${change.slice(0, 20)}-${changeIndex}`}
                                     initial={{ opacity: 0, x: -10 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     transition={{ delay: changeIndex * 0.05 }}
@@ -219,7 +219,7 @@ export function MobileChangelog({
                                   {item.changes.improved.map(
                                     (change, changeIndex) => (
                                       <motion.div
-                                        key={changeIndex}
+                                        key={`${item.version}-improved-${change.slice(0, 20)}-${changeIndex}`}
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{
@@ -287,7 +287,7 @@ export function MobileChangelog({
                                 {item.changes.fixed.map(
                                   (change, changeIndex) => (
                                     <motion.div
-                                      key={changeIndex}
+                                      key={`${item.version}-fixed-${change.slice(0, 20)}-${changeIndex}`}
                                       initial={{ opacity: 0, x: -10 }}
                                       animate={{ opacity: 1, x: 0 }}
                                       transition={{ delay: changeIndex * 0.05 }}
