@@ -6,7 +6,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { url } = body;
 
-    if (!url || !url.includes("firebasestorage.googleapis.com")) {
+    if (!url?.includes("firebasestorage.googleapis.com")) {
       return NextResponse.json(
         { error: "Invalid or missing Firebase Storage URL" },
         { status: 400 },

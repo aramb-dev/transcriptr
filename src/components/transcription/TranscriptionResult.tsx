@@ -1,765 +1,456 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "../ui/tabs";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { Copy, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
-import { SequentialRevealList } from "../ui/sequential-reveal-list";
 import { ScrollRevealSection } from "../ui/scroll-reveal-section";
-
-// Define interfaces for better type safety
-interface TranscriptSegment {
-  start?: number;
-  end?: number;
-  text: string;
-}
-
-// Removed the heavy imports:
-// import JSZip from 'jszip';
-// import { saveAs } from 'file-saver';
-// import { Document as DocxDocument, Paragraph, Packer } from 'docx';
-
-// Create a helper function for dynamic imports
-const dynamicImports = {
-  // Load JSZip only when needed
-  getJsZip: () => import("jszip").then((module) => module.default),
-
-  // Load FileSaver only when needed
-  getFileSaver: () => import("file-saver").then((module) => module.saveAs),
-
-  // Load Docx only when needed
-  getDocx: () => import("docx").then((module) => module),
-
-  // Load jsPDF only when needed
-  getJsPdf: () => import("jspdf").then((module) => module.jsPDF),
-
-  // HTML document generator for multilingual support
-  generateHTML: (title: string, content: string) => {
-    // Check for RTL languages
-    const containsArabic = /[\u0600-\u06FF]/.test(content);
-    const containsHebrew = /[\u0590-\u05FF]/.test(content);
-    const isRTL = containsArabic || containsHebrew;
-
-    // Format current date
-    const today = new Date();
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: "short",
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    };
-    const formattedDate = today.toLocaleDateString("en-US", options);
-
-    // Create HTML with proper styling and UTF-8 encoding
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>${title}</title>
-        <style>
-          body {
-            font-family: Arial, 'Noto Sans', 'Noto Sans Arabic', sans-serif;
-            margin: 20px;
-            color: #333;
-            line-height: 1.5;
-          }
-          .header {
-            border-bottom: 2px solid #0066cc;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
-          .title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #0066cc;
-          }
-          .date {
-            color: #777;
-            font-size: 12px;
-          }
-          .content {
-            white-space: pre-wrap;
-            ${isRTL ? "direction: rtl; text-align: right;" : ""}
-          }
-          .footer {
-            margin-top: 30px;
-            border-top: 1px solid #ddd;
-            padding-top: 10px;
-            text-align: center;
-            font-size: 10px;
-            color: #777;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <div class="title">${title}</div>
-          <div class="date">${formattedDate}</div>
-        </div>
-        <div class="content">${content}</div>
-        <div class="footer">
-          Generated with Transcriptr (https://transcriptr.aramb.dev)
-        </div>
-      </body>
-      </html>
-    `;
-
-    // Convert HTML to Blob
-    return new Blob([htmlContent], { type: "text/html" });
-  },
-};
-
-// Helper function for downloading data
-const createDownloadableDataUrl = async (
-  blob: Blob,
-  filename: string,
-): Promise<void> => {
-  return new Promise((resolve) => {
-    const reader = new FileReader();
-    reader.onloadend = function () {
-      const a = document.createElement("a");
-      a.href = reader.result as string;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-
-      setTimeout(() => {
-        document.body.removeChild(a);
-        resolve();
-      }, 100);
-    };
-    reader.readAsDataURL(blob);
-  });
-};
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
+import jsPDF from "jspdf";
 
 interface TranscriptionResultProps {
   transcription: string;
+  onNewTranscription?: () => void;
+  onOpenStudio?: () => void;
 }
 
-// Update the usePdfGeneration hook
-const usePdfGeneration = () => {
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [pdfError, setPdfError] = useState<string | null>(null);
-  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null);
-  const [pdfObjectUrl, setPdfObjectUrl] = useState<string | null>(null);
-  const [primaryPdfFailed, setPrimaryPdfFailed] = useState(false); // Track if Printerz failed
-
-  // Clean up object URL when component unmounts
-  useEffect(() => {
-    return () => {
-      if (pdfObjectUrl) {
-        URL.revokeObjectURL(pdfObjectUrl);
-      }
-    };
-  }, [pdfObjectUrl]);
-
-  // Helper function to create a PDF preview from a blob
-  const createPdfPreview = (blob: Blob) => {
-    if (pdfObjectUrl) {
-      URL.revokeObjectURL(pdfObjectUrl);
-    }
-    const url = URL.createObjectURL(blob);
-    setPdfObjectUrl(url);
-    return blob; // Return blob for chaining if needed
-  };
-
-  // --- PDF Generation using our library function ---
-  const generatePrimaryPdf = async (
-    transcription: string,
-    title: string,
-  ): Promise<Blob> => {
-    setIsGeneratingPdf(true);
-    setPdfError(null);
-    setPrimaryPdfFailed(false); // Reset failure flag
-
-    try {
-      console.log("Generating PDF document using jsPDF");
-
-      // Import the function only when needed
-      const { generatePdf } = await import("../../lib/pdf-generation");
-
-      // Generate PDF using our library function
-      const blob = await generatePdf("", { title, content: transcription });
-
-      setPdfBlob(blob); // Store the generated blob
-
-      // Create preview if possible
-      try {
-        createPdfPreview(blob);
-      } catch (previewError) {
-        console.warn("Could not create preview for PDF document", previewError);
-      }
-
-      toast.success("PDF generated successfully!");
-      return blob; // Return the blob for the download handler
-    } catch (error) {
-      console.error("Error generating PDF document:", error);
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to generate PDF";
-      setPdfError(errorMessage);
-      setPrimaryPdfFailed(true); // Set failure flag
-      throw new Error(errorMessage); // Re-throw error to be caught by caller
-    } finally {
-      setIsGeneratingPdf(false);
-    }
-  };
-
-  // Maintain the generateFallbackPdf function for backward compatibility
-  // but it now just points to the primary method since that already handles fallbacks
-  const generateFallbackPdf = async (
-    transcription: string,
-    title: string,
-  ): Promise<Blob> => {
-    return generatePrimaryPdf(transcription, title);
-  };
-
-  return {
-    generatePrimaryPdf, // Renamed for clarity
-    generateFallbackPdf, // Added fallback function
-    isGeneratingPdf,
-    pdfError,
-    pdfObjectUrl,
-    hasPdf: !!pdfBlob,
-    primaryPdfFailed, // Expose failure status
-    pdfBlob, // Expose blob directly if needed elsewhere, carefully
-  };
-};
-
-// In your TranscriptionResult component:
 export default function TranscriptionResult({
   transcription,
+  onNewTranscription,
+  onOpenStudio,
 }: TranscriptionResultProps) {
-  // This will now work correctly
-  const transcript = React.useMemo(() => {
+  // State for copy functionality
+  const [copySuccess, setCopySuccess] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  // Extract the transcript text
+  const transcriptText = React.useMemo(() => {
     try {
-      return typeof transcription === "string"
-        ? JSON.parse(transcription)
-        : null;
-    } catch (e) {
-      console.warn("Failed to parse transcription data:", e);
-      return null;
+      const parsed =
+        typeof transcription === "string"
+          ? JSON.parse(transcription)
+          : transcription;
+      return parsed?.text || transcription;
+    } catch {
+      return transcription;
     }
   }, [transcription]);
 
-  // Firebase storage related state
-  const [isGeneratingDocx, setIsGeneratingDocx] = useState(false);
-  const [pdfGenerated, setPdfGenerated] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const initialPdfTitleRef = useRef<string>("");
+  // Detect if the transcription is in Arabic
+  const isArabic = React.useMemo(() => {
+    const arabicRegex =
+      /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+    return arabicRegex.test(transcriptText);
+  }, [transcriptText]);
 
-  // Use the enhanced PDF generation hook
-  const { generatePrimaryPdf, isGeneratingPdf, pdfError, pdfObjectUrl } =
-    usePdfGeneration();
-
-  // No longer need fallback confirmation state
-
-  // Set default title with timestamp
-  const getDefaultTitle = () => {
-    const now = new Date();
-    return `Transcription ${now.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })} ${now.toLocaleTimeString("en-US")}`;
-  };
-
-  const [pdfTitle, setPdfTitle] = useState(getDefaultTitle());
-
-  // When title changes, mark that the PDF has not been regenerated with this title
-  useEffect(() => {
-    // When title is set initially or reset
-    initialPdfTitleRef.current = pdfTitle;
-  }, [pdfTitle]);
-
-  // Handle PDF preview generation
-  const handleGeneratePdfPreview = async () => {
+  // Copy function
+  const handleCopyAll = async () => {
     try {
-      await generatePrimaryPdf(transcription, pdfTitle);
-      setPdfGenerated(true);
-    } catch (error) {
-      console.error("PDF preview generation failed:", error);
+      await navigator.clipboard.writeText(transcriptText);
+      setCopySuccess(true);
+      toast.success("Copied to clipboard!");
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch {
+      toast.error("Failed to copy");
     }
   };
 
-  // Updated generateDocx function with better language support
-  const generateDocx = async () => {
-    setIsGeneratingDocx(true);
+  // Download function for TXT
+  const handleDownloadTxt = async () => {
+    setIsDownloading(true);
     try {
-      // Dynamically import docx when needed
-      const docx = await dynamicImports.getDocx();
-      const { Document, Paragraph, Packer, TextRun, HeadingLevel } = docx;
+      const blob = new Blob([transcriptText], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "transcription.txt";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+      toast.success("Downloaded as TXT!");
+    } catch {
+      toast.error("Download failed");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
-      // Check for RTL languages
-      const containsArabic = /[\u0600-\u06FF]/.test(transcription);
-      const containsHebrew = /[\u0590-\u05FF]/.test(transcription);
-      const isRTL = containsArabic || containsHebrew;
+  // Download function for Markdown
+  const handleDownloadMarkdown = async () => {
+    setIsDownloading(true);
+    try {
+      // Format the text content as markdown with proper formatting
+      const markdownContent = `# Transcription\n\n${transcriptText}`;
+      const blob = new Blob([markdownContent], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "transcription.md";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+      toast.success("Downloaded as Markdown!");
+    } catch {
+      toast.error("Download failed");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
-      // Create a title paragraph
-      const titleParagraph = new Paragraph({
-        text: pdfTitle,
-        heading: HeadingLevel.HEADING_1,
-        spacing: {
-          after: 300,
-        },
-        // Set bidirectional text for RTL languages if needed
-        bidirectional: isRTL,
-      });
-
-      // Create paragraph for each line with proper text direction
-      const paragraphs = [
-        titleParagraph,
-        ...transcription.split("\n").map((line) => {
-          const trimmedLine = line.trim() || " ";
-          return new Paragraph({
-            children: [
-              new TextRun({
-                text: trimmedLine,
-                // Add proper font settings for non-Latin scripts
-                font: {
-                  name: "Arial Unicode MS",
-                  // Use a common Unicode font that works with most languages
-                },
-              }),
-            ],
-            spacing: {
-              after: 200,
-            },
-            // Set bidirectional text for RTL languages
-            bidirectional: isRTL,
-          });
-        }),
-      ];
-
-      // Create document with correct text direction properties
+  // Download function for DOCX
+  const handleDownloadDocx = async () => {
+    setIsDownloading(true);
+    try {
+      // Create a proper DOCX document using the docx library
       const doc = new Document({
-        features: {
-          // Enable better RTL language support
-          updateFields: true,
-        },
         sections: [
           {
-            properties: {},
-            children: paragraphs,
+            children: [
+              new Paragraph({
+                text: "Transcription",
+                heading: HeadingLevel.TITLE,
+              }),
+              new Paragraph({
+                children: [new TextRun("")],
+              }),
+              ...transcriptText.split("\n").map(
+                (line: string) =>
+                  new Paragraph({
+                    children: [new TextRun(line)],
+                  }),
+              ),
+            ],
           },
         ],
       });
 
-      const blob = await Packer.toBlob(doc);
-      return blob;
-    } catch (error) {
-      console.error("Error generating DOCX:", error);
-      return null;
-    } finally {
-      setIsGeneratingDocx(false);
-    }
-  };
+      // Generate the document buffer
+      const buffer = await Packer.toBuffer(doc);
 
-  // --- Updated handleDownload Function ---
-  const handleDownload = async (format: "txt" | "md" | "pdf" | "docx") => {
-    if (!transcription) return;
-
-    setIsDownloading(true); // Use a general downloading state for the button
-    // No longer need to manage fallback confirmation
-
-    let blobToDownload: Blob | null = null;
-    let downloadFilename: string = "";
-
-    try {
-      const timestamp = new Date().toLocaleDateString().replace(/\//g, "-");
-      // Use the correct file extension for the format
-      const fileExtension = format;
-      downloadFilename = `Transcription_${pdfTitle.replace(/[^a-z0-9]/gi, "_")}_${timestamp}.${fileExtension}`;
-
-      if (format === "txt") {
-        blobToDownload = new Blob([transcription], { type: "text/plain" });
-      } else if (format === "md") {
-        // Basic markdown - could be enhanced
-        const mdContent = `# ${pdfTitle}\n\n${transcription}`;
-        blobToDownload = new Blob([mdContent], { type: "text/markdown" });
-      } else if (format === "pdf") {
-        // --- PDF Specific Logic ---
-        try {
-          // Generate PDF using our enhanced function that handles both Printerz and local generation
-          blobToDownload = await generatePrimaryPdf(transcription, pdfTitle);
-          toast.success("PDF generated successfully!");
-        } catch (error) {
-          console.error("PDF generation failed:", error);
-          toast.error(
-            `PDF generation failed: ${error instanceof Error ? error.message : "Unknown error"}`,
-          );
-          setIsDownloading(false);
-          return;
-        }
-        // --- End PDF Specific Logic ---
-      } else if (format === "docx") {
-        blobToDownload = await generateDocx(); // Assuming generateDocx returns a blob or null
-      }
-
-      // --- Trigger Download (if blob exists) ---
-      if (blobToDownload) {
-        try {
-          const url = URL.createObjectURL(blobToDownload);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = downloadFilename;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          setTimeout(() => URL.revokeObjectURL(url), 100); // Cleanup
-        } catch (downloadError) {
-          console.error("Standard download method failed:", downloadError);
-          // Fallback download method (using FileReader)
-          await createDownloadableDataUrl(blobToDownload, downloadFilename);
-        }
-      } else if (format !== "pdf") {
-        // Don't show error if PDF failed already
-        toast.error(`Failed to generate ${format.toUpperCase()} file.`);
-      }
-    } catch (error) {
-      // Catch errors from non-PDF generation or download triggering
-      console.error(`Error preparing download for ${format}:`, error);
-      toast.error(
-        `Failed to download ${format.toUpperCase()}: ${error instanceof Error ? error.message : "Unknown error"}`,
-      );
+      // Create blob and download
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "transcription.docx";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 100);
+      toast.success("Downloaded as DOCX!");
+    } catch {
+      toast.error("Download failed");
     } finally {
       setIsDownloading(false);
     }
   };
 
-  // No longer need the confirmation handling since our PDF generation
-  // automatically falls back to client-side generation
-
-  // --- Updated handleDownloadAll ---
-  const handleDownloadAll = async () => {
+  // Download function for PDF
+  const handleDownloadPdf = async () => {
     setIsDownloading(true);
     try {
-      const [JSZip, saveAs] = await Promise.all([
-        dynamicImports.getJsZip(),
-        dynamicImports.getFileSaver(),
-      ]);
-      const zip = new JSZip();
+      const pdf = new jsPDF();
 
-      // Add txt and md
-      zip.file("transcription.txt", transcription);
-      const mdContent = `# ${pdfTitle}\n\n${transcription}`;
-      zip.file("transcription.md", mdContent);
+      // Add title
+      pdf.setFontSize(20);
+      pdf.text("Transcription", 20, 30);
 
-      // Add PDF document
-      try {
-        // Import the generatePdf function only when needed
-        const { generatePdf } = await import("../../lib/pdf-generation");
-        const pdfBlob = await generatePdf("", {
-          title: pdfTitle,
-          content: transcription,
-        });
-        zip.file("transcription.pdf", pdfBlob);
-      } catch (error) {
-        console.error("PDF generation failed for ZIP:", error);
-        toast.error("Failed to generate PDF for ZIP file.");
-      }
+      // Add content with text wrapping
+      pdf.setFontSize(12);
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const margin = 20;
+      const maxWidth = pageWidth - margin * 2;
 
-      // Add DOCX
-      const docxBlob = await generateDocx();
-      if (docxBlob) {
-        zip.file("transcription.docx", docxBlob);
-      }
+      // Split text into lines that fit the page width
+      const lines = pdf.splitTextToSize(transcriptText, maxWidth);
+      pdf.text(lines, margin, 50);
 
-      // Generate and save ZIP
-      const content = await zip.generateAsync({ type: "blob" });
-      const zipFilename = `Transcription_${pdfTitle.replace(/[^a-z0-9]/gi, "_")}.zip`;
-      saveAs(content, zipFilename);
-      toast.success("All available files zipped and downloaded.");
-    } catch (error) {
-      console.error("Error creating ZIP file:", error);
-      toast.error(
-        "Failed to download files: " +
-          (error instanceof Error ? error.message : "Unknown error"),
-      );
+      // Save the PDF
+      pdf.save("transcription.pdf");
+      toast.success("Downloaded as PDF!");
+    } catch {
+      toast.error("Download failed");
     } finally {
       setIsDownloading(false);
     }
   };
 
-  // Check if the title has changed since PDF generation
-  const hasNameChanged =
-    pdfGenerated && pdfTitle !== initialPdfTitleRef.current;
-
-  // Regenerate PDF with new title
-  const regeneratePdf = async () => {
-    try {
-      await handleGeneratePdfPreview();
-      initialPdfTitleRef.current = pdfTitle;
-    } catch (error) {
-      console.error("Error regenerating PDF:", error);
-    }
-  };
-
-  const lines = transcription.split("\n");
-
-  // No longer need confirmation UI since our PDF generation automatically falls back
-
   return (
-    <div className="p-6">
+    <div className="mx-auto max-w-4xl p-6">
+      {/* Unified Transcription Card */}
       <ScrollRevealSection>
-        <h2 className="mb-4 text-2xl font-semibold">Transcription Result</h2>
-        <div className="mb-6 flex flex-wrap gap-4">
-          <Button
-            variant="outline"
-            onClick={() => handleDownloadAll()}
-            disabled={isDownloading}
-            className="flex items-center gap-2"
-          >
-            {isDownloading ? "Downloading..." : "Download All Formats (.zip)"}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-          </Button>
-        </div>
-      </ScrollRevealSection>
-
-      <Tabs defaultValue="text" className="mt-6">
-        <ScrollRevealSection delay={0.1}>
-          <TabsList>
-            <TabsTrigger value="text">Text</TabsTrigger>
-            {/* Fix this line with proper null check */}
-            {transcript && transcript.segments && (
-              <TabsTrigger value="segments">Timestamped</TabsTrigger>
-            )}
-            <TabsTrigger value="export">Export</TabsTrigger>
-          </TabsList>
-        </ScrollRevealSection>
-
-        <TabsContent value="text" className="mt-4">
-          <SequentialRevealList
-            items={lines.map((line, idx) => (
-              <div
-                key={idx}
-                className="rounded-md bg-gray-50 p-4 dark:bg-gray-800/50"
-              >
-                {line}
-              </div>
-            ))}
-            className="space-y-4"
-          />
-        </TabsContent>
-
-        {/* Make sure to add null checks to all other places where transcript is used */}
-        <TabsContent value="segments" className="mt-4">
-          {transcript && transcript.segments ? (
-            <SequentialRevealList
-              items={transcript.segments.map(
-                (segment: TranscriptSegment, idx: number) => (
-                  <div
-                    key={idx}
-                    className="rounded-md bg-gray-50 p-4 dark:bg-gray-800/50"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500 dark:text-gray-400">
-                        {segment.start
-                          ? new Date(segment.start * 1000)
-                              .toISOString()
-                              .substr(14, 8)
-                          : "00:00:00"}{" "}
-                        -
-                        {segment.end
-                          ? new Date(segment.end * 1000)
-                              .toISOString()
-                              .substr(14, 8)
-                          : "00:00:00"}
-                      </span>
-                    </div>
-                    <p className="mt-1">{segment.text}</p>
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          {/* Header */}
+          <div className="border-b border-gray-200 p-6 dark:border-gray-700">
+            <div className="flex items-start justify-between">
+              <div>
+                <div className="mb-2 flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
+                    <svg
+                      className="h-4 w-4 text-green-600 dark:text-green-400"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                   </div>
-                ),
-              )}
-              className="space-y-4"
-            />
-          ) : (
-            <p>No timestamped segments available</p>
-          )}
-        </TabsContent>
+                  <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    Transcription Complete
+                  </h1>
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Your audio has been successfully transcribed
+                </p>
+              </div>
 
-        {/* Export tab with download options */}
-        <TabsContent value="export" className="mt-4">
-          <div className="rounded-lg bg-gray-50 p-6 dark:bg-gray-800/50">
-            <h3 className="mb-4 text-lg font-medium">Export Transcription</h3>
-
-            <div className="mb-6">
-              <Label htmlFor="pdf-title" className="mb-2 block">
-                PDF Title
-              </Label>
-              <div className="flex gap-3">
-                <Input
-                  id="pdf-title"
-                  value={pdfTitle}
-                  onChange={(e) => setPdfTitle(e.target.value)}
-                  className="flex-1"
-                  placeholder="Enter PDF title"
-                />
-                {hasNameChanged && (
+              <div className="flex items-center gap-3">
+                {onOpenStudio && (
                   <Button
-                    onClick={regeneratePdf}
-                    size="sm"
-                    variant="outline"
-                    disabled={isGeneratingPdf}
+                    onClick={onOpenStudio}
+                    className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700"
                   >
-                    Update PDF
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <line x1="9" y1="9" x2="15" y2="15" />
+                      <polyline points="15,9 15,15 9,15" />
+                    </svg>
+                    Open in Studio
+                  </Button>
+                )}
+
+                {onNewTranscription && (
+                  <Button
+                    variant="outline"
+                    onClick={onNewTranscription}
+                    className="flex items-center gap-2 border-gray-400 text-gray-700 hover:border-gray-500 dark:border-gray-500 dark:text-gray-300 dark:hover:border-gray-400"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="12" y1="8" x2="12" y2="16" />
+                      <line x1="8" y1="12" x2="16" y2="12" />
+                    </svg>
+                    New Transcription
                   </Button>
                 )}
               </div>
             </div>
+          </div>
 
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Button
-                variant="outline"
-                onClick={() => handleDownload("txt")}
-                disabled={isDownloading}
-                className="flex h-auto items-center justify-center gap-2 py-6"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+          {/* Content */}
+          <div className="p-6">
+            {/* Content Actions */}
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-medium text-gray-900 dark:text-white">
+                Transcript
+              </h2>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyAll}
+                  disabled={copySuccess}
+                  className="flex items-center gap-2 border-gray-400 text-gray-700 hover:border-gray-500 dark:border-gray-500 dark:text-gray-300 dark:hover:border-gray-400"
                 >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <polyline points="14 2 14 8 20 8"></polyline>
-                  <line x1="16" y1="13" x2="8" y2="13"></line>
-                  <line x1="16" y1="17" x2="8" y2="17"></line>
-                  <polyline points="10 9 9 9 8 9"></polyline>
-                </svg>
-                Download as TXT
-              </Button>
+                  {copySuccess ? (
+                    <>
+                      <Copy className="h-4 w-4 text-green-600" />
+                      <span>Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4" />
+                      <span>Copy All</span>
+                    </>
+                  )}
+                </Button>
 
-              <Button
-                variant="outline"
-                onClick={() => handleDownload("md")}
-                disabled={isDownloading}
-                className="flex h-auto items-center justify-center gap-2 py-6"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <path d="M14 2v6h6"></path>
-                  <path d="M9 15v-4"></path>
-                  <path d="M12 13.5l3-2.5"></path>
-                  <path d="M12 11l-3-2.5"></path>
-                </svg>
-                Download as MD
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => handleDownload("pdf")}
-                disabled={isDownloading || isGeneratingPdf}
-                className="flex h-auto items-center justify-center gap-2 py-6"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <path d="M14 2v6h6"></path>
-                  <path d="M5 12h14"></path>
-                  <path d="M5 16h14"></path>
-                  <path d="M9 20h6"></path>
-                </svg>
-                {isGeneratingPdf
-                  ? "Creating PDF..."
-                  : isDownloading
-                    ? "Downloading..."
-                    : "Download as PDF"}
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={() => handleDownload("docx")}
-                disabled={isDownloading || isGeneratingDocx}
-                className="flex h-auto items-center justify-center gap-2 py-6"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                  <path d="M14 2v6h6"></path>
-                  <path d="M8 12h8"></path>
-                  <path d="M8 16h8"></path>
-                </svg>
-                {isGeneratingDocx ? "Generating DOCX..." : "Download as DOCX"}
-              </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={isDownloading}
+                      className="flex items-center gap-2 border-gray-400 text-gray-700 hover:border-gray-500 dark:border-gray-500 dark:text-gray-300 dark:hover:border-gray-400"
+                    >
+                      {isDownloading ? (
+                        <>
+                          <svg
+                            className="h-4 w-4 animate-spin"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          <span>Downloading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg
+                            className="h-4 w-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                          </svg>
+                          <span>Download</span>
+                          <ChevronDown className="h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800"
+                  >
+                    <DropdownMenuItem
+                      onClick={handleDownloadTxt}
+                      className="flex items-center gap-2"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <polyline points="10 9 9 9 8 9" />
+                      </svg>
+                      Download as TXT
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleDownloadMarkdown}
+                      className="flex items-center gap-2"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <path d="M10 12l2 2 4-4" />
+                      </svg>
+                      Download as Markdown
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleDownloadDocx}
+                      className="relative flex items-center gap-2"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <path d="M16 13H8M16 17H8" />
+                        <path d="M12 9h4" />
+                      </svg>
+                      <span>Download as DOCX</span>
+                      {isArabic && (
+                        <span className="ml-auto rounded-full bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-800">
+                          BETA
+                        </span>
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={handleDownloadPdf}
+                      className="relative flex items-center gap-2"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <path d="M8 16h8M8 12h8M8 8h4" />
+                      </svg>
+                      <span>Download as PDF</span>
+                      {isArabic && (
+                        <span className="ml-auto rounded-full bg-orange-100 px-1.5 py-0.5 text-xs font-medium text-orange-800">
+                          BETA
+                        </span>
+                      )}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
 
-            {pdfObjectUrl && (
-              <div className="mt-6">
-                <h4 className="text-md mb-2 font-medium">Document Preview</h4>
-                <div className="h-96 overflow-hidden rounded-md border border-gray-200 dark:border-gray-700">
-                  <iframe
-                    src={pdfObjectUrl}
-                    className="h-full w-full"
-                    title="Document Preview"
-                  />
+            {/* Transcript Content */}
+            <div className="rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">
+              <div className="max-h-[400px] overflow-y-auto p-4">
+                <div className="font-mono text-sm leading-relaxed whitespace-pre-wrap text-gray-800 dark:text-gray-200">
+                  {transcriptText || "No transcript available"}
+                </div>
+              </div>
+            </div>
+
+            {/* Arabic Format Warning */}
+            {isArabic && (
+              <div className="mt-4 rounded-lg border border-orange-200 bg-orange-50 p-3 dark:border-orange-800 dark:bg-orange-900/20">
+                <div className="flex items-start gap-2">
+                  <svg
+                    className="mt-0.5 h-5 w-5 flex-shrink-0 text-orange-600 dark:text-orange-400"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-medium text-orange-800 dark:text-orange-200">
+                      Arabic Text Format Notice
+                    </p>
+                    <p className="mt-1 text-sm text-orange-700 dark:text-orange-300">
+                      DOCX files may have editing issues, and PDF files might
+                      not display Arabic text correctly. For best results with
+                      Arabic content, we recommend using TXT or Markdown
+                      formats.
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
-
-            {pdfError && (
-              <div className="mt-4 rounded-md border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-                <p className="text-sm text-red-700 dark:text-red-300">
-                  {pdfError}
-                </p>
-              </div>
-            )}
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </ScrollRevealSection>
     </div>
   );
 }

@@ -4,21 +4,21 @@ import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { UploadAudio } from "../UploadAudio";
 import { TranscriptionProcessing } from "./TranscriptionProcessing";
 import { TranscriptionError } from "./TranscriptionError";
-import TranscriptionResult from "./TranscriptionResult";
 import { MobileTranscriptionResult } from "./MobileTranscriptionResult";
+import TranscriptionResult from "./TranscriptionResult";
+import { TranscriptionStudio } from "./TranscriptionStudio";
 import SessionRecoveryPrompt from "./SessionRecoveryPrompt";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import {
   TranscriptionStatus,
   statusMessages,
   getApiUrl,
-  fileToBase64,
   formatTimestamp,
 } from "../../services/transcription";
 import { trackEvent } from "../../lib/analytics";
-import { isLargeFile, uploadLargeFile } from "../../lib/storage-service";
+import { uploadLargeFile } from "../../lib/storage-service";
+import { getUserFriendlyErrorMessage } from "../../lib/error-utils";
 
-import { cleanupFirebaseFile } from "../../lib/cleanup-service";
-import { Button } from "../ui/button";
 import { motion } from "framer-motion";
 import { fadeInUp, springTransition } from "../../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
@@ -36,14 +36,20 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
   >([]);
   const [showApiDetails, setShowApiDetails] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [copySuccess, setCopySuccess] = useState(false);
   const [currentPredictionId, setCurrentPredictionId] = useState<string | null>(
     null,
   );
-  const [firebaseFilePath, setFirebaseFilePath] = useState<string | null>(null);
+  const [frameProgress, setFrameProgress] = useState<{
+    percentage: number;
+    current: number;
+    total: number;
+  } | null>(null);
 
   // Mobile detection hook
   const [isMobile, setIsMobile] = useState(false);
+
+  // Studio modal state
+  const [isStudioModalOpen, setIsStudioModalOpen] = useState(false);
 
   useEffect(() => {
     const checkIsMobile = () => {
@@ -78,7 +84,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       // Restore state from recovered session
       setTransStatus(session.status);
       setProgress(session.progress);
-      setFirebaseFilePath(session.firebaseFilePath);
       setCurrentPredictionId(session.predictionId);
 
       if (session.apiResponses) {
@@ -100,7 +105,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       // Set the correct state based on the session
       setTransStatus(initialSession.status);
       setProgress(initialSession.progress);
-      setFirebaseFilePath(initialSession.firebaseFilePath);
       setCurrentPredictionId(initialSession.predictionId);
 
       if (initialSession.apiResponses) {
@@ -130,12 +134,21 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       setTransStatus("succeeded");
       setProgress(100);
 
-      // Parse the output to extract the transcription text
+      // Parse the output to extract the transcription text and segments
       let finalTranscription = "Error: Could not parse transcription.";
+      let segments = undefined;
+
       if (typeof output === "string") {
         finalTranscription = output;
       } else if (output && typeof output === "object") {
-        if ("text" in output && typeof output.text === "string") {
+        // OpenAI Whisper model returns { transcription: string, segments: array, ... }
+        if ("transcription" in output && typeof output.transcription === "string") {
+          finalTranscription = output.transcription;
+          // Extract segments if available
+          if ("segments" in output && Array.isArray(output.segments)) {
+            segments = output.segments;
+          }
+        } else if ("text" in output && typeof output.text === "string") {
           finalTranscription = output.text;
         } else if (
           Array.isArray(output) &&
@@ -150,27 +163,13 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       }
       setTranscription(finalTranscription);
 
-      // Update session with completed result
+      // Update session with completed result and segments
       if (activeSession) {
         updateSessionData({
           status: "succeeded",
           progress: 100,
           result: finalTranscription,
-        });
-      }
-
-      // Cleanup Firebase file if exists when transcription is complete
-      if (firebaseFilePath) {
-        cleanupFirebaseFile(firebaseFilePath).then((success) => {
-          if (success) {
-            console.log("Temporary file cleaned up successfully");
-            setFirebaseFilePath(null);
-
-            // Update session to clear firebase path
-            if (activeSession) {
-              updateSessionData({ firebaseFilePath: null });
-            }
-          }
+          segments: segments,
         });
       }
     },
@@ -212,6 +211,9 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         updateSessionData({ apiResponses: updatedResponses });
       }
     },
+    onFrameProgress: (progress) => {
+      setFrameProgress(progress);
+    },
   });
 
   const getProgressColor = () => {
@@ -231,26 +233,21 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     }
   };
 
-  const isLoading = transStatus === "starting" || transStatus === "processing";
-
-  const handleCopyToClipboard = async () => {
-    if (transcription) {
-      try {
-        await navigator.clipboard.writeText(transcription);
-        setCopySuccess(true);
-
-        setTimeout(() => {
-          setCopySuccess(false);
-        }, 2000);
-      } catch (err) {
-        console.error("Failed to copy text: ", err);
-      }
-    }
-  };
+  const isLoading =
+    transStatus === "converting" ||
+    transStatus === "starting" ||
+    transStatus === "processing";
 
   const handleUpload = async (
-    data: FormData | { audioUrl: string },
-    options: { language: string; diarize: boolean },
+    data:
+      | FormData
+      | { audioUrl: string; originalFile?: { name: string; size: number } },
+    options: {
+      language: string;
+      diarize: boolean;
+      translate?: boolean;
+      temperature?: number;
+    },
   ) => {
     // --- Reset State ---
     setError(null);
@@ -260,7 +257,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     setCurrentPredictionId(null); // Clear previous prediction ID
     setTransStatus("starting"); // <--- SET STATUS TO STARTING HERE
     setProgress(5);
-    setFirebaseFilePath(null); // Reset Firebase file path
 
     // Create new session
     let audioSource: {
@@ -284,10 +280,20 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         };
       }
     } else if ("audioUrl" in data) {
-      audioSource = {
-        type: "url",
-        url: data.audioUrl,
-      };
+      // Check if this is a converted file (has originalFile metadata)
+      if (data.originalFile) {
+        audioSource = {
+          type: "file", // Treat converted files as file uploads in history
+          name: data.originalFile.name,
+          size: data.originalFile.size,
+        };
+      } else {
+        // Regular URL input
+        audioSource = {
+          type: "url",
+          url: data.audioUrl,
+        };
+      }
     }
 
     // Create new session and store in state
@@ -302,7 +308,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         language?: string;
         diarize?: boolean;
       } | null;
-      audioData?: string; // Base64 data
       audioUrl?: string; // URL from input or Firebase
     } = { options: null };
 
@@ -311,7 +316,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     try {
       let file: File | null = null;
       let sourceDescription = "";
-      const firebaseFilePath: string | null = null; // Track Firebase path for potential cleanup
 
       // Check if data is FormData (file upload) or object (URL input)
       if (data instanceof FormData) {
@@ -321,57 +325,61 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         }
         sourceDescription = `file: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)} MB, Type: ${file.type}`;
 
-        if (isLargeFile(file)) {
-          setProgress(10);
+        // Always upload to Firebase (no more base64)
+        setProgress(10);
+        setApiResponses((prev) => [
+          ...prev,
+          {
+            timestamp: new Date(),
+            data: {
+              message: `Uploading to temporary storage...`,
+            },
+          },
+        ]);
+
+        try {
+          const uploadResult = await uploadLargeFile(file);
+          requestBody.audioUrl = uploadResult.url; // Use Firebase URL
+
+          // Save URL to localStorage for Studio access
+          localStorage.setItem("studioAudioUrl", uploadResult.url);
+          console.log("Saved audio URL to localStorage:", uploadResult.url);
+
+          // Update session with audio URL for Studio playback
+          updateSessionData({
+            audioSource: {
+              type: "file",
+              name: file.name,
+              size: file.size,
+              url: uploadResult.url,
+            },
+          });
+          console.log("Updated session with upload URL:", uploadResult.url);
+
+          setProgress(20);
           setApiResponses((prev) => [
             ...prev,
             {
               timestamp: new Date(),
               data: {
-                message: `Large file detected. Uploading to temporary storage...`,
+                message: "File uploaded to temporary storage.",
+                url: uploadResult.url,
               },
             },
           ]);
-          try {
-            const uploadResult = await uploadLargeFile(file);
-            requestBody.audioUrl = uploadResult.url; // Use Firebase URL
-            setFirebaseFilePath(uploadResult.path); // Store the path for cleanup later
-            setProgress(20);
-            setApiResponses((prev) => [
-              ...prev,
-              {
-                timestamp: new Date(),
-                data: {
-                  message: "File uploaded to temporary storage.",
-                  url: uploadResult.url,
-                },
+        } catch (uploadError) {
+          setApiResponses((prev) => [
+            ...prev,
+            {
+              timestamp: new Date(),
+              data: {
+                error: `Firebase upload error: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`,
               },
-            ]);
-          } catch (uploadError) {
-            setApiResponses((prev) => [
-              ...prev,
-              {
-                timestamp: new Date(),
-                data: {
-                  error: `Firebase upload error: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`,
-                },
-              },
-            ]);
-            throw new Error(
-              `Failed to upload large file: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`,
-            );
-          }
-        } else {
-          // Convert smaller files to base64
-          try {
-            const base64Audio = await fileToBase64(file);
-            setProgress(15);
-            requestBody.audioData = base64Audio;
-          } catch (base64Error) {
-            throw new Error(
-              `Failed to prepare file: ${base64Error instanceof Error ? base64Error.message : String(base64Error)}`,
-            );
-          }
+            },
+          ]);
+          throw new Error(
+            `Failed to upload file: ${uploadError instanceof Error ? uploadError.message : String(uploadError)}`,
+          );
         }
         // --- End File processing logic ---
       } else {
@@ -394,41 +402,36 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       const apiOptions = {
         modelId:
           process.env.NEXT_PUBLIC_REPLICATE_MODEL_ID ||
-          "vaibhavs10/incredibly-fast-whisper:3ab86df6c8f54c11309d4d1f930ac292bad43ace52d10c80d87eb258b3c9f79c",
-        task: "transcribe",
-        batch_size: 64,
-        return_timestamps: true,
-        language: options.language === "None" ? undefined : options.language, // Send undefined if "None"
-        diarize: options.diarize,
+          "openai/whisper:8099696689d249cf8b122d833c36ac3f75505c666a395ca40ef26f68e7d3d16e",
+        language: options.language, // "auto" for auto-detect, or specific language
+        translate: options.translate || false,
+        temperature: options.temperature || 0,
       };
       requestBody.options = apiOptions;
-
-      // Ensure only one audio source is sent
-      if (requestBody.audioUrl && requestBody.audioData) {
-        console.warn(
-          "Both audioUrl and audioData present, preferring audioUrl.",
-        );
-        delete requestBody.audioData;
-      }
 
       console.log(
         "Sending request to server with options:",
         requestBody.options,
       );
-      console.log(
-        "Using method:",
-        requestBody.audioUrl ? "URL" : "base64 data",
-      );
+      console.log("Using Firebase URL for audio:", requestBody.audioUrl);
       setProgress(25);
 
-      // --- API Call Logic (remains largely the same) ---
-      const response = await fetch(getApiUrl("transcribe"), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-      });
+      // --- API Call Logic with network error handling ---
+      let response: Response;
+      try {
+        response = await fetch(getApiUrl("transcribe"), {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
+      } catch {
+        // Network error during fetch
+        throw new Error(
+          "Lost internet connection. Please check your network and try again.",
+        );
+      }
 
       setProgress(40);
 
@@ -439,8 +442,13 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
           errorBody =
             errorJson.error || errorJson.message || JSON.stringify(errorJson);
         } catch {
-          errorBody = await response.text();
+          try {
+            errorBody = await response.text();
+          } catch {
+            errorBody = `Server error (${response.status})`;
+          }
         }
+
         setApiResponses((prev) => [
           ...prev,
           {
@@ -448,23 +456,30 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
             data: { error: `Server error: ${response.status} - ${errorBody}` },
           },
         ]);
-        throw new Error(
-          `Server responded with ${response.status}: ${errorBody}`,
-        );
+
+        // Create a more specific error for server errors
+        const error = new Error(errorBody) as Error & { status?: number };
+        error.status = response.status;
+        throw error;
       }
 
       const resultData = await response.json();
       console.log("API response data:", resultData);
 
-      // Add Firebase path to result if it exists, for potential cleanup later
-      if (firebaseFilePath) {
-        resultData.firebaseFilePath = firebaseFilePath;
-      }
-
       setApiResponses((prev) => [
         ...prev,
         { timestamp: new Date(), data: resultData },
       ]);
+
+      // Save audio URL to session if provided (for Studio playback)
+      if (resultData.audioUrl && activeSession) {
+        updateSessionData({
+          audioSource: {
+            ...activeSession.audioSource,
+            url: resultData.audioUrl,
+          },
+        });
+      }
 
       // --- Check for Prediction ID and Start Polling ---
       if (resultData && resultData.id) {
@@ -508,21 +523,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
               result: finalTranscription,
             });
           }
-
-          // Cleanup Firebase file if exists when transcription is complete
-          if (firebaseFilePath) {
-            cleanupFirebaseFile(firebaseFilePath).then((success) => {
-              if (success) {
-                console.log("Temporary file cleaned up successfully");
-                setFirebaseFilePath(null);
-
-                // Update session to clear firebase path
-                if (activeSession) {
-                  updateSessionData({ firebaseFilePath: null });
-                }
-              }
-            });
-          }
         } else {
           throw new Error(
             "Invalid API response: Missing prediction ID or result.",
@@ -532,18 +532,25 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       // --- End Initial API Call & Polling Start ---
     } catch (err) {
       console.error("Transcription process failed:", err);
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      setError(errorMessage); // Set error state
+
+      // Get user-friendly error message
+      const errorInfo = getUserFriendlyErrorMessage(err);
+      const userMessage = errorInfo.userMessage;
+
+      setError(userMessage); // Set user-friendly error message
       setTransStatus("failed"); // Set status to failed
       setApiResponses((prev) => [
         ...prev,
         {
           timestamp: new Date(),
-          data: { error: `Transcription failed: ${errorMessage}` },
+          data: {
+            error: `Transcription failed: ${userMessage}`,
+            isNetworkError: errorInfo.isNetworkError,
+          },
         },
       ]);
       setProgress(0);
-      trackEvent("Transcription", "Error", errorMessage);
+      trackEvent("Transcription", "Error", userMessage);
     }
   };
 
@@ -561,36 +568,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     if (activeSession) {
       discardSession();
     }
-
-    // Cleanup Firebase file if exists when resetting
-    if (firebaseFilePath) {
-      cleanupFirebaseFile(firebaseFilePath).then((success) => {
-        if (success) {
-          console.log("Temporary file cleaned up on reset");
-          setFirebaseFilePath(null);
-        }
-      });
-    }
   };
-
-  // Use effect to ensure we cleanup files when component unmounts
-  useEffect(() => {
-    return () => {
-      // Don't cleanup Firebase file automatically on unmount if we have an active session
-      if (
-        firebaseFilePath &&
-        (!activeSession ||
-          activeSession.status === "succeeded" ||
-          activeSession.status === "failed")
-      ) {
-        cleanupFirebaseFile(firebaseFilePath).then((success) => {
-          if (success) {
-            console.log("Temporary file cleaned up on component unmount");
-          }
-        });
-      }
-    };
-  }, [firebaseFilePath, activeSession]);
 
   // Run cleanup of expired sessions once on component mount
   useEffect(() => {
@@ -636,7 +614,9 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         ) : isLoading ? (
           <TranscriptionProcessing
             progress={progress}
-            transStatus={transStatus as "starting" | "processing"}
+            transStatus={
+              transStatus as "converting" | "starting" | "processing"
+            }
             getProgressColor={getProgressColor}
             statusMessages={statusMessages}
             showApiDetails={showApiDetails}
@@ -644,6 +624,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
             apiResponses={apiResponses}
             formatTimestamp={formatTimestamp}
             onCancel={handleReset}
+            frameProgress={frameProgress}
           />
         ) : transStatus === "failed" || transStatus === "canceled" ? (
           <TranscriptionError
@@ -663,75 +644,65 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
               onNewTranscription={handleReset}
             />
           ) : (
-            // Desktop result view with existing layout
-            <div className="p-8">
-              <TranscriptionResult transcription={transcription} />
-              {/* Buttons moved outside TranscriptionResult */}
-              <div className="mt-4 flex justify-center gap-4 border-t border-gray-100 bg-gray-50 px-8 py-4 dark:border-gray-700 dark:bg-gray-800/80">
-                <Button
-                  variant="outline"
-                  onClick={handleReset}
-                  className="bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                >
-                  New Transcription
-                </Button>
-                <Button
-                  onClick={handleCopyToClipboard}
-                  className="gap-2 bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-                  disabled={copySuccess}
-                >
-                  {copySuccess ? (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="text-green-500"
-                      >
-                        <path d="M20 6L9 17l-5-5"></path>
-                      </svg>
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <rect
-                          x="9"
-                          y="9"
-                          width="13"
-                          height="13"
-                          rx="2"
-                          ry="2"
-                        ></rect>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                      </svg>
-                      Copy to Clipboard
-                    </>
-                  )}
-                </Button>
-              </div>
-            </div>
+            // Desktop result view with studio modal option
+            <>
+              <TranscriptionResult
+                transcription={transcription}
+                onNewTranscription={handleReset}
+                onOpenStudio={() => setIsStudioModalOpen(true)}
+              />
+
+              {/* Studio Modal */}
+              <Dialog
+                open={isStudioModalOpen}
+                onOpenChange={setIsStudioModalOpen}
+              >
+                <DialogContent className="h-[90vh] max-h-[90vh] w-[90vw] max-w-[90vw] overflow-hidden bg-gray-50 p-0">
+                  <DialogHeader className="sr-only">
+                    <DialogTitle>Transcription Studio</DialogTitle>
+                  </DialogHeader>
+                  <div className="h-full overflow-auto">
+                    <div className="min-h-full">
+                      <TranscriptionStudio
+                        transcription={transcription}
+                        audioSource={activeSession?.audioSource}
+                        segments={activeSession?.segments}
+                        onNewTranscription={() => {
+                          setIsStudioModalOpen(false);
+                          handleReset();
+                        }}
+                      />
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </>
           )
         ) : (
           // Default: show upload form when idle or if something unexpected happened
           <div className="mobile:p-6 p-8">
-            <UploadAudio onUpload={handleUpload} />
+            <UploadAudio
+              onUpload={handleUpload}
+              onConversionStart={() => setTransStatus("converting")}
+              onConversionComplete={() =>
+                console.log("Conversion completed, starting transcription...")
+              }
+              onConversionError={(error) => {
+                console.error("Conversion failed:", error);
+                setError(`Audio conversion failed: ${error}`);
+                setTransStatus("failed");
+              }}
+              onApiResponse={(response) => {
+                console.log("API Response:", response.data);
+                setApiResponses((prev) => [
+                  ...prev,
+                  response as {
+                    timestamp: Date;
+                    data: Record<string, unknown>;
+                  },
+                ]);
+              }}
+            />
           </div>
         )}
       </div>

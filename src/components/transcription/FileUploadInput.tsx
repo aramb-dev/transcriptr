@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { UploadCloud, FileCheck2, XCircle } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { expandCenter, springTransition } from "../../lib/animations";
+import { getAcceptedMimeTypes } from "@/lib/file-format-utils";
 
 interface FileUploadInputProps {
   fileName: string | null;
@@ -136,7 +137,7 @@ export function FileUploadInput({
           <input
             id="audio-file"
             type="file"
-            accept="audio/mpeg,audio/wav,audio/flac,audio/ogg,.mp3,.wav,.flac,.ogg"
+            accept={getAcceptedMimeTypes()}
             ref={fileInputRef}
             className="hidden"
             onChange={onFileChange}

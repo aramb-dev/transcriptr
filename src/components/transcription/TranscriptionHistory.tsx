@@ -275,7 +275,7 @@ export function TranscriptionHistory({
                           />
                         </svg>
                       </span>
-                      {session.options.language === "None"
+                      {session.options.language === "auto"
                         ? "Auto"
                         : session.options.language}
                     </div>

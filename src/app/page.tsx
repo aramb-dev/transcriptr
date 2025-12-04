@@ -9,8 +9,7 @@ import { TranscriptionForm } from "../components/transcription/TranscriptionForm
 import { Toaster } from "sonner";
 import { FeedbackModals } from "../components/feedback/FeedbackModals";
 import { ChangelogModal } from "../components/ChangelogModal";
-import { V2AnnouncementModal } from "../components/V2AnnouncementModal";
-import { useV2Announcement } from "../hooks/useV2Announcement";
+import { V3AnnouncementModal } from "../components/V3AnnouncementModal";
 import TranscriptionHistory from "../components/transcription/TranscriptionHistory";
 import { fadeInUp, expandCenter } from "../lib/animations";
 import { TranscriptionSession } from "@/lib/persistence-service";
@@ -29,13 +28,8 @@ export default function Page() {
   const [showError, setShowError] = useState(false);
   const [showChangelogModal, setShowChangelogModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [showV3Modal, setShowV3Modal] = useState(false);
   const [formKey, setFormKey] = useState(Date.now()); // Key to force re-render TranscriptionForm when needed
-
-  // V2 Announcement modal logic
-  const {
-    shouldShow: shouldShowV2Announcement,
-    hideAnnouncement: hideV2Announcement,
-  } = useV2Announcement();
 
   // For handling session selection from history
   const [selectedSession, setSelectedSession] =
@@ -55,6 +49,14 @@ export default function Page() {
 
   const closeChangelogModal = () => {
     setShowChangelogModal(false);
+  };
+
+  const openV3Modal = () => {
+    setShowV3Modal(true);
+  };
+
+  const closeV3Modal = () => {
+    setShowV3Modal(false);
   };
 
   const openHistoryModal = () => {
@@ -89,6 +91,7 @@ export default function Page() {
           onOpenChangelog={openChangelogModal}
           onShowHistory={openHistoryModal}
           onOpenFeedbackModal={openFeedbackModal}
+          onShowV3={openV3Modal}
         />
 
         <AnimatePresence mode="wait">
@@ -132,9 +135,7 @@ export default function Page() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {shouldShowV2Announcement && (
-          <V2AnnouncementModal onClose={hideV2Announcement} />
-        )}
+        {showV3Modal && <V3AnnouncementModal onClose={closeV3Modal} />}
       </AnimatePresence>
 
       <AnimatePresence>

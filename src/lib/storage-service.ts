@@ -6,12 +6,6 @@ import {
   deleteObject,
 } from "firebase/storage";
 
-// Size threshold for using Firebase Storage (in MB)
-const LARGE_FILE_THRESHOLD = parseInt(
-  process.env.NEXT_PUBLIC_LARGE_FILE_THRESHOLD || "1",
-  10,
-);
-
 // Generate a unique filename with timestamp and random string
 const generateUniqueFilename = (originalName: string) => {
   const timestamp = Date.now();
@@ -20,17 +14,8 @@ const generateUniqueFilename = (originalName: string) => {
   return `audio_${timestamp}_${randomString}.${fileExtension}`;
 };
 
-export const isLargeFile = (file: File): boolean => {
-  // Convert file size from bytes to MB
-  const fileSizeInMB = file.size / (1024 * 1024);
-
-  console.log(
-    `File size: ${fileSizeInMB.toFixed(2)}MB, Threshold: ${LARGE_FILE_THRESHOLD}MB`,
-  );
-  return fileSizeInMB > LARGE_FILE_THRESHOLD;
-};
-
-// Update the uploadLargeFile function to add more detailed error logging:
+// Upload audio file to Firebase Storage
+// Note: All files are uploaded to Firebase (no base64 encoding)
 export const uploadLargeFile = async (
   file: File,
 ): Promise<{ url: string; path: string }> => {
@@ -65,7 +50,7 @@ export const uploadLargeFile = async (
   } catch (error: unknown) {
     console.error("Error uploading file to Firebase:", error);
     const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to upload large audio file: ${errorMessage}`);
+    throw new Error(`Failed to upload audio file: ${errorMessage}`);
   }
 };
 

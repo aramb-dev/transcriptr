@@ -4,7 +4,9 @@
 
 Transcriptr is a modern web application that converts audio files to text using artificial intelligence. It provides a clean, intuitive interface for uploading audio files and receiving high-quality transcriptions powered by Replicate's Incredibly Fast Whisper model.
 
-![Transcriptr Screenshot](https://hc-cdn.hel1.your-objectstorage.com/s/v3/adb3df4b145f7080f7275b56e56d7269daaad0f2_image.png)
+Visit the live demo at [Transcriptr Demo](https://transcriptr.aramb.dev).
+
+![Transcriptr Screenshot](https://hc-cdn.hel1.your-objectstorage.com/s/v3/45e4e8138906a0b9ee7229c575d5ff7cd8226ca8_image.png)
 
 ## Features
 
@@ -31,7 +33,7 @@ Transcriptr is a modern web application that converts audio files to text using 
 ### Prerequisites
 
 - Node.js (v18 or later)
-- npm or yarn
+- bun
 - Replicate API token (for AI transcription)
 
 ### Installation
@@ -39,14 +41,14 @@ Transcriptr is a modern web application that converts audio files to text using 
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/transcriptr.git
+   git clone https://github.com/aramb-dev/transcriptr.git
    cd transcriptr
    ```
 
 2. Install dependencies:
 
    ```bash
-   npm install
+   bun install
    ```
 
 3. Create a .env.local file in the root directory with your Replicate API token:
@@ -58,7 +60,7 @@ Transcriptr is a modern web application that converts audio files to text using 
 4. Start the development server:
 
    ```bash
-   npm run dev
+   bun run dev
    ```
 
 5. Open your browser to `http://localhost:3000` to see the application.
@@ -79,15 +81,14 @@ Transcriptr requires several environment variables to function properly. Create 
 | `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Firebase messaging sender ID                                             |
 | `NEXT_PUBLIC_FIREBASE_APP_ID`              | Firebase application ID                                                  |
 | `NEXT_PUBLIC_PRINTERZ_API_KEY`             | API key for Printerz PDF generation services                             |
-| `NEXT_PUBLIC_LARGE_FILE_THRESHOLD`         | Threshold in MB for large file warnings                                  |
 
 ### Optional Environment Variables
 
-| Variable                           | Description                                                            | Default       |
-| ---------------------------------- | ---------------------------------------------------------------------- | ------------- |
-| `NEXT_PUBLIC_CLOUDCONVERT_API_KEY` | API key for CloudConvert services (for additional file format support) | None          |
-| `PORT`                             | Port for the server to listen on                                       | `3000`        |
-| `NODE_ENV`                         | Environment mode (`development` or `production`)                       | `development` |
+| Variable                           | Description                                                                      | Default       |
+| ---------------------------------- | -------------------------------------------------------------------------------- | ------------- |
+| `NEXT_PUBLIC_CLOUDCONVERT_API_KEY` | CloudConvert API key for automatic audio format conversion (M4A, AAC, WMA → MP3) | None          |
+| `PORT`                             | Port for the server to listen on                                                 | `3000`        |
+| `NODE_ENV`                         | Environment mode (`development` or `production`)                                 | `development` |
 
 ### Example .env.local file
 
@@ -100,7 +101,6 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789012
 NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789012:web:abcdef1234567890
 NEXT_PUBLIC_PRINTERZ_API_KEY=your_printerz_api_key
-NEXT_PUBLIC_LARGE_FILE_THRESHOLD=1
 NEXT_PUBLIC_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
 ```
 
@@ -109,7 +109,7 @@ NEXT_PUBLIC_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
 - **Replicate API Token**: Sign up at [Replicate](https://replicate.com/) and create an API token
 - **Firebase**: Set up a project in [Firebase Console](https://console.firebase.google.com/) and get your credentials
 - **Printerz**: Create an account at [Printerz](https://printerz.dev/) and get your API key
-- **CloudConvert** (optional): Register at [CloudConvert](https://cloudconvert.com/) for additional file format conversion capabilities
+- **CloudConvert** (optional): Register at [CloudConvert](https://cloudconvert.com/) to enable automatic conversion of M4A, AAC, WMA, and other formats to MP3
 
 ## Build and Deployment
 
@@ -118,7 +118,7 @@ NEXT_PUBLIC_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
 To build the application for production:
 
 ```bash
-npm run build
+bun run build
 ```
 
 This command creates an optimized production build in the `.next` directory.
@@ -129,7 +129,7 @@ This command creates an optimized production build in the `.next` directory.
 2. Set the environment variable `NODE_ENV` to `production`
 3. Start the server:
    ```bash
-   npm run start
+   bun run start
    ```
 
 The server will run on port 3000 by default, but you can override this by setting the `PORT` environment variable.
@@ -144,17 +144,17 @@ FROM node:18-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
+RUN bun install
 
 COPY . .
-RUN npm run build
+RUN bun run build
 
 ENV NODE_ENV=production
 ENV PORT=3000
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start"]
+CMD ["bun", "run", "start"]
 ```
 
 Build and run the Docker container:
@@ -191,16 +191,32 @@ Next.js API Routes are used for the backend. The API endpoints are located in th
 
 ## Audio Format Support
 
-Transcriptr currently supports the following audio formats:
+Transcriptr supports a wide range of audio formats with **automatic conversion**:
 
-- MP3 (.mp3)
-- WAV (.wav)
-- FLAC (.flac)
-- OGG (.ogg)
+### 🚀 Directly Supported (Fastest Processing)
 
-For other formats like M4A, AAC, or WMA, please convert your files to one of the supported formats before uploading. You can use online tools like [CloudConvert](https://cloudconvert.com/m4a-to-mp3) for this purpose.
+- MP3 (.mp3) - Most common format
+- WAV (.wav) - Uncompressed audio
+- FLAC (.flac) - Lossless compression
+- OGG (.ogg) - Open-source format
 
-We're working on adding native support for more audio formats. Contributions are welcome!
+### 🔄 Auto-Converted Formats (Slightly Longer Processing)
+
+- M4A (.m4a) - iPhone/macOS recordings
+- AAC (.aac) - Advanced Audio Coding
+- MP4 (.mp4) - Video files with audio
+- WMA (.wma) - Windows Media Audio
+- AIFF (.aiff) - Apple format
+- CAF (.caf) - Core Audio Format
+
+### How It Works
+
+1. **Upload any supported format** - No manual conversion needed!
+2. **Automatic detection** - System identifies if conversion is required
+3. **Seamless processing** - Unsupported formats are converted to MP3 automatically
+4. **Transparent progress** - View conversion status in real-time
+
+> **Note**: To enable automatic conversion, you need to set up the `CLOUDCONVERT_API_KEY` environment variable. See the [Environment Variables](#environment-variables) section for details.
 
 ## Contributing
 

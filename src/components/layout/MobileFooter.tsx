@@ -82,6 +82,23 @@ export function MobileFooter({
           </Link>
         </div>
 
+        {/* Peerlist Project Embed */}
+        <div className="flex justify-center px-4">
+          <a
+            href="https://peerlist.io/arambdev/project/transcriptr--ai-audio-transcription"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-opacity hover:opacity-80"
+          >
+            <img
+              src="https://peerlist.io/api/v1/projects/embed/PRJHDNDKB9EAMOEDB2LJQBODEP9PRE?showUpvote=true&theme=light"
+              alt="Transcriptr | AI Audio Transcription"
+              style={{ width: 'auto', height: '64px' }}
+              className="rounded-lg shadow-sm"
+            />
+          </a>
+        </div>
+
         {/* Copyright */}
         <div className="px-4">
           <p className="text-xs text-gray-500 dark:text-gray-400">

@@ -3,7 +3,7 @@ import { Button } from "../ui/button";
 
 interface TranscriptionProcessingProps {
   progress: number;
-  transStatus: "starting" | "processing";
+  transStatus: "converting" | "starting" | "processing";
   getProgressColor: () => string;
   statusMessages: Record<string, string>;
   showApiDetails: boolean;
@@ -11,6 +11,11 @@ interface TranscriptionProcessingProps {
   apiResponses: Array<{ timestamp: Date; data: Record<string, unknown> }>;
   formatTimestamp: (date: Date) => string;
   onCancel: () => void;
+  frameProgress?: {
+    percentage: number;
+    current: number;
+    total: number;
+  } | null;
 }
 
 export function TranscriptionProcessing({
@@ -23,6 +28,7 @@ export function TranscriptionProcessing({
   apiResponses,
   formatTimestamp,
   onCancel,
+  frameProgress,
 }: TranscriptionProcessingProps) {
   return (
     <div className="flex flex-col items-center justify-center space-y-6 px-6 py-12">
@@ -50,6 +56,13 @@ export function TranscriptionProcessing({
           ? "Converting audio format for better compatibility..."
           : statusMessages[transStatus]}
       </p>
+
+      {frameProgress && transStatus === "processing" && (
+        <p className="max-w-md text-center text-sm text-gray-600 dark:text-gray-400">
+          Processing frame {frameProgress.current.toLocaleString()} of{" "}
+          {frameProgress.total.toLocaleString()}
+        </p>
+      )}
 
       <div className="w-full max-w-md">
         <div className="flex justify-center">

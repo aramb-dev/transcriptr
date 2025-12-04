@@ -6,12 +6,22 @@ import { TranscriptionOptions } from "./transcription/TranscriptionOptions";
 import { UploadCloud, Link as LinkIcon } from "lucide-react";
 import { FileUploadInput } from "./transcription/FileUploadInput";
 import { UrlInput } from "./transcription/UrlInput";
+import { getAllSupportedFormats } from "@/lib/file-format-utils";
+import { uploadLargeFile } from "@/lib/storage-service";
 
 interface UploadAudioProps {
   onUpload: (
-    data: FormData | { audioUrl: string },
+    data:
+      | FormData
+      | { audioUrl: string; originalFile?: { name: string; size: number } },
     options: { language: string; diarize: boolean },
   ) => void;
+  disabled?: boolean;
+  maxFileSize?: number;
+  onConversionStart?: () => void;
+  onConversionComplete?: () => void;
+  onConversionError?: (error: string) => void;
+  onApiResponse?: (response: { timestamp: Date; data: unknown }) => void;
 }
 
 // --- URL Validation Helpers (can be moved to a util file if needed elsewhere) ---
@@ -25,11 +35,19 @@ const isValidUrlFormat = (url: string) => {
 };
 
 const hasAudioExtension = (url: string) => {
-  return /\.(mp3|wav|flac|ogg)$/i.test(url);
+  const supportedFormats = getAllSupportedFormats();
+  const regex = new RegExp(`\\.(${supportedFormats.join("|")})$`, "i");
+  return regex.test(url);
 };
 // --- End URL Validation Helpers ---
 
-export function UploadAudio({ onUpload }: UploadAudioProps) {
+export function UploadAudio({
+  onUpload,
+  onConversionStart,
+  onConversionComplete,
+  onConversionError,
+  onApiResponse,
+}: UploadAudioProps) {
   const [file, setFile] = useState<File | null>(null);
   const [audioUrl, setAudioUrl] = useState<string>("");
   const [activeTab, setActiveTab] = useState<string>("file");
@@ -37,7 +55,7 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
     language: string;
     diarize: boolean;
   }>({
-    language: "None",
+    language: "auto",
     diarize: false,
   });
 
@@ -48,9 +66,11 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
     handleFileSelect,
     clearFile,
     fileSize,
+    requiresConversion,
     validateFile, // Add this to extract the validation function from your hook
   } = useFileInput({
     maxSize: 100, // Max size in MB
+    allowConversion: true, // Allow files that require conversion
   });
 
   const isUrlPotentiallyValid =
@@ -59,8 +79,8 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
   if (audioUrl && !isValidUrlFormat(audioUrl)) {
     urlError = "Please enter a valid URL (starting with http:// or https://)";
   } else if (audioUrl && !hasAudioExtension(audioUrl)) {
-    urlError =
-      "URL does not seem to point to a supported audio file (.mp3, .wav, .flac, .ogg)";
+    const supportedFormats = getAllSupportedFormats().join(", ");
+    urlError = `URL does not seem to point to a supported audio file (${supportedFormats})`;
   }
 
   const handleFileChange = useCallback(
@@ -103,9 +123,131 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
 
   const handleSubmit = useCallback(async () => {
     if (activeTab === "file" && file && !fileError) {
-      const formData = new FormData();
-      formData.append("file", file);
-      onUpload(formData, transcriptionOptions);
+      // Check if the file requires conversion
+      if (requiresConversion) {
+        try {
+          // Start conversion state IMMEDIATELY before any async operations
+          onConversionStart?.();
+
+          // Log conversion start
+          onApiResponse?.({
+            timestamp: new Date(),
+            data: {
+              message: `Starting conversion: ${file.name} (${file.type || "unknown type"}) → MP3`,
+              originalFile: file.name,
+              originalFormat:
+                file.name.split(".").pop()?.toLowerCase() || "unknown",
+              targetFormat: "mp3",
+              fileSize: file.size,
+            },
+          });
+
+          // Add a small delay to ensure state updates are processed
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
+          // First upload the file to Firebase to get a public URL
+          onApiResponse?.({
+            timestamp: new Date(),
+            data: {
+              message: `Uploading ${file.name} to Firebase for conversion...`,
+            },
+          });
+
+          const uploadResult = await uploadLargeFile(file);
+
+          onApiResponse?.({
+            timestamp: new Date(),
+            data: {
+              message: `File uploaded successfully`,
+              firebaseUrl: uploadResult.url,
+              firebasePath: uploadResult.path,
+            },
+          });
+
+          const fileExtension = file.name.split(".").pop()?.toLowerCase() || "";
+
+          // Call conversion endpoint with the uploaded file URL
+          onApiResponse?.({
+            timestamp: new Date(),
+            data: {
+              message: `Calling CloudConvert API for ${fileExtension.toUpperCase()} → MP3 conversion...`,
+            },
+          });
+
+          const response = await fetch("/api/convert/cloud", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              fileUrl: uploadResult.url,
+              originalFormat: fileExtension,
+              targetFormat: "mp3",
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Conversion failed: ${response.statusText}`);
+          }
+
+          const conversionResult = await response.json();
+
+          onApiResponse?.({
+            timestamp: new Date(),
+            data: {
+              message: `CloudConvert API response received`,
+              success: conversionResult.success,
+              jobId: conversionResult.jobId,
+              convertedUrl: conversionResult.convertedUrl
+                ? "URL generated"
+                : "No URL",
+            },
+          });
+
+          if (!conversionResult.success) {
+            throw new Error(conversionResult.error || "Conversion failed");
+          }
+
+          onConversionComplete?.();
+
+          onApiResponse?.({
+            timestamp: new Date(),
+            data: {
+              message: `Conversion completed successfully! Proceeding to transcription...`,
+              convertedUrl: conversionResult.convertedUrl,
+            },
+          });
+
+          // Now submit the converted file URL for transcription WITH original file metadata
+          onUpload(
+            {
+              audioUrl: conversionResult.convertedUrl,
+              originalFile: { name: file.name, size: file.size },
+            },
+            transcriptionOptions,
+          );
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Conversion failed";
+
+          onApiResponse?.({
+            timestamp: new Date(),
+            data: {
+              message: `Conversion failed: ${errorMessage}`,
+              error: errorMessage,
+              step: "conversion",
+            },
+          });
+
+          onConversionError?.(errorMessage);
+          console.error("Conversion error:", error);
+        }
+      } else {
+        // File doesn't need conversion, proceed normally
+        const formData = new FormData();
+        formData.append("file", file);
+        onUpload(formData, transcriptionOptions);
+      }
     } else if (activeTab === "url" && audioUrl && isUrlPotentiallyValid) {
       onUpload({ audioUrl }, transcriptionOptions);
     } else {
@@ -115,9 +257,14 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
     activeTab,
     file,
     fileError,
+    requiresConversion,
     audioUrl,
     isUrlPotentiallyValid,
     onUpload,
+    onConversionStart,
+    onConversionComplete,
+    onConversionError,
+    onApiResponse,
     transcriptionOptions,
   ]);
 
@@ -135,9 +282,9 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
 
       if (file) {
         // First, validate the file
-        const validationError = validateFile(file);
+        const validation = validateFile(file);
 
-        if (!validationError) {
+        if (!validation.error) {
           // If validation passes:
           // 1. Set the file state
           setFile(file);
@@ -158,7 +305,7 @@ export function UploadAudio({ onUpload }: UploadAudioProps) {
           console.log("File set successfully:", file.name);
         } else {
           // If validation fails, log the error
-          console.log("File validation failed:", validationError);
+          console.log("File validation failed:", validation.error);
           // You also might want to handle showing the error to the user here
         }
       }

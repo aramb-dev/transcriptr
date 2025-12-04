@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { X, Sparkles, Zap, Star } from "lucide-react";
+import { X, Sparkles, Music2, Play } from "lucide-react";
 import Confetti from "react-confetti";
 import { Button } from "./ui/button";
 import { AnimatedBackdrop } from "./ui/animated-backdrop";
 import { expandCenter } from "../lib/animations";
 
-interface V2AnnouncementModalProps {
+interface V3AnnouncementModalProps {
   onClose: () => void;
 }
 
-export function V2AnnouncementModal({ onClose }: V2AnnouncementModalProps) {
+export function V3AnnouncementModal({ onClose }: V3AnnouncementModalProps) {
   const [showConfetti, setShowConfetti] = useState(false);
   const [windowDimensions, setWindowDimensions] = useState({
     width: 0,
@@ -45,7 +45,7 @@ export function V2AnnouncementModal({ onClose }: V2AnnouncementModalProps) {
 
   const handleClose = () => {
     // Set the flag to prevent showing again
-    localStorage.setItem("seenV2", "true");
+    localStorage.setItem("seenV3", "true");
     onClose();
   };
 
@@ -66,10 +66,10 @@ export function V2AnnouncementModal({ onClose }: V2AnnouncementModalProps) {
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-gradient-to-r from-blue-500 to-purple-600 p-2">
-                  <Sparkles className="h-6 w-6 text-white" />
+                  <Play className="h-6 w-6 text-white" />
                 </div>
                 <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent dark:from-blue-400 dark:to-purple-400">
-                  V2 is here!
+                  V3 is here!
                 </h1>
               </div>
               <Button
@@ -85,54 +85,57 @@ export function V2AnnouncementModal({ onClose }: V2AnnouncementModalProps) {
             {/* Main content */}
             <div className="space-y-6">
               <p className="text-lg text-gray-700 dark:text-gray-300">
-                Welcome to the completely redesigned Transcriptr! We've rebuilt
-                the entire platform from the ground up to deliver a faster, more
-                reliable, and feature-rich transcription experience.
+                Experience the future of transcription with Transcription Studio!
+                V3 brings a revolutionary interactive workspace with OpenAI's
+                official Whisper model for unmatched accuracy.
               </p>
 
               {/* Feature highlights */}
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 rounded-full bg-green-100 p-1 dark:bg-green-900">
-                    <Zap className="h-4 w-4 text-green-600 dark:text-green-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-green-600 dark:text-green-400">
-                      Lightning Fast Performance
-                    </h3>
-                    <p className="text-sm text-gray-700 dark:text-gray-300">
-                      Completely rewritten with Next.js for blazing-fast load
-                      times and seamless user experience.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
                   <div className="mt-1 rounded-full bg-blue-100 p-1 dark:bg-blue-900">
-                    <Star className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <Play className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
                     <h3 className="font-medium text-blue-600 dark:text-blue-400">
-                      Enhanced Reliability
+                      🎬 Transcription Studio
                     </h3>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
-                      Improved error handling, better file format support, and
-                      automatic retry mechanisms for failed transcriptions.
+                      Brand new interactive workspace with an integrated audio
+                      player. Click any segment to jump to that exact moment in
+                      the audio!
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 rounded-full bg-amber-100 p-1 dark:bg-amber-900">
-                    <Sparkles className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  <div className="mt-1 rounded-full bg-purple-100 p-1 dark:bg-purple-900">
+                    <Music2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-amber-600 dark:text-amber-400">
-                      Modern Interface
+                    <h3 className="font-medium text-purple-600 dark:text-purple-400">
+                      🤖 OpenAI Whisper Model
                     </h3>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
-                      Beautiful new design with improved accessibility, better
-                      mobile support, and intuitive user workflows.
+                      Upgraded to OpenAI's official Whisper model with precise
+                      timestamps for every segment. Better accuracy, better
+                      results.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="mt-1 rounded-full bg-green-100 p-1 dark:bg-green-900">
+                    <Sparkles className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-green-600 dark:text-green-400">
+                      ⏱️ Interactive Playback
+                    </h3>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">
+                      Watch segments highlight in real-time as audio plays. Export
+                      professional SRT and VTT subtitle files with perfect
+                      timestamps.
                     </p>
                   </div>
                 </div>
@@ -141,8 +144,8 @@ export function V2AnnouncementModal({ onClose }: V2AnnouncementModalProps) {
               {/* Call to action */}
               <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
                 <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                  Ready to experience the future of transcription? Upload your
-                  first file and see the difference!
+                  Try the new Studio! Upload an audio file and click "Open in
+                  Studio" to experience interactive playback.
                 </p>
               </div>
 

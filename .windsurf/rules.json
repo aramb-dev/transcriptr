@@ -1,0 +1,306 @@
+{
+  "name": "Transcriptr Project Rules",
+  "description": "Comprehensive rules for the Transcriptr AI audio transcription application",
+  "version": "1.0.0",
+  "rules": [
+    {
+      "name": "component-structure",
+      "description": "React component organization and structure",
+      "pattern": "src/components/**/*.{ts,tsx}",
+      "rules": [
+        "Use TypeScript interfaces for all props",
+        "Export components as named exports, not default exports",
+        "Use 'use client' directive for client-side components",
+        "Place hooks at the top of component functions",
+        "Use React.memo for performance-critical components",
+        "Implement proper error boundaries for complex components",
+        "Use semantic HTML elements",
+        "Add proper ARIA labels for accessibility",
+        "Follow shadcn/ui patterns for UI components"
+      ]
+    },
+    {
+      "name": "api-routes",
+      "description": "Next.js API route structure and patterns",
+      "pattern": "src/app/api/**/*.{ts,js}",
+      "rules": [
+        "Use proper HTTP status codes",
+        "Implement comprehensive error handling",
+        "Validate all input data",
+        "Use CORS headers for cross-origin requests",
+        "Add rate limiting for production endpoints",
+        "Log errors with appropriate context",
+        "Use environment variables for sensitive data",
+        "Implement proper request/response types",
+        "Add API documentation comments",
+        "Handle file uploads with proper validation"
+      ]
+    },
+    {
+      "name": "typescript-strict",
+      "description": "TypeScript best practices and strict typing",
+      "pattern": "**/*.{ts,tsx}",
+      "rules": [
+        "Avoid 'any' type - use proper typing or 'unknown'",
+        "Use interface for object shapes, type for unions/primitives",
+        "Prefer 'const' over 'let' when possible",
+        "Use proper generic types",
+        "Implement proper return types for functions",
+        "Use enum or const assertions for constants",
+        "Add proper JSDoc comments for complex functions",
+        "Use utility types (Partial, Pick, Omit) when appropriate",
+        "Implement proper error types",
+        "Use 'as const' for readonly arrays/objects"
+      ]
+    },
+    {
+      "name": "styling-tailwind",
+      "description": "Tailwind CSS and styling conventions",
+      "pattern": "**/*.{tsx,jsx,css}",
+      "rules": [
+        "Use Tailwind classes instead of custom CSS when possible",
+        "Follow mobile-first responsive design",
+        "Use custom spacing variables for consistent design",
+        "Implement dark mode support with proper CSS variables",
+        "Use semantic color names from theme",
+        "Avoid magic numbers - use spacing scale",
+        "Use proper focus states for accessibility",
+        "Implement smooth transitions with Framer Motion",
+        "Use proper breakpoints (xs, touch, tablet, desktop)",
+        "Follow component-specific styling patterns"
+      ]
+    },
+    {
+      "name": "state-management",
+      "description": "React state management patterns",
+      "pattern": "src/components/**/*.{ts,tsx}",
+      "rules": [
+        "Use useState for local component state",
+        "Use useEffect with proper dependency arrays",
+        "Implement proper cleanup in useEffect",
+        "Use custom hooks for complex state logic",
+        "Avoid prop drilling - use context when appropriate",
+        "Use localStorage through persistence-service",
+        "Implement proper loading states",
+        "Use optimistic updates for better UX",
+        "Handle error states properly",
+        "Use proper TypeScript types for state"
+      ]
+    },
+    {
+      "name": "file-handling",
+      "description": "File upload and processing patterns",
+      "pattern": "src/**/*.{ts,tsx}",
+      "rules": [
+        "Validate file types and sizes before upload",
+        "Use proper progress indicators for file operations",
+        "Implement proper error handling for file failures",
+        "Use Firebase Storage for file persistence",
+        "Handle large files with chunked uploads",
+        "Implement proper cleanup for temporary files",
+        "Use appropriate file format conversion",
+        "Add proper file type detection",
+        "Handle network failures gracefully",
+        "Use proper MIME type validation"
+      ]
+    },
+    {
+      "name": "performance",
+      "description": "Performance optimization patterns",
+      "pattern": "**/*.{ts,tsx}",
+      "rules": [
+        "Use React.lazy for code splitting large components",
+        "Implement proper image optimization",
+        "Use useMemo for expensive computations",
+        "Use useCallback for stable function references",
+        "Implement proper loading states",
+        "Use appropriate caching strategies",
+        "Optimize bundle size with dynamic imports",
+        "Use proper debouncing for user input",
+        "Implement virtual scrolling for large lists",
+        "Monitor performance with appropriate tools"
+      ]
+    },
+    {
+      "name": "security",
+      "description": "Security best practices",
+      "pattern": "**/*.{ts,tsx,js}",
+      "rules": [
+        "Never expose API keys in client-side code",
+        "Validate all user inputs",
+        "Use proper CSRF protection",
+        "Implement proper authentication checks",
+        "Sanitize user-generated content",
+        "Use HTTPS for all API calls",
+        "Implement proper rate limiting",
+        "Use secure cookie practices",
+        "Validate file uploads properly",
+        "Implement proper error message sanitization"
+      ]
+    },
+    {
+      "name": "testing",
+      "description": "Testing patterns and conventions",
+      "pattern": "**/*.{ts,tsx,js,jsx}",
+      "rules": [
+        "Write unit tests for utility functions",
+        "Test component rendering and interactions",
+        "Mock external API calls in tests",
+        "Test error scenarios properly",
+        "Use proper test data factories",
+        "Implement integration tests for API routes",
+        "Test accessibility features",
+        "Use proper test organization",
+        "Test responsive design behavior",
+        "Implement proper test coverage"
+      ]
+    },
+    {
+      "name": "naming-conventions",
+      "description": "File and variable naming conventions",
+      "pattern": "**/*.{ts,tsx,js,jsx}",
+      "rules": [
+        "Use PascalCase for components and interfaces",
+        "Use camelCase for variables and functions",
+        "Use kebab-case for file names",
+        "Use UPPER_SNAKE_CASE for constants",
+        "Use descriptive names for functions and variables",
+        "Prefix boolean variables with 'is', 'has', or 'should'",
+        "Use proper event handler naming (handle*, on*)",
+        "Use proper async function naming",
+        "Avoid abbreviations in names",
+        "Use consistent naming patterns across the project"
+      ]
+    },
+    {
+      "name": "error-handling",
+      "description": "Error handling patterns",
+      "pattern": "**/*.{ts,tsx,js}",
+      "rules": [
+        "Use try-catch blocks for async operations",
+        "Implement proper error boundaries",
+        "Use user-friendly error messages",
+        "Log errors with appropriate context",
+        "Implement proper error recovery mechanisms",
+        "Use proper error types and interfaces",
+        "Handle network errors gracefully",
+        "Implement proper validation error handling",
+        "Use proper error state management",
+        "Add error tracking for production"
+      ]
+    },
+    {
+      "name": "documentation",
+      "description": "Code documentation standards",
+      "pattern": "**/*.{ts,tsx,js}",
+      "rules": [
+        "Add JSDoc comments for complex functions",
+        "Document component props and interfaces",
+        "Add inline comments for complex logic",
+        "Document API endpoints properly",
+        "Use proper TypeScript comments",
+        "Add usage examples for complex components",
+        "Document environment variables",
+        "Add proper README for new features",
+        "Document external API integrations",
+        "Keep documentation up to date"
+      ]
+    }
+  ],
+  "overrides": [
+    {
+      "pattern": "src/components/ui/**/*.{ts,tsx}",
+      "rules": [
+        "Follow shadcn/ui component patterns exactly",
+        "Use proper forwardRef for DOM elements",
+        "Implement proper variant systems",
+        "Use proper className merging with cn utility",
+        "Implement proper accessibility features"
+      ]
+    },
+    {
+      "pattern": "src/app/api/**/*.{ts,js}",
+      "rules": [
+        "Always implement proper error responses",
+        "Use proper HTTP methods",
+        "Implement request validation",
+        "Add proper API rate limiting",
+        "Use proper response formatting"
+      ]
+    },
+    {
+      "pattern": "src/hooks/**/*.{ts,tsx}",
+      "rules": [
+        "Start hook names with 'use'",
+        "Implement proper cleanup functions",
+        "Handle error states properly",
+        "Use proper dependency arrays",
+        "Return consistent hook interfaces"
+      ]
+    }
+  ],
+  "globals": {
+    "description": "Global project standards",
+    "standards": [
+      "Use Bun as the package manager",
+      "Follow Conventional Commits for git messages",
+      "Use semantic versioning for releases",
+      "Implement proper CI/CD pipelines",
+      "Use proper environment variable management",
+      "Follow mobile-first responsive design",
+      "Implement proper accessibility standards",
+      "Use proper security practices",
+      "Follow performance optimization guidelines",
+      "Maintain proper code coverage",
+      "Use conventional commit format: feat(scope): description",
+      "Commit after every todo completion for atomic changes",
+      "Write clear, concise commit messages that describe changes",
+      "Use git checkout for branch switching",
+      "Use perl -C -i -pe for file text replacements",
+      "Run bun run lint before commits",
+      "Use chmod for file permission management"
+    ]
+  },
+  "file-structure": {
+    "description": "Project file organization standards",
+    "patterns": [
+      "Keep components in feature-specific directories",
+      "Use index files for clean imports",
+      "Separate client and server code properly",
+      "Keep utilities in lib/ directory",
+      "Use proper TypeScript configuration",
+      "Maintain clean component exports",
+      "Use proper asset organization",
+      "Keep tests close to source files",
+      "Use proper configuration file organization",
+      "Maintain clean import/export structure"
+    ]
+  },
+  "development-workflow": {
+    "description": "Development workflow and Git practices",
+    "patterns": [
+      "Use conventional commit format: feat(scope): description",
+      "Commit after every todo list or task ID completion for atomic changes",
+      "Write clear, concise commit messages that describe changes",
+      "Run bun run lint before committing changes",
+      "Use git checkout for branch switching operations",
+      "Use perl -C -i -pe for file text replacements",
+      "Use chmod for file permission management when needed",
+      "Use grep for searching within files",
+      "Use git add for staging changes",
+      "Avoid using head/tail commands - use dedicated tools instead"
+    ]
+  },
+  "allowed-operations": {
+    "description": "Allowed development operations and commands",
+    "permissions": [
+      "Bash(grep:*) - Search within files",
+      "Bash(git add:*) - Stage files for commit",
+      "Bash(git commit:*) - Commit changes with proper messages",
+      "Bash(bun run lint:*) - Run linting before commits",
+      "Bash(perl -C -i -pe:*) - File text replacements",
+      "Bash(git checkout:*) - Branch switching",
+      "Bash(chmod:*) - File permission management"
+    ]
+  }
+}

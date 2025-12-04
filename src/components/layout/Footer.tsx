@@ -93,6 +93,24 @@ export function Footer({ onOpenFeedbackModal, onOpenChangelog }: FooterProps) {
             Documentation
           </Link>
         </div>
+
+        {/* Peerlist Project Embed */}
+        <div className="mt-6 flex justify-center">
+          <a
+            href="https://peerlist.io/arambdev/project/transcriptr--ai-audio-transcription"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="transition-opacity hover:opacity-80"
+          >
+            <img
+              src="https://peerlist.io/api/v1/projects/embed/PRJHDNDKB9EAMOEDB2LJQBODEP9PRE?showUpvote=true&theme=light"
+              alt="Transcriptr | AI Audio Transcription"
+              style={{ width: 'auto', height: '72px' }}
+              className="rounded-lg shadow-sm"
+            />
+          </a>
+        </div>
+
         <p className="mt-4">
           © {new Date().getFullYear()} Transcriptr. All rights reserved.
         </p>

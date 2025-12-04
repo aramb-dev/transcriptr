@@ -1,35 +1,57 @@
 import { useState, useRef, useCallback } from "react";
+import { validateFileFormat } from "@/lib/file-format-utils";
 
 interface UseFileInputOptions {
   maxSize?: number; // in MB
-  allowedMimeTypes?: string[];
+  allowConversion?: boolean; // Whether to allow files that require conversion
 }
 
 export function useFileInput({
   maxSize = 100, // Default to 100MB
-  allowedMimeTypes = ["audio/mpeg", "audio/wav", "audio/flac", "audio/ogg"],
+  allowConversion = true, // Allow files that require conversion by default
 }: UseFileInputOptions = {}) {
   const [fileName, setFileName] = useState<string | null>(null);
   const [fileSize, setFileSize] = useState<number>(0);
   const [error, setError] = useState<string | null>(null);
+  const [requiresConversion, setRequiresConversion] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Extract the validation logic to a separate function
   const validateFile = useCallback(
-    (file: File): string | null => {
-      // Check file type
-      if (!allowedMimeTypes.includes(file.type)) {
-        return "Unsupported file format. Please upload MP3, WAV, FLAC, or OGG files.";
-      }
-
-      // Check file size
+    (file: File): { error: string | null; requiresConversion: boolean } => {
+      // Check file size first
       if (file.size > maxSize * 1024 * 1024) {
-        return `File size exceeds the ${maxSize}MB limit.`;
+        return {
+          error: `File size exceeds the ${maxSize}MB limit.`,
+          requiresConversion: false,
+        };
       }
 
-      return null; // No error
+      // Check file format support
+      const formatValidation = validateFileFormat(file);
+
+      if (!formatValidation.valid) {
+        return {
+          error: formatValidation.error || "Unsupported file format",
+          requiresConversion: false,
+        };
+      }
+
+      // If conversion is required but not allowed
+      if (formatValidation.requiresConversion && !allowConversion) {
+        return {
+          error:
+            "This file format requires conversion, but conversion is not enabled.",
+          requiresConversion: false,
+        };
+      }
+
+      return {
+        error: null,
+        requiresConversion: formatValidation.requiresConversion || false,
+      };
     },
-    [allowedMimeTypes, maxSize],
+    [maxSize, allowConversion],
   );
 
   const handleFileSelect = useCallback(
@@ -40,20 +62,22 @@ export function useFileInput({
       setFileName(null);
       setFileSize(0);
       setError(null);
+      setRequiresConversion(false);
 
       if (!file) return;
 
       // Validate the file
-      const validationError = validateFile(file);
+      const validation = validateFile(file);
 
-      if (validationError) {
-        setError(validationError);
+      if (validation.error) {
+        setError(validation.error);
         return;
       }
 
       // If file is valid, set the file name and size
       setFileName(file.name);
       setFileSize(file.size);
+      setRequiresConversion(validation.requiresConversion);
     },
     [validateFile],
   );
@@ -62,6 +86,7 @@ export function useFileInput({
     setFileName(null);
     setFileSize(0);
     setError(null);
+    setRequiresConversion(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -71,9 +96,10 @@ export function useFileInput({
     fileName,
     fileSize,
     error,
+    requiresConversion,
     fileInputRef,
     handleFileSelect,
     clearFile,
-    validateFile, // Export the validation function
+    validateFile,
   };
 }

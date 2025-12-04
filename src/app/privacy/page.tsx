@@ -218,7 +218,7 @@ export default function PrivacyPage() {
                 >
                   contact@aramb.dev
                 </a>
-                .
+                {"."}
               </p>
             </section>
           </div>

@@ -1,6 +1,7 @@
 // Constants
 export type TranscriptionStatus =
   | "idle"
+  | "converting"
   | "starting"
   | "processing"
   | "succeeded"
@@ -9,6 +10,7 @@ export type TranscriptionStatus =
 
 export const statusMessages: Record<TranscriptionStatus, string> = {
   idle: "Ready to transcribe",
+  converting: "Converting audio file to MP3 format...",
   starting: "Transcription engine starting. Please wait 4-5 seconds.",
   processing: "Processing audio. This will depend on the length of your audio.",
   succeeded: "Processing complete! Loading result...",

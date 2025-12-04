@@ -6,6 +6,18 @@
 import { TranscriptionStatus } from "@/services/transcription";
 
 // Type definitions
+export interface TranscriptionSegment {
+  id: number;
+  start: number; // Start time in seconds
+  end: number; // End time in seconds
+  text: string;
+  tokens?: number[];
+  avg_logprob?: number;
+  temperature?: number;
+  no_speech_prob?: number;
+  compression_ratio?: number;
+}
+
 export interface TranscriptionSession {
   id: string; // Unique session ID
   status: TranscriptionStatus; // Current status
@@ -20,6 +32,7 @@ export interface TranscriptionSession {
     name?: string; // Original filename
     size?: number; // File size
     url?: string; // URL for audio if applicable
+    duration?: number; // Audio duration in seconds
   };
   options: {
     // Transcription options
@@ -32,6 +45,7 @@ export interface TranscriptionSession {
     data: Record<string, unknown>;
   }>;
   result?: string; // Final transcription result if available
+  segments?: TranscriptionSegment[]; // Transcription segments with timestamps
 }
 
 // Constants
@@ -161,8 +175,8 @@ export const createSession = async (
     url?: string;
   },
 ): Promise<TranscriptionSession> => {
-  // Create a new session ID or use existing one from cookie
-  const sessionId = getSessionId() || createSessionId();
+  // Always create a new unique session ID for each transcription
+  const sessionId = createSessionId();
 
   const now = Date.now();
   const expiryHours = DEFAULT_SESSION_EXPIRY_HOURS;

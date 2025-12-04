@@ -1,5 +1,6 @@
 import { useRef, useEffect } from "react";
 import { TranscriptionStatus, getApiUrl } from "../services/transcription";
+import { getUserFriendlyErrorMessage } from "../lib/error-utils";
 
 interface UseTranscriptionPollingProps {
   predictionId: string | null;
@@ -11,6 +12,11 @@ interface UseTranscriptionPollingProps {
     timestamp: Date;
     data: Record<string, unknown>;
   }) => void;
+  onFrameProgress?: (progress: {
+    percentage: number;
+    current: number;
+    total: number;
+  }) => void;
 }
 
 export function useTranscriptionPolling({
@@ -20,8 +26,29 @@ export function useTranscriptionPolling({
   onProgress,
   onStatusChange,
   onApiResponse,
+  onFrameProgress,
 }: UseTranscriptionPollingProps) {
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Function to parse frame progress from Replicate logs
+  const parseFrameProgress = (logs: string) => {
+    // Look for pattern like: " 14%|█▍        | 14618/105854 [00:28<03:10, 479.95frames/s]"
+    const progressRegex = /(\d+)%.*?\|\s*(\d+)\/(\d+)/;
+    const lines = logs.split("\n");
+
+    // Get the last line that matches the pattern (most recent progress)
+    for (let i = lines.length - 1; i >= 0; i--) {
+      const match = lines[i].match(progressRegex);
+      if (match) {
+        return {
+          percentage: parseInt(match[1], 10),
+          current: parseInt(match[2], 10),
+          total: parseInt(match[3], 10),
+        };
+      }
+    }
+    return null;
+  };
 
   // Clean up interval on unmount
   useEffect(() => {
@@ -93,11 +120,28 @@ export function useTranscriptionPolling({
           } else if (data.status === "processing") {
             // 50%-100% range for processing status
             onStatusChange("processing");
-            // Calculate progress within the 50-98% range based on attempts
-            const processingProgressMax = 48; // Max progress to add during processing (50 to 98)
-            const processingProgress =
-              (Math.min(attempts, 30) / 30) * processingProgressMax;
-            newProgress = 50 + Math.floor(processingProgress);
+
+            // Try to parse frame progress from logs
+            if (data.logs && onFrameProgress) {
+              const frameProgress = parseFrameProgress(data.logs);
+              if (frameProgress) {
+                // Use real progress from Replicate
+                newProgress = 50 + Math.floor(frameProgress.percentage * 0.48); // Map 0-100% to 50-98%
+                onFrameProgress(frameProgress);
+              } else {
+                // Fallback to estimate-based progress
+                const processingProgressMax = 48;
+                const processingProgress =
+                  (Math.min(attempts, 30) / 30) * processingProgressMax;
+                newProgress = 50 + Math.floor(processingProgress);
+              }
+            } else {
+              // Fallback to estimate-based progress
+              const processingProgressMax = 48;
+              const processingProgress =
+                (Math.min(attempts, 30) / 30) * processingProgressMax;
+              newProgress = 50 + Math.floor(processingProgress);
+            }
             // Update progress with the calculated value
             onProgress(newProgress);
           } else if (data.status === "succeeded") {
@@ -149,14 +193,19 @@ export function useTranscriptionPolling({
         })
         .catch((error) => {
           console.error("Error during polling:", error);
+
+          // Get user-friendly error message
+          const errorInfo = getUserFriendlyErrorMessage(error);
+
           stopPolling();
-          onError(error instanceof Error ? error.message : String(error));
+          onError(errorInfo.userMessage);
           onStatusChange("failed");
           onProgress(0);
           onApiResponse({
             timestamp: new Date(),
             data: {
-              error: `Polling Error: ${error instanceof Error ? error.message : String(error)}`,
+              error: `Polling Error: ${errorInfo.userMessage}`,
+              isNetworkError: errorInfo.isNetworkError,
             },
           });
         });
