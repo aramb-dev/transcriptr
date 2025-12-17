@@ -1,4 +1,3 @@
-import React from "react";
 import { MobileHeader } from "./MobileHeader";
 
 interface HeaderProps {

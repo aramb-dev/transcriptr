@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { marked } from "marked";
 import { Button } from "./ui/button";

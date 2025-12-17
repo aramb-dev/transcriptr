@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { marked } from "marked";
 import { Button } from "./ui/button";
@@ -13,9 +13,9 @@ interface ChangelogProps {
 
 export function Changelog({ isModal = false, onClose }: ChangelogProps) {
   // Mobile-first: Use MobileChangelog on small screens
-  const [isMobile, setIsMobile] = React.useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };

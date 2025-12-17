@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { MobileNavigation } from "../ui/mobile-navigation";
 
 interface MobileHeaderProps {

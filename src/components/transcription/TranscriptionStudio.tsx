@@ -64,7 +64,7 @@ const formatFileSize = (bytes?: number): string => {
 // Audio Player Component
 interface AudioPlayerProps {
   audioUrl?: string;
-  audioRef?: React.RefObject<HTMLAudioElement>;
+  audioRef?: React.RefObject<HTMLAudioElement | null>;
   onTimeUpdate?: (time: number) => void;
 }
 
