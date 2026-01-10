@@ -378,10 +378,29 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         }
         // --- End File processing logic ---
       } else {
-        // Handle URL input
+        // Handle URL input (includes converted video files from CloudConvert)
         requestBody.audioUrl = data.audioUrl; // Use the provided URL directly
         sourceDescription = `URL: ${data.audioUrl}`;
         setProgress(15); // Set progress for URL case
+
+        // Save converted audio URL to localStorage for Studio access
+        // This handles video files that were converted to audio via CloudConvert
+        localStorage.setItem("studioAudioUrl", data.audioUrl);
+        console.log("Saved converted audio URL to localStorage:", data.audioUrl);
+
+        // Update session with audio URL for Studio playback
+        if (data.originalFile) {
+          // This is a converted file (video → audio)
+          updateSessionData({
+            audioSource: {
+              type: "file",
+              name: data.originalFile.name,
+              size: data.originalFile.size,
+              url: data.audioUrl,
+            },
+          });
+          console.log("Updated session with converted audio URL:", data.audioUrl);
+        }
       }
 
       console.log(`Processing ${sourceDescription}`);

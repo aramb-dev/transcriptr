@@ -1,4 +1,4 @@
-"use client";
+-"use client";
 
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
@@ -9,6 +9,7 @@ import {
   Play,
   Pause,
   Volume2,
+  VolumeX,
   SkipBack,
   SkipForward,
   Search,
@@ -20,6 +21,10 @@ import {
   AlertCircle,
   Keyboard,
   X,
+  Repeat,
+  ChevronLeft,
+  ChevronRight,
+  BarChart3,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
@@ -69,19 +74,103 @@ interface AudioPlayerProps {
   audioUrl?: string;
   audioRef?: React.RefObject<HTMLAudioElement | null>;
   onTimeUpdate?: (time: number) => void;
+  segments?: TranscriptionSegment[];
+  onSegmentChange?: (segmentIndex: number) => void;
 }
+
+// Playback speed options
+const PLAYBACK_SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
 const AudioPlayer: React.FC<AudioPlayerProps> = ({
   audioUrl,
   audioRef: externalAudioRef,
   onTimeUpdate,
+  segments,
+  onSegmentChange,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [isLooping, setIsLooping] = useState(false);
+  const [loopStart, setLoopStart] = useState<number | null>(null);
+  const [loopEnd, setLoopEnd] = useState<number | null>(null);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const internalAudioRef = useRef<HTMLAudioElement>(null);
   const audioRef = externalAudioRef || internalAudioRef;
+
+  // Get current segment index
+  const currentSegmentIndex = segments?.findIndex(
+    (seg) => currentTime >= seg.start && currentTime < seg.end
+  ) ?? -1;
+
+  // Handle playback speed change
+  const handleSpeedChange = (speed: number) => {
+    setPlaybackSpeed(speed);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = speed;
+    }
+    setShowSpeedMenu(false);
+    toast.success(`Playback speed: ${speed}x`);
+  };
+
+  // Navigate to previous segment
+  const goToPrevSegment = () => {
+    if (!segments || segments.length === 0) return;
+    const prevIndex = Math.max(0, currentSegmentIndex - 1);
+    if (audioRef.current && segments[prevIndex]) {
+      audioRef.current.currentTime = segments[prevIndex].start;
+      onSegmentChange?.(prevIndex);
+    }
+  };
+
+  // Navigate to next segment
+  const goToNextSegment = () => {
+    if (!segments || segments.length === 0) return;
+    const nextIndex = Math.min(segments.length - 1, currentSegmentIndex + 1);
+    if (audioRef.current && segments[nextIndex]) {
+      audioRef.current.currentTime = segments[nextIndex].start;
+      onSegmentChange?.(nextIndex);
+    }
+  };
+
+  // Toggle mute
+  const toggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  // Set loop points
+  const setLoopPoint = (type: 'start' | 'end') => {
+    if (type === 'start') {
+      setLoopStart(currentTime);
+      toast.success(`Loop start: ${formatDuration(currentTime)}`);
+    } else {
+      setLoopEnd(currentTime);
+      toast.success(`Loop end: ${formatDuration(currentTime)}`);
+    }
+  };
+
+  // Clear loop
+  const clearLoop = () => {
+    setLoopStart(null);
+    setLoopEnd(null);
+    setIsLooping(false);
+    toast.success('Loop cleared');
+  };
+
+  // Handle loop playback
+  useEffect(() => {
+    if (isLooping && loopStart !== null && loopEnd !== null && audioRef.current) {
+      if (currentTime >= loopEnd) {
+        audioRef.current.currentTime = loopStart;
+      }
+    }
+  }, [currentTime, isLooping, loopStart, loopEnd, audioRef]);
 
   const togglePlay = () => {
     if (audioRef.current) {
@@ -227,20 +316,123 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
                 </div>
               </div>
 
-              {/* Volume */}
-              <div className="flex items-center gap-2">
-                <Volume2 className="h-4 w-4 text-gray-500" />
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={volume}
-                  onChange={handleVolumeChange}
-                  className="h-1 flex-1"
-                  aria-label="Volume control"
-                />
+              {/* Volume & Speed Controls */}
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleMute}
+                    className="h-8 w-8 p-0"
+                    title={isMuted ? "Unmute" : "Mute"}
+                  >
+                    {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                  </Button>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={isMuted ? 0 : volume}
+                    onChange={handleVolumeChange}
+                    className="h-1 w-20"
+                    aria-label="Volume control"
+                  />
+                </div>
+
+                {/* Playback Speed */}
+                <div className="relative">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+                    className="h-8 px-2 text-xs"
+                  >
+                    {playbackSpeed}x
+                  </Button>
+                  {showSpeedMenu && (
+                    <div className="absolute right-0 bottom-10 z-10 rounded-md border bg-white p-1 shadow-lg dark:bg-gray-800">
+                      {PLAYBACK_SPEEDS.map((speed) => (
+                        <button
+                          key={speed}
+                          onClick={() => handleSpeedChange(speed)}
+                          className={cn(
+                            "block w-full rounded px-3 py-1 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700",
+                            playbackSpeed === speed && "bg-blue-100 dark:bg-blue-900"
+                          )}
+                        >
+                          {speed}x
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Loop Controls */}
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant={isLooping ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => {
+                      if (loopStart !== null && loopEnd !== null) {
+                        setIsLooping(!isLooping);
+                      } else {
+                        toast.error("Set loop start and end points first");
+                      }
+                    }}
+                    className="h-8 w-8 p-0"
+                    title="Toggle loop"
+                  >
+                    <Repeat className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
+
+              {/* Segment Navigation */}
+              {segments && segments.length > 0 && (
+                <div className="flex items-center justify-between border-t pt-3">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={goToPrevSegment}
+                    disabled={currentSegmentIndex <= 0}
+                    className="flex items-center gap-1"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    Prev
+                  </Button>
+                  <span className="text-xs text-gray-500">
+                    Segment {currentSegmentIndex + 1} of {segments.length}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={goToNextSegment}
+                    disabled={currentSegmentIndex >= segments.length - 1}
+                    className="flex items-center gap-1"
+                  >
+                    Next
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+
+              {/* Loop Points Display */}
+              {(loopStart !== null || loopEnd !== null) && (
+                <div className="flex items-center justify-between border-t pt-3 text-xs">
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setLoopPoint('start')} className="h-6 px-2 text-xs">
+                      A: {loopStart !== null ? formatDuration(loopStart) : '--:--'}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setLoopPoint('end')} className="h-6 px-2 text-xs">
+                      B: {loopEnd !== null ? formatDuration(loopEnd) : '--:--'}
+                    </Button>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={clearLoop} className="h-6 px-2 text-xs text-red-500">
+                    Clear
+                  </Button>
+                </div>
+              )}
             </div>
           </>
         ) : (
@@ -306,11 +498,86 @@ interface ExportControlsProps {
   segments?: TranscriptionSegment[];
 }
 
+// Statistics Component (Phase 4)
+const TranscriptStatistics: React.FC<{ transcription: string; segments?: TranscriptionSegment[] }> = ({
+  transcription,
+  segments,
+}) => {
+  const stats = React.useMemo(() => {
+    const words = transcription.trim().split(/\s+/).filter(w => w.length > 0);
+    const characters = transcription.length;
+    const sentences = transcription.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
+    const paragraphs = transcription.split(/\n\n+/).filter(p => p.trim().length > 0).length;
+    const avgWordLength = words.length > 0 ? (words.reduce((sum, w) => sum + w.length, 0) / words.length).toFixed(1) : '0';
+    const totalDuration = segments && segments.length > 0 
+      ? segments[segments.length - 1].end - segments[0].start 
+      : 0;
+    const wordsPerMinute = totalDuration > 0 ? Math.round(words.length / (totalDuration / 60)) : 0;
+    
+    // Find most common words (excluding short words)
+    const wordFreq: Record<string, number> = {};
+    words.forEach(w => {
+      const word = w.toLowerCase().replace(/[^a-z]/g, '');
+      if (word.length > 3) {
+        wordFreq[word] = (wordFreq[word] || 0) + 1;
+      }
+    });
+    const topWords = Object.entries(wordFreq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    return { words: words.length, characters, sentences, paragraphs, avgWordLength, totalDuration, wordsPerMinute, topWords };
+  }, [transcription, segments]);
+
+  return (
+    <Card className="mb-4">
+      <CardHeader className="pb-3">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="h-4 w-4 text-purple-600" />
+          <h3 className="text-sm font-medium">Statistics</h3>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-2 text-sm">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="rounded bg-gray-100 p-2 dark:bg-gray-800">
+            <div className="text-lg font-bold text-blue-600">{stats.words.toLocaleString()}</div>
+            <div className="text-xs text-gray-500">Words</div>
+          </div>
+          <div className="rounded bg-gray-100 p-2 dark:bg-gray-800">
+            <div className="text-lg font-bold text-green-600">{stats.characters.toLocaleString()}</div>
+            <div className="text-xs text-gray-500">Characters</div>
+          </div>
+          <div className="rounded bg-gray-100 p-2 dark:bg-gray-800">
+            <div className="text-lg font-bold text-purple-600">{stats.sentences}</div>
+            <div className="text-xs text-gray-500">Sentences</div>
+          </div>
+          <div className="rounded bg-gray-100 p-2 dark:bg-gray-800">
+            <div className="text-lg font-bold text-orange-600">{stats.wordsPerMinute}</div>
+            <div className="text-xs text-gray-500">Words/min</div>
+          </div>
+        </div>
+        {stats.topWords.length > 0 && (
+          <div className="border-t pt-2">
+            <div className="text-xs text-gray-500 mb-1">Top Words</div>
+            <div className="flex flex-wrap gap-1">
+              {stats.topWords.map(([word, count]) => (
+                <span key={word} className="rounded bg-blue-100 px-2 py-0.5 text-xs dark:bg-blue-900">
+                  {word} ({count})
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
 const ExportControls: React.FC<ExportControlsProps> = ({
   transcription,
   segments,
 }) => {
-  const [selectedFormat, setSelectedFormat] = useState<"txt" | "docx" | "srt" | "vtt">(
+  const [selectedFormat, setSelectedFormat] = useState<"txt" | "docx" | "srt" | "vtt" | "json" | "csv" | "md">(
     "txt",
   );
   const [isDownloading, setIsDownloading] = useState(false);
@@ -365,6 +632,54 @@ const ExportControls: React.FC<ExportControlsProps> = ({
     return vtt;
   };
 
+  // Generate JSON export (Phase 5)
+  const generateJSON = (): string => {
+    return JSON.stringify({
+      exportedAt: new Date().toISOString(),
+      transcription,
+      segments: segments || [],
+      metadata: {
+        wordCount: transcription.split(/\s+/).length,
+        characterCount: transcription.length,
+        segmentCount: segments?.length || 0,
+      }
+    }, null, 2);
+  };
+
+  // Generate CSV export (Phase 5)
+  const generateCSV = (): string => {
+    if (!segments || segments.length === 0) {
+      return "id,start,end,text\n1,0,0,\"" + transcription.replace(/"/g, '""') + "\"";
+    }
+    const header = "id,start,end,duration,text";
+    const rows = segments.map(seg => 
+      `${seg.id},${seg.start.toFixed(3)},${seg.end.toFixed(3)},${(seg.end - seg.start).toFixed(3)},"${seg.text.replace(/"/g, '""')}"`
+    );
+    return [header, ...rows].join("\n");
+  };
+
+  // Generate Markdown export with timestamps (Phase 5)
+  const generateMarkdown = (): string => {
+    let md = "# Transcription\n\n";
+    md += `*Exported: ${new Date().toLocaleString()}*\n\n`;
+    md += "---\n\n";
+    
+    if (segments && segments.length > 0) {
+      md += "## Segments\n\n";
+      segments.forEach(seg => {
+        md += `**[${formatDuration(seg.start)} - ${formatDuration(seg.end)}]**\n\n`;
+        md += `${seg.text.trim()}\n\n`;
+      });
+    } else {
+      md += "## Full Transcript\n\n";
+      md += transcription;
+    }
+    
+    md += "\n---\n\n";
+    md += `*Word count: ${transcription.split(/\s+/).length}*\n`;
+    return md;
+  };
+
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
@@ -403,6 +718,12 @@ const ExportControls: React.FC<ExportControlsProps> = ({
         blob = new Blob([new Uint8Array(buffer)], {
           type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         });
+      } else if (selectedFormat === "json") {
+        blob = new Blob([generateJSON()], { type: "application/json" });
+      } else if (selectedFormat === "csv") {
+        blob = new Blob([generateCSV()], { type: "text/csv" });
+      } else if (selectedFormat === "md") {
+        blob = new Blob([generateMarkdown()], { type: "text/markdown" });
       } else {
         blob = new Blob([transcription], { type: "text/plain" });
       }
@@ -437,14 +758,14 @@ const ExportControls: React.FC<ExportControlsProps> = ({
         {/* Format Selection */}
         <div>
           <label className="mb-2 block text-xs text-gray-600">Format</label>
-          <div className="grid grid-cols-2 gap-2">
-            {(["txt", "srt", "vtt", "docx"] as const).map((format) => (
+          <div className="grid grid-cols-4 gap-1">
+            {(["txt", "docx", "srt", "vtt", "json", "csv", "md"] as const).map((format) => (
               <Button
                 key={format}
                 variant={selectedFormat === format ? "default" : "outline"}
                 size="sm"
                 onClick={() => setSelectedFormat(format)}
-                className="text-xs"
+                className="px-2 text-xs"
               >
                 {format.toUpperCase()}
               </Button>
@@ -453,15 +774,15 @@ const ExportControls: React.FC<ExportControlsProps> = ({
         </div>
 
         {/* Format Info */}
-        {segments && (
-          <div className="rounded-md bg-blue-50 p-2 text-xs text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
-            {selectedFormat === "srt"
-              ? "SRT format with timestamps from transcription segments"
-              : selectedFormat === "vtt"
-                ? "WebVTT format with timestamps from transcription segments"
-                : "Plain text transcription"}
-          </div>
-        )}
+        <div className="rounded-md bg-blue-50 p-2 text-xs text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+          {selectedFormat === "srt" && "SRT - Subtitle format with timestamps"}
+          {selectedFormat === "vtt" && "WebVTT - Web subtitle format"}
+          {selectedFormat === "txt" && "Plain text transcription"}
+          {selectedFormat === "docx" && "Microsoft Word document"}
+          {selectedFormat === "json" && "JSON with full metadata & segments"}
+          {selectedFormat === "csv" && "CSV spreadsheet with timestamps"}
+          {selectedFormat === "md" && "Markdown with formatted timestamps"}
+        </div>
 
         {/* Download Button */}
         <Button
@@ -1119,7 +1440,11 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
                 audioUrl={audioUrl}
                 audioRef={audioRef}
                 onTimeUpdate={handleTimeUpdate}
+                segments={segments}
               />
+
+              {/* Statistics - Phase 4 */}
+              <TranscriptStatistics transcription={transcription} segments={segments} />
 
               {/* File Details - Hidden on mobile, shown on desktop */}
               <div className="hidden lg:block">
