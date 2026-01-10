@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Badge } from "../ui/badge";
@@ -18,10 +18,13 @@ import {
   Clock,
   FileText,
   AlertCircle,
+  Keyboard,
+  X,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 
 // Types
 interface AudioSource {
@@ -157,7 +160,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
               onEnded={() => setIsPlaying(false)}
               preload="metadata"
               crossOrigin="anonymous"
-              controls
+              className="hidden"
             />
 
             <div className="space-y-4">
@@ -365,28 +368,46 @@ const ExportControls: React.FC<ExportControlsProps> = ({
   const handleDownload = async () => {
     setIsDownloading(true);
     try {
-      // Simulate download process
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
       const timestamp = new Date().toISOString().split("T")[0];
       const filename = `transcription_${timestamp}.${selectedFormat}`;
-      let content = transcription;
-      let mimeType = "text/plain";
+      let blob: Blob;
 
       if (selectedFormat === "srt") {
-        content = generateSRT();
-        mimeType = "text/plain";
+        const content = generateSRT();
+        blob = new Blob([content], { type: "text/plain" });
       } else if (selectedFormat === "vtt") {
-        content = generateVTT();
-        mimeType = "text/vtt";
+        const content = generateVTT();
+        blob = new Blob([content], { type: "text/vtt" });
       } else if (selectedFormat === "docx") {
-        mimeType =
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        // Create proper DOCX document
+        const doc = new Document({
+          sections: [
+            {
+              children: [
+                new Paragraph({
+                  text: "Transcription",
+                  heading: HeadingLevel.TITLE,
+                }),
+                new Paragraph({ children: [new TextRun("")] }),
+                ...transcription.split("\n").map(
+                  (line: string) =>
+                    new Paragraph({
+                      children: [new TextRun(line)],
+                    }),
+                ),
+              ],
+            },
+          ],
+        });
+        const buffer = await Packer.toBuffer(doc);
+        blob = new Blob([new Uint8Array(buffer)], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        });
+      } else {
+        blob = new Blob([transcription], { type: "text/plain" });
       }
 
-      const blob = new Blob([content], { type: mimeType });
       const url = URL.createObjectURL(blob);
-
       const a = document.createElement("a");
       a.href = url;
       a.download = filename;
@@ -396,7 +417,8 @@ const ExportControls: React.FC<ExportControlsProps> = ({
 
       setTimeout(() => URL.revokeObjectURL(url), 100);
       toast.success(`${selectedFormat.toUpperCase()} file downloaded!`);
-    } catch {
+    } catch (error) {
+      console.error("Download failed:", error);
       toast.error("Download failed");
     } finally {
       setIsDownloading(false);
@@ -458,10 +480,17 @@ const ExportControls: React.FC<ExportControlsProps> = ({
 };
 
 // Copy/Download Actions Component
-const ActionButtons: React.FC<{ transcription: string }> = ({
+interface ActionButtonsProps {
+  transcription: string;
+  segments?: TranscriptionSegment[];
+}
+
+const ActionButtons: React.FC<ActionButtonsProps> = ({
   transcription,
+  segments,
 }) => {
   const [copySuccess, setCopySuccess] = useState(false);
+  const [isDownloadingAll, setIsDownloadingAll] = useState(false);
 
   const handleCopy = async () => {
     try {
@@ -474,9 +503,130 @@ const ActionButtons: React.FC<{ transcription: string }> = ({
     }
   };
 
+  // Helper functions for subtitle formats
+  const formatTimeForSRT = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const milliseconds = Math.round((seconds % 1) * 1000);
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")},${milliseconds.toString().padStart(3, "0")}`;
+  };
+
+  const formatTimeForVTT = (seconds: number): string => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const milliseconds = Math.round((seconds % 1) * 1000);
+    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}.${milliseconds.toString().padStart(3, "0")}`;
+  };
+
+  const generateSRT = (): string => {
+    if (!segments || segments.length === 0) {
+      return "1\n00:00:00,000 --> 00:00:00,100\n" + transcription;
+    }
+    return segments
+      .map((segment) => {
+        const startTime = formatTimeForSRT(segment.start);
+        const endTime = formatTimeForSRT(segment.end);
+        return `${segment.id + 1}\n${startTime} --> ${endTime}\n${segment.text.trim()}\n`;
+      })
+      .join("\n");
+  };
+
+  const generateVTT = (): string => {
+    if (!segments || segments.length === 0) {
+      return "WEBVTT\n\n00:00:00.000 --> 00:00:00.100\n" + transcription;
+    }
+    let vtt = "WEBVTT\n\n";
+    vtt += segments
+      .map((segment) => {
+        const startTime = formatTimeForVTT(segment.start);
+        const endTime = formatTimeForVTT(segment.end);
+        return `${startTime} --> ${endTime}\n${segment.text.trim()}\n`;
+      })
+      .join("\n");
+    return vtt;
+  };
+
   const handleDownloadAll = async () => {
-    toast.success("Preparing all formats...");
-    // This would integrate with existing download functionality
+    setIsDownloadingAll(true);
+    toast.info("Preparing all formats...");
+
+    try {
+      const timestamp = new Date().toISOString().split("T")[0];
+      const downloads: Array<{ content: Blob; filename: string }> = [];
+
+      // TXT
+      downloads.push({
+        content: new Blob([transcription], { type: "text/plain" }),
+        filename: `transcription_${timestamp}.txt`,
+      });
+
+      // SRT
+      downloads.push({
+        content: new Blob([generateSRT()], { type: "text/plain" }),
+        filename: `transcription_${timestamp}.srt`,
+      });
+
+      // VTT
+      downloads.push({
+        content: new Blob([generateVTT()], { type: "text/vtt" }),
+        filename: `transcription_${timestamp}.vtt`,
+      });
+
+      // DOCX
+      const doc = new Document({
+        sections: [
+          {
+            children: [
+              new Paragraph({
+                text: "Transcription",
+                heading: HeadingLevel.TITLE,
+              }),
+              new Paragraph({ children: [new TextRun("")] }),
+              ...transcription.split("\n").map(
+                (line: string) =>
+                  new Paragraph({
+                    children: [new TextRun(line)],
+                  }),
+              ),
+            ],
+          },
+        ],
+      });
+      const buffer = await Packer.toBuffer(doc);
+      downloads.push({
+        content: new Blob([new Uint8Array(buffer)], {
+          type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        }),
+        filename: `transcription_${timestamp}.docx`,
+      });
+
+      // Download all files with a small delay between each
+      for (let i = 0; i < downloads.length; i++) {
+        const { content, filename } = downloads[i];
+        const url = URL.createObjectURL(content);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+        
+        // Small delay between downloads to prevent browser blocking
+        if (i < downloads.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 300));
+        }
+      }
+
+      toast.success(`Downloaded ${downloads.length} files!`);
+    } catch (error) {
+      console.error("Download all failed:", error);
+      toast.error("Failed to download all formats");
+    } finally {
+      setIsDownloadingAll(false);
+    }
   };
 
   return (
@@ -503,11 +653,12 @@ const ActionButtons: React.FC<{ transcription: string }> = ({
       <Button
         variant="outline"
         onClick={handleDownloadAll}
+        disabled={isDownloadingAll}
         className="w-full text-sm"
         size="sm"
       >
         <Download className="mr-2 h-3 w-3" />
-        Download All Formats
+        {isDownloadingAll ? "Downloading..." : "Download All Formats"}
       </Button>
     </div>
   );
@@ -518,6 +669,7 @@ interface EnhancedTranscriptProps {
   transcription: string;
   segments?: TranscriptionSegment[];
   onSegmentClick?: (startTime: number) => void;
+  searchInputRef?: React.RefObject<HTMLInputElement | null>;
   currentTime?: number;
 }
 
@@ -526,6 +678,7 @@ const EnhancedTranscript: React.FC<EnhancedTranscriptProps> = ({
   segments,
   onSegmentClick,
   currentTime = 0,
+  searchInputRef,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState<number[]>([]);
@@ -619,7 +772,8 @@ const EnhancedTranscript: React.FC<EnhancedTranscriptProps> = ({
         <div className="relative">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
           <Input
-            placeholder="Search transcript..."
+            ref={searchInputRef}
+            placeholder="Search transcript... (Ctrl+F)"
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
             className="pl-10"
@@ -713,6 +867,53 @@ const EnhancedTranscript: React.FC<EnhancedTranscriptProps> = ({
 };
 
 // Main TranscriptionStudio Component
+// Keyboard Shortcuts Modal
+const KeyboardShortcutsModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  const shortcuts = [
+    { key: "Space", action: "Play / Pause" },
+    { key: "←", action: "Skip back 5s" },
+    { key: "→", action: "Skip forward 5s" },
+    { key: "Shift + ←", action: "Skip back 30s" },
+    { key: "Shift + →", action: "Skip forward 30s" },
+    { key: "↑ / ↓", action: "Volume up / down" },
+    { key: "M", action: "Mute / Unmute" },
+    { key: "0-9", action: "Jump to 0%-90%" },
+    { key: "Ctrl/⌘ + F", action: "Focus search" },
+    { key: "Ctrl/⌘ + C", action: "Copy transcript" },
+    { key: "Esc", action: "Clear search" },
+    { key: "?", action: "Show shortcuts" },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
+      <div
+        className="mx-4 w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900 dark:text-white">
+            <Keyboard className="h-5 w-5" />
+            Keyboard Shortcuts
+          </h3>
+          <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0">
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+        <div className="space-y-2">
+          {shortcuts.map(({ key, action }) => (
+            <div key={key} className="flex items-center justify-between rounded px-2 py-1.5 text-sm hover:bg-gray-100 dark:hover:bg-gray-700">
+              <span className="text-gray-600 dark:text-gray-300">{action}</span>
+              <kbd className="rounded bg-gray-200 px-2 py-1 font-mono text-xs dark:bg-gray-700">{key}</kbd>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
   transcription,
   audioSource,
@@ -720,7 +921,11 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
   onNewTranscription,
 }) => {
   const [currentTime, setCurrentTime] = useState(0);
+  const [, setIsMuted] = useState(false);
+  const [, setVolume] = useState(1);
+  const [showShortcuts, setShowShortcuts] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Get audio URL from localStorage or prop
   const audioUrl =
@@ -744,70 +949,212 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
     setCurrentTime(time);
   };
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger shortcuts when typing in input fields
+      const target = e.target as HTMLElement;
+      const isInputField = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
+
+      // Allow Escape even in input fields
+      if (e.key === "Escape") {
+        if (searchInputRef.current) {
+          searchInputRef.current.blur();
+          searchInputRef.current.value = "";
+        }
+        return;
+      }
+
+      // Ctrl/Cmd + F to focus search
+      if ((e.ctrlKey || e.metaKey) && e.key === "f") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        return;
+      }
+
+      // Ctrl/Cmd + C to copy (only when not in input)
+      if ((e.ctrlKey || e.metaKey) && e.key === "c" && !isInputField) {
+        e.preventDefault();
+        navigator.clipboard.writeText(transcription).then(() => {
+          toast.success("Transcript copied to clipboard!");
+        }).catch(() => {
+          toast.error("Failed to copy transcript");
+        });
+        return;
+      }
+
+      // Skip other shortcuts if in input field
+      if (isInputField) return;
+
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      switch (e.key) {
+        case " ": // Space - Play/Pause
+          e.preventDefault();
+          if (audio.paused) {
+            audio.play().catch(console.error);
+          } else {
+            audio.pause();
+          }
+          break;
+
+        case "ArrowLeft": // Left arrow - Skip back
+          e.preventDefault();
+          audio.currentTime = Math.max(0, audio.currentTime - (e.shiftKey ? 30 : 5));
+          break;
+
+        case "ArrowRight": // Right arrow - Skip forward
+          e.preventDefault();
+          audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + (e.shiftKey ? 30 : 5));
+          break;
+
+        case "ArrowUp": // Up arrow - Volume up
+          e.preventDefault();
+          const newVolUp = Math.min(1, audio.volume + 0.1);
+          audio.volume = newVolUp;
+          setVolume(newVolUp);
+          toast.success(`Volume: ${Math.round(newVolUp * 100)}%`);
+          break;
+
+        case "ArrowDown": // Down arrow - Volume down
+          e.preventDefault();
+          const newVolDown = Math.max(0, audio.volume - 0.1);
+          audio.volume = newVolDown;
+          setVolume(newVolDown);
+          toast.success(`Volume: ${Math.round(newVolDown * 100)}%`);
+          break;
+
+        case "m": // M - Mute/Unmute
+        case "M":
+          e.preventDefault();
+          audio.muted = !audio.muted;
+          setIsMuted(audio.muted);
+          toast.success(audio.muted ? "Muted" : "Unmuted");
+          break;
+
+        case "1": case "2": case "3": case "4": case "5":
+        case "6": case "7": case "8": case "9":
+          // Number keys 1-9 - Jump to percentage
+          e.preventDefault();
+          const percentage = parseInt(e.key) * 10;
+          if (audio.duration) {
+            audio.currentTime = (audio.duration * percentage) / 100;
+            toast.success(`Jumped to ${percentage}%`);
+          }
+          break;
+
+        case "0": // 0 - Jump to start
+          e.preventDefault();
+          audio.currentTime = 0;
+          break;
+
+        case "?": // ? - Show keyboard shortcuts
+          e.preventDefault();
+          setShowShortcuts(true);
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [transcription]);
+
   return (
-    <div className="h-full bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto flex h-full flex-col px-4 py-6">
-        {/* Header */}
-        <div className="mb-6 flex flex-shrink-0 items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Transcription Studio
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Professional audio transcription workspace
-            </p>
+    <>
+      <KeyboardShortcutsModal isOpen={showShortcuts} onClose={() => setShowShortcuts(false)} />
+      
+      <div className="min-h-full bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto flex min-h-full flex-col px-4 py-4 lg:py-6">
+          {/* Header */}
+          <div className="mb-4 flex flex-shrink-0 flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-xl font-bold text-gray-900 sm:text-2xl dark:text-white">
+                Transcription Studio
+              </h1>
+              <p className="text-sm text-gray-600 sm:text-base dark:text-gray-400">
+                Professional audio transcription workspace
+                <button
+                  onClick={() => setShowShortcuts(true)}
+                  className="ml-2 hidden text-xs text-gray-400 hover:text-gray-600 lg:inline dark:hover:text-gray-300"
+                >
+                  • Press <kbd className="rounded bg-gray-200 px-1 dark:bg-gray-700">?</kbd> for shortcuts
+                </button>
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowShortcuts(true)}
+                className="hidden lg:flex"
+                title="Keyboard shortcuts"
+              >
+                <Keyboard className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="outline"
+                onClick={onNewTranscription}
+                className="flex items-center gap-2"
+                size="sm"
+              >
+                <FileAudio className="h-4 w-4" />
+                <span className="hidden sm:inline">New Transcription</span>
+                <span className="sm:hidden">New</span>
+              </Button>
+            </div>
           </div>
 
-          <Button
-            variant="outline"
-            onClick={onNewTranscription}
-            className="flex items-center gap-2"
-          >
-            <FileAudio className="h-4 w-4" />
-            New Transcription
-          </Button>
-        </div>
+          {/* Mobile-first Layout: stacked on mobile, side-by-side on desktop */}
+          <div className="flex flex-1 flex-col gap-4 lg:grid lg:grid-cols-3 lg:gap-6 lg:overflow-hidden">
+          {/* Mobile: Audio player first, then transcript */}
+          {/* Desktop: Transcript left, controls right */}
+          
+          {/* Audio Player - Shows first on mobile */}
+          <div className="order-1 lg:order-2 lg:col-span-1 lg:row-span-1">
+            <div className="space-y-4 lg:max-h-full lg:overflow-y-auto">
+              {/* Audio Player */}
+              <AudioPlayer
+                audioUrl={audioUrl}
+                audioRef={audioRef}
+                onTimeUpdate={handleTimeUpdate}
+              />
 
-        {/* Two-Column Layout */}
-        <div className="grid flex-1 grid-cols-1 gap-6 overflow-hidden lg:grid-cols-3">
-          {/* Left Panel - Transcript */}
-          <div className="flex flex-col lg:col-span-2">
+              {/* File Details - Hidden on mobile, shown on desktop */}
+              <div className="hidden lg:block">
+                <FileDetails audioSource={audioSource} />
+              </div>
+
+              {/* Export Controls */}
+              <ExportControls transcription={transcription} segments={segments} />
+
+              {/* Action Buttons */}
+              <ActionButtons transcription={transcription} segments={segments} />
+            </div>
+          </div>
+
+          {/* Transcript Panel - Shows second on mobile, first on desktop */}
+          <div className="order-2 flex min-h-[400px] flex-col lg:order-1 lg:col-span-2">
             <Card className="flex flex-1 flex-col">
-              <CardHeader className="flex-shrink-0">
-                <h2 className="text-lg font-semibold">Transcript</h2>
+              <CardHeader className="flex-shrink-0 pb-2 lg:pb-4">
+                <h2 className="text-base font-semibold lg:text-lg">Transcript</h2>
               </CardHeader>
-              <CardContent className="flex-1 overflow-hidden p-6">
+              <CardContent className="flex-1 overflow-hidden p-4 lg:p-6">
                 <EnhancedTranscript
                   transcription={transcription}
                   segments={segments}
                   onSegmentClick={handleSegmentClick}
                   currentTime={currentTime}
+                  searchInputRef={searchInputRef}
                 />
               </CardContent>
             </Card>
           </div>
-
-          {/* Right Panel - Controls */}
-          <div className="max-h-full space-y-4 overflow-y-auto">
-            {/* Audio Player */}
-            <AudioPlayer
-              audioUrl={audioUrl}
-              audioRef={audioRef}
-              onTimeUpdate={handleTimeUpdate}
-            />
-
-            {/* File Details */}
-            <FileDetails audioSource={audioSource} />
-
-            {/* Export Controls */}
-            <ExportControls transcription={transcription} segments={segments} />
-
-            {/* Action Buttons */}
-            <ActionButtons transcription={transcription} />
-          </div>
         </div>
       </div>
     </div>
+    </>
   );
 };
 

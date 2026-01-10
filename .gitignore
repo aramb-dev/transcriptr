@@ -30,3 +30,8 @@ dist-ssr
 .next
 next-env.d.ts
 dist
+.vercel
+.env*.local
+
+# macOS resource forks
+._*

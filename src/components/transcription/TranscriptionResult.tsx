@@ -133,8 +133,8 @@ export default function TranscriptionResult({
       // Generate the document buffer
       const buffer = await Packer.toBuffer(doc);
 
-      // Create blob and download
-      const blob = new Blob([buffer], {
+      // Create blob and download (convert Buffer to Uint8Array for browser compatibility)
+      const blob = new Blob([new Uint8Array(buffer)], {
         type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       });
       const url = URL.createObjectURL(blob);
