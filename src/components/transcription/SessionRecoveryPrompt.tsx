@@ -1,4 +1,3 @@
-import React from "react";
 import { TranscriptionSession } from "@/lib/persistence-service";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";

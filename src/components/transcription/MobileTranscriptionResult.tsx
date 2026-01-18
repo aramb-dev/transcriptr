@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "../ui/button";
 import { MobileButton } from "../ui/mobile-button";
 import { Copy, Download, RotateCcw, FileText, Share2 } from "lucide-react";

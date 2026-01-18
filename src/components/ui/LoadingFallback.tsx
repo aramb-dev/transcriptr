@@ -1,5 +1,3 @@
-import React from "react";
-
 export const LoadingFallback = () => (
   <div className="flex min-h-screen items-center justify-center bg-linear-to-b from-sky-50 to-white dark:from-gray-900 dark:to-gray-800">
     <div className="flex space-x-2">

@@ -1,4 +1,3 @@
-import React from "react";
 import { Changelog } from "./Changelog";
 import { motion } from "framer-motion";
 import { scaleDown } from "../lib/animations";
