@@ -55,14 +55,22 @@ export function MobileFooter({
             rel="noopener noreferrer"
             className="text-blue-600 hover:underline dark:text-blue-400"
           >
-            ⭐ Star on GitHub
+            Star on GitHub
           </a>
           <Link
             href="/documentation"
             className="text-blue-600 hover:underline dark:text-blue-400"
           >
-            📚 Docs
+            Docs
           </Link>
+          <a
+            href="https://donate.stripe.com/3cIeVe2e5dHxeEh7BKfUQ0h"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber-600 hover:underline dark:text-amber-400"
+          >
+            Donate
+          </a>
         </div>
 
         {/* Legal Links */}

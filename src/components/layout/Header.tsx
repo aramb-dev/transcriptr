@@ -67,7 +67,7 @@ export function Header({
             {onShowV3 && (
               <button
                 onClick={onShowV3}
-                className="group relative flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 px-3 py-1 text-sm font-medium text-white shadow-md transition-all hover:shadow-lg hover:scale-105"
+                className="group relative flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1 text-sm font-medium text-white shadow-md transition-all hover:bg-blue-700 hover:shadow-lg hover:scale-105"
               >
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>

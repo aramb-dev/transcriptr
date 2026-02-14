@@ -63,10 +63,10 @@ export function V3AnnouncementModal({ onClose }: V3AnnouncementModalProps) {
             {/* Header with close button */}
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="rounded-full bg-gradient-to-r from-blue-500 to-purple-600 p-2">
+                <div className="rounded-full bg-blue-600 p-2 dark:bg-blue-500">
                   <Brain className="h-6 w-6 text-white" />
                 </div>
-                <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent dark:from-blue-400 dark:to-purple-400">
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                   V3.2 -- AI Intelligence
                 </h1>
               </div>
@@ -83,9 +83,9 @@ export function V3AnnouncementModal({ onClose }: V3AnnouncementModalProps) {
             {/* Main content */}
             <div className="space-y-6">
               <p className="text-lg text-gray-700 dark:text-gray-300">
-                Transcriptr now runs on the AssemblyAI SDK with opt-in AI
-                analysis features. Get chapters, summaries, sentiment, entities,
-                and more -- all from a single transcription.
+                Transcriptr now runs on a more robust and accurate transcription
+                engine with opt-in AI analysis features. Get chapters, summaries,
+                sentiment, entities, and more -- all from a single transcription.
               </p>
 
               {/* Feature highlights */}
@@ -108,27 +108,27 @@ export function V3AnnouncementModal({ onClose }: V3AnnouncementModalProps) {
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 rounded-full bg-purple-100 p-1 dark:bg-purple-900">
-                    <Languages className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                  <div className="mt-1 rounded-full bg-sky-100 p-1 dark:bg-sky-900">
+                    <Languages className="h-4 w-4 text-sky-600 dark:text-sky-400" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-purple-600 dark:text-purple-400">
+                    <h3 className="font-medium text-sky-600 dark:text-sky-400">
                       30+ Language Support
                     </h3>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
                       Auto-detect or manually select from 20+ languages.
-                      AssemblyAI natively supports audio and video formats --
+                      Audio and video formats are natively supported --
                       no conversion step needed.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 rounded-full bg-green-100 p-1 dark:bg-green-900">
-                    <RefreshCw className="h-4 w-4 text-green-600 dark:text-green-400" />
+                  <div className="mt-1 rounded-full bg-cyan-100 p-1 dark:bg-cyan-900">
+                    <RefreshCw className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-green-600 dark:text-green-400">
+                    <h3 className="font-medium text-cyan-600 dark:text-cyan-400">
                       Smart Error Recovery
                     </h3>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
@@ -152,11 +152,20 @@ export function V3AnnouncementModal({ onClose }: V3AnnouncementModalProps) {
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
                 <Button
                   onClick={handleClose}
-                  className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                  className="bg-blue-600 hover:bg-blue-700"
                 >
                   Get Started
                 </Button>
-                <Button variant="outline" onClick={handleClose}>
+                <Button asChild variant="outline" className="border-amber-300 text-amber-700 hover:bg-amber-50 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-900/20">
+                  <a
+                    href="https://donate.stripe.com/3cIeVe2e5dHxeEh7BKfUQ0h"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Support the Project
+                  </a>
+                </Button>
+                <Button variant="ghost" onClick={handleClose} className="text-gray-500">
                   Dismiss
                 </Button>
               </div>

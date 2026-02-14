@@ -167,7 +167,7 @@ export function MobileNavigation({
                     <Button
                       variant="ghost"
                       onClick={handleV3Click}
-                      className="mb-3 w-full justify-start bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-left font-medium text-white hover:from-blue-600 hover:to-purple-700"
+                      className="mb-3 w-full justify-start bg-blue-600 p-4 text-left font-medium text-white hover:bg-blue-700"
                     >
                       <span className="relative mr-3 flex h-2 w-2">
                         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75"></span>

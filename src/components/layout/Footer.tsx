@@ -91,6 +91,15 @@ export function Footer({ onOpenFeedbackModal, onOpenChangelog }: FooterProps) {
           >
             Documentation
           </Link>
+          <span>•</span>
+          <a
+            href="https://donate.stripe.com/3cIeVe2e5dHxeEh7BKfUQ0h"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber-600 hover:underline dark:text-amber-400"
+          >
+            Donate
+          </a>
         </div>
 
         {/* Peerlist Project Embed */}

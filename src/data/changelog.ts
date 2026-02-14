@@ -14,7 +14,7 @@ export const changelogItems: ChangeItem[] = [
     version: "3.2.0",
     changes: {
       new: [
-        "**AssemblyAI SDK Integration**: Migrated transcription engine to the official AssemblyAI JavaScript SDK for better reliability and type safety",
+        "**New Transcription Engine**: Migrated to a more robust and accurate transcription engine for better reliability and language support",
         "**AI Analysis Features**: Opt-in AI intelligence features including Auto Chapters, Summarization, Sentiment Analysis, Entity Detection, Key Phrases, Content Moderation, and Topic Detection",
         "**Speaker Diarization**: Identify different speakers in interviews, meetings, and conversations",
         "**Smart Error Recovery**: Feature-language incompatibility errors now show a clear explanation and a one-click retry button that automatically disables the unsupported feature",
