@@ -21,7 +21,7 @@ export interface TranscriptionSegment {
 export interface TranscriptionSession {
   id: string; // Unique session ID
   status: TranscriptionStatus; // Current status
-  predictionId: string | null; // Replicate prediction ID
+  predictionId: string | null; // Transcription job ID
   progress: number; // Progress percentage
   firebaseFilePath: string | null; // Path to temp file if applicable
   createdAt: number; // Timestamp

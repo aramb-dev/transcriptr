@@ -3,7 +3,7 @@
  * Handles detection of supported vs. convertible audio formats
  */
 
-// Formats natively supported by Replicate transcription service
+// Formats natively supported by the transcription service
 export const NATIVELY_SUPPORTED_FORMATS = [
   "mp3",
   "wav",

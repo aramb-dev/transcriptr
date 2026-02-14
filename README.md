@@ -2,7 +2,7 @@
 
 # Transcriptr - AI-Powered Audio Transcription
 
-Transcriptr is a modern web application that converts audio files to text using artificial intelligence. It provides a clean, intuitive interface for uploading audio files and receiving high-quality transcriptions powered by Replicate's Incredibly Fast Whisper model.
+Transcriptr is a modern web application that converts audio files to text using artificial intelligence. It provides a clean, intuitive interface for uploading audio files and receiving high-quality transcriptions powered by AssemblyAI.
 
 Visit the live demo at [Transcriptr Demo](https://transcriptr.aramb.dev).
 
@@ -22,7 +22,7 @@ Visit the live demo at [Transcriptr Demo](https://transcriptr.aramb.dev).
 - **Frontend**: React with TypeScript, powered by Next.js for server-side rendering and static site generation
 - **UI**: Tailwind CSS with shadcn/ui components for a modern interface
 - **Backend**: Next.js API Routes for handling API requests
-- **AI Integration**: Replicate API for accessing the Incredibly Fast Whisper model
+- **AI Integration**: AssemblyAI for speech-to-text transcription with speaker diarization
 - **Document Handling**:
   - Printerz for high-quality PDF template rendering
   - Libraries for generating DOCX, and ZIP files
@@ -34,7 +34,7 @@ Visit the live demo at [Transcriptr Demo](https://transcriptr.aramb.dev).
 
 - Node.js (v18 or later)
 - bun
-- Replicate API token (for AI transcription)
+- AssemblyAI API key (for AI transcription)
 
 ### Installation
 
@@ -51,10 +51,10 @@ Visit the live demo at [Transcriptr Demo](https://transcriptr.aramb.dev).
    bun install
    ```
 
-3. Create a .env.local file in the root directory with your Replicate API token:
+3. Create a .env.local file in the root directory with your AssemblyAI API key:
 
    ```
-   NEXT_PUBLIC_REPLICATE_API_TOKEN=your_replicate_api_token_here
+   ASSEMBLYAI_API_KEY=your_assemblyai_api_key_here
    ```
 
 4. Start the development server:
@@ -73,7 +73,7 @@ Transcriptr requires several environment variables to function properly. Create 
 
 | Variable                                   | Description                                                              |
 | ------------------------------------------ | ------------------------------------------------------------------------ |
-| `NEXT_PUBLIC_REPLICATE_API_TOKEN`          | Your Replicate API token for accessing the Incredibly Fast Whisper model |
+| `ASSEMBLYAI_API_KEY`                       | Your AssemblyAI API key for transcription                               |
 | `NEXT_PUBLIC_FIREBASE_API_KEY`             | Firebase API key for storage services                                    |
 | `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`         | Firebase auth domain                                                     |
 | `NEXT_PUBLIC_FIREBASE_PROJECT_ID`          | Firebase project ID                                                      |
@@ -93,7 +93,7 @@ Transcriptr requires several environment variables to function properly. Create 
 ### Example .env.local file
 
 ```
-NEXT_PUBLIC_REPLICATE_API_TOKEN=your_replicate_token_here
+ASSEMBLYAI_API_KEY=your_assemblyai_api_key_here
 NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
@@ -106,7 +106,7 @@ NEXT_PUBLIC_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
 
 ### Getting API Keys
 
-- **Replicate API Token**: Sign up at [Replicate](https://replicate.com/) and create an API token
+- **AssemblyAI API Key**: Sign up at [AssemblyAI](https://www.assemblyai.com/) and create an API key
 - **Firebase**: Set up a project in [Firebase Console](https://console.firebase.google.com/) and get your credentials
 - **Printerz**: Create an account at [Printerz](https://printerz.dev/) and get your API key
 - **CloudConvert** (optional): Register at [CloudConvert](https://cloudconvert.com/) to enable automatic conversion of M4A, AAC, WMA, and other formats to MP3
@@ -161,7 +161,7 @@ Build and run the Docker container:
 
 ```bash
 docker build -t transcriptr .
-docker run -p 3000:3000 -e NEXT_PUBLIC_REPLICATE_API_TOKEN=your_token_here transcriptr
+docker run -p 3000:3000 -e ASSEMBLYAI_API_KEY=your_key_here transcriptr
 ```
 
 ## Project Structure
@@ -234,7 +234,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgements
 
-- [Replicate](https://replicate.com/) for providing the Incredibly Fast Whisper model
+- [AssemblyAI](https://www.assemblyai.com/) for speech-to-text transcription
 - [shadcn/ui](https://ui.shadcn.com/) for the component library
 - [Tailwind CSS](https://tailwindcss.com/) for styling
 - [React](https://reactjs.org/) for the UI framework

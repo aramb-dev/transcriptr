@@ -33,76 +33,62 @@ app.use(((req, res, next) => {
 
 app.post("/api/transcribe", (async (req: Request, res: Response) => {
   try {
-    const { audioData, audioUrl, options } = req.body;
+    const { audioUrl, options } = req.body;
 
     console.log("Request received with options:", {
       ...options,
-      audioData: audioData
-        ? `${audioData.substring(0, 50)}... (truncated)`
-        : "using URL",
       audioUrl: audioUrl ? "URL provided" : "not provided",
     });
 
-    const [, versionHash] = options.modelId.split(":");
-
-    interface InputParams {
-      task: string;
-      batch_size: number;
-      return_timestamps: boolean;
-      diarize: boolean;
-      audio: string;
-      language?: string;
+    interface TranscriptionParams {
+      audio_url: string;
+      speaker_labels?: boolean;
+      language_detection?: boolean;
+      language_code?: string;
     }
 
-    const inputParams: InputParams = {
-      task: options.task || "transcribe",
-      batch_size: options.batch_size || 8,
-      return_timestamps: options.return_timestamps || true,
-      diarize: options.diarize || false,
-      audio: "",
+    const params: TranscriptionParams = {
+      audio_url: audioUrl,
     };
 
-    if (audioUrl) {
-      inputParams.audio = audioUrl;
+    if (options.diarize) {
+      params.speaker_labels = true;
+    }
+
+    if (options.language && options.language !== "auto") {
+      params.language_code = options.language;
     } else {
-      inputParams.audio = audioData;
+      params.language_detection = true;
     }
 
-    if (options.language) {
-      inputParams.language = options.language; // "auto" for auto-detect, or specific language
-    }
-
-    const response = await fetch("https://api.replicate.com/v1/predictions", {
+    const response = await fetch("https://api.assemblyai.com/v2/transcript", {
       method: "POST",
       headers: {
-        Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
+        Authorization: process.env.ASSEMBLYAI_API_KEY || "",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        version: versionHash,
-        input: inputParams,
-      }),
+      body: JSON.stringify(params),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("Replicate API error:", response.status, errorText);
+      console.error("AssemblyAI API error:", response.status, errorText);
       return res.status(response.status).json({
-        error: `Replicate API error: ${response.status} ${response.statusText}`,
+        error: `AssemblyAI API error: ${response.status} ${response.statusText}`,
         details: errorText,
       });
     }
 
     const data = await response.json();
-    console.log("Replicate API response:", data);
+    console.log("AssemblyAI API response:", data);
     res.json(data);
   } catch (error) {
-    console.error("Error proxying to Replicate:", error);
+    console.error("Error proxying to AssemblyAI:", error);
     res.status(500).json({
       error:
         error instanceof Error
           ? error.message
-          : "Failed to communicate with Replicate API",
+          : "Failed to communicate with AssemblyAI API",
     });
   }
 }) as RequestHandler);
@@ -111,13 +97,13 @@ app.get("/api/prediction/:id", (async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    console.log(`Checking prediction status for ID: ${id}`);
+    console.log(`Checking transcription status for ID: ${id}`);
 
     const response = await fetch(
-      `https://api.replicate.com/v1/predictions/${id}`,
+      `https://api.assemblyai.com/v2/transcript/${id}`,
       {
         headers: {
-          Authorization: `Token ${process.env.REPLICATE_API_TOKEN}`,
+          Authorization: process.env.ASSEMBLYAI_API_KEY || "",
         },
       },
     );
@@ -125,25 +111,25 @@ app.get("/api/prediction/:id", (async (req: Request, res: Response) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(
-        `Error checking prediction status: ${response.status}`,
+        `Error checking transcription status: ${response.status}`,
         errorText,
       );
       return res.status(response.status).json({
-        error: `Error checking prediction: ${response.status} ${response.statusText}`,
+        error: `Error checking transcription: ${response.status} ${response.statusText}`,
         details: errorText,
       });
     }
 
     const data = await response.json();
-    console.log("Prediction status data:", data);
+    console.log("Transcription status data:", data);
     res.json(data);
   } catch (error) {
-    console.error("Error checking prediction status:", error);
+    console.error("Error checking transcription status:", error);
     res.status(500).json({
       error:
         error instanceof Error
           ? error.message
-          : "Failed to check prediction status",
+          : "Failed to check transcription status",
     });
   }
 }) as RequestHandler);

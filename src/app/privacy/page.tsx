@@ -154,7 +154,7 @@ export default function PrivacyPage() {
               </h2>
               <p className="mb-4">We use the following third-party services:</p>
               <ul className="mb-4 list-disc space-y-2 pl-6">
-                <li>Replicate: Processes audio files for transcription</li>
+                <li>AssemblyAI: Processes audio files for transcription</li>
                 <li>Firebase Storage: Temporarily stores larger audio files</li>
                 <li>
                   Google Analytics: Tracks usage patterns (with consent only)

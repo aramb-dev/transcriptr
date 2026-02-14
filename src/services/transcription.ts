@@ -11,7 +11,7 @@ export type TranscriptionStatus =
 export const statusMessages: Record<TranscriptionStatus, string> = {
   idle: "Ready to transcribe",
   converting: "Converting audio file to MP3 format...",
-  starting: "Transcription engine starting. Please wait 4-5 seconds.",
+  starting: "Transcription queued. Waiting for processing...",
   processing: "Processing audio. This will depend on the length of your audio.",
   succeeded: "Processing complete! Loading result...",
   failed: "The transcription encountered an error during processing.",

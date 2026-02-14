@@ -1,22 +1,17 @@
-import { useRef, useEffect } from "react";
-import { TranscriptionStatus, getApiUrl } from "../services/transcription";
-import { getUserFriendlyErrorMessage } from "../lib/error-utils";
+import { useRef, useEffect } from "react"
+import { TranscriptionStatus, getApiUrl } from "../services/transcription"
+import { getUserFriendlyErrorMessage } from "../lib/error-utils"
 
 interface UseTranscriptionPollingProps {
-  predictionId: string | null;
-  onSuccess: (output: unknown) => void;
-  onError: (error: string) => void;
-  onProgress: (value: number) => void;
-  onStatusChange: (status: TranscriptionStatus) => void;
+  predictionId: string | null
+  onSuccess: (output: unknown) => void
+  onError: (error: string) => void
+  onProgress: (value: number) => void
+  onStatusChange: (status: TranscriptionStatus) => void
   onApiResponse: (response: {
-    timestamp: Date;
-    data: Record<string, unknown>;
-  }) => void;
-  onFrameProgress?: (progress: {
-    percentage: number;
-    current: number;
-    total: number;
-  }) => void;
+    timestamp: Date
+    data: Record<string, unknown>
+  }) => void
 }
 
 export function useTranscriptionPolling({
@@ -26,153 +21,111 @@ export function useTranscriptionPolling({
   onProgress,
   onStatusChange,
   onApiResponse,
-  onFrameProgress,
 }: UseTranscriptionPollingProps) {
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Function to parse frame progress from Replicate logs
-  const parseFrameProgress = (logs: string) => {
-    // Look for pattern like: " 14%|█▍        | 14618/105854 [00:28<03:10, 479.95frames/s]"
-    const progressRegex = /(\d+)%.*?\|\s*(\d+)\/(\d+)/;
-    const lines = logs.split("\n");
-
-    // Get the last line that matches the pattern (most recent progress)
-    for (let i = lines.length - 1; i >= 0; i--) {
-      const match = lines[i].match(progressRegex);
-      if (match) {
-        return {
-          percentage: parseInt(match[1], 10),
-          current: parseInt(match[2], 10),
-          total: parseInt(match[3], 10),
-        };
-      }
-    }
-    return null;
-  };
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   // Clean up interval on unmount
   useEffect(() => {
     return () => {
       if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
+        clearInterval(pollIntervalRef.current)
       }
-    };
-  }, []);
+    }
+  }, [])
 
   // Start polling when predictionId changes
   useEffect(() => {
     if (predictionId) {
-      startPolling(predictionId);
+      startPolling(predictionId)
     }
     return () => {
       if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
+        clearInterval(pollIntervalRef.current)
+        pollIntervalRef.current = null
       }
-    };
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [predictionId]);
+  }, [predictionId])
 
   const startPolling = (id: string) => {
     // Clear any existing polling interval
     if (pollIntervalRef.current) {
-      console.log("Polling: Clearing previous interval.");
-      clearInterval(pollIntervalRef.current);
+      console.log("Polling: Clearing previous interval.")
+      clearInterval(pollIntervalRef.current)
     }
 
-    let attempts = 0;
-    const maxAttempts = 335; // About 5 minutes with a 900ms interval
-    const pollIntervalMs = 1500;
+    let attempts = 0
+    const maxAttempts = 335 // About 5 minutes with a 900ms interval
+    const pollIntervalMs = 1500
 
-    console.log(`Polling: Starting for prediction ID: ${id}`);
+    console.log(`Polling: Starting for prediction ID: ${id}`)
 
     // Create poll function that uses the closure over id
     const poll = () => {
-      attempts++;
-      console.log(`Polling: Attempt #${attempts} for ${id}`);
+      attempts++
+      console.log(`Polling: Attempt #${attempts} for ${id}`)
 
       fetch(getApiUrl(`prediction/${id}`))
         .then((response) => {
           if (!response.ok) {
             throw new Error(
               `Failed to check prediction status: ${response.status} ${response.statusText}`,
-            );
+            )
           }
-          return response.json();
+          return response.json()
         })
         .then((data) => {
-          console.log(`Prediction status (attempt ${attempts}):`, data);
-          onApiResponse({ timestamp: new Date(), data });
+          console.log(`Prediction status (attempt ${attempts}):`, data)
+          onApiResponse({ timestamp: new Date(), data })
 
           // Update progress based on status
-          let newProgress = 50; // Default starting point for polling
+          let newProgress = 50 // Default starting point for polling
 
           if (data.status === "starting") {
             // 25%-50% range for starting status
-            onStatusChange("starting");
-            // Calculate progress within the 25-50% range based on attempts
-            const startingProgressMax = 25; // Max progress to add during starting phase
+            onStatusChange("starting")
+            const startingProgressMax = 25
             const startingProgress =
-              (Math.min(attempts, 20) / 20) * startingProgressMax;
-            newProgress = 25 + Math.floor(startingProgress);
-            // Update progress with the calculated value
-            onProgress(newProgress);
+              (Math.min(attempts, 20) / 20) * startingProgressMax
+            newProgress = 25 + Math.floor(startingProgress)
+            onProgress(newProgress)
           } else if (data.status === "processing") {
-            // 50%-100% range for processing status
-            onStatusChange("processing");
-
-            // Try to parse frame progress from logs
-            if (data.logs && onFrameProgress) {
-              const frameProgress = parseFrameProgress(data.logs);
-              if (frameProgress) {
-                // Use real progress from Replicate
-                newProgress = 50 + Math.floor(frameProgress.percentage * 0.48); // Map 0-100% to 50-98%
-                onFrameProgress(frameProgress);
-              } else {
-                // Fallback to estimate-based progress
-                const processingProgressMax = 48;
-                const processingProgress =
-                  (Math.min(attempts, 30) / 30) * processingProgressMax;
-                newProgress = 50 + Math.floor(processingProgress);
-              }
-            } else {
-              // Fallback to estimate-based progress
-              const processingProgressMax = 48;
-              const processingProgress =
-                (Math.min(attempts, 30) / 30) * processingProgressMax;
-              newProgress = 50 + Math.floor(processingProgress);
-            }
-            // Update progress with the calculated value
-            onProgress(newProgress);
+            // 50%-98% range for processing status (estimate-based)
+            onStatusChange("processing")
+            const processingProgressMax = 48
+            const processingProgress =
+              (Math.min(attempts, 30) / 30) * processingProgressMax
+            newProgress = 50 + Math.floor(processingProgress)
+            onProgress(newProgress)
           } else if (data.status === "succeeded") {
-            onProgress(100);
+            onProgress(100)
             console.log(
               "Transcription succeeded, handling output:",
               data.output,
-            );
-            stopPolling();
-            onSuccess(data.output);
+            )
+            stopPolling()
+            onSuccess(data.output)
           } else if (data.status === "failed") {
-            console.error("Transcription failed:", data.error);
-            stopPolling();
-            onStatusChange("failed");
-            onProgress(0);
-            const replicateError = data.error || "Unknown Replicate error";
-            onError(`Transcription failed: ${replicateError}`);
+            console.error("Transcription failed:", data.error)
+            stopPolling()
+            onStatusChange("failed")
+            onProgress(0)
+            const transcriptionError = data.error || "Unknown transcription error"
+            onError(`Transcription failed: ${transcriptionError}`)
             onApiResponse({
               timestamp: new Date(),
-              data: { error: `Replicate Error: ${replicateError}` },
-            });
+              data: { error: `Transcription Error: ${transcriptionError}` },
+            })
           } else if (data.status === "canceled") {
-            console.warn("Transcription canceled by Replicate");
-            stopPolling();
-            onStatusChange("canceled");
-            onProgress(0);
-            onError("Transcription was canceled");
+            console.warn("Transcription canceled")
+            stopPolling()
+            onStatusChange("canceled")
+            onProgress(0)
+            onError("Transcription was canceled")
             onApiResponse({
               timestamp: new Date(),
-              data: { message: "Transcription canceled by Replicate" },
-            });
+              data: { message: "Transcription canceled" },
+            })
           }
 
           // Timeout check
@@ -180,54 +133,53 @@ export function useTranscriptionPolling({
             attempts >= maxAttempts &&
             (data.status === "starting" || data.status === "processing")
           ) {
-            console.error(`Polling timeout after ${attempts} attempts`);
-            stopPolling();
-            onError("Transcription timed out after several minutes.");
-            onStatusChange("failed");
-            onProgress(0);
+            console.error(`Polling timeout after ${attempts} attempts`)
+            stopPolling()
+            onError("Transcription timed out after several minutes.")
+            onStatusChange("failed")
+            onProgress(0)
             onApiResponse({
               timestamp: new Date(),
               data: { error: "Polling timed out" },
-            });
+            })
           }
         })
         .catch((error) => {
-          console.error("Error during polling:", error);
+          console.error("Error during polling:", error)
 
-          // Get user-friendly error message
-          const errorInfo = getUserFriendlyErrorMessage(error);
+          const errorInfo = getUserFriendlyErrorMessage(error)
 
-          stopPolling();
-          onError(errorInfo.userMessage);
-          onStatusChange("failed");
-          onProgress(0);
+          stopPolling()
+          onError(errorInfo.userMessage)
+          onStatusChange("failed")
+          onProgress(0)
           onApiResponse({
             timestamp: new Date(),
             data: {
               error: `Polling Error: ${errorInfo.userMessage}`,
               isNetworkError: errorInfo.isNetworkError,
             },
-          });
-        });
-    };
+          })
+        })
+    }
 
     // Set up the interval first
-    pollIntervalRef.current = setInterval(poll, pollIntervalMs);
+    pollIntervalRef.current = setInterval(poll, pollIntervalMs)
 
     // Use setTimeout to delay the first poll execution slightly
     // This gives React time to update state
     setTimeout(() => {
-      console.log(`Executing first poll for ${id}`);
-      poll();
-    }, 100);
-  };
+      console.log(`Executing first poll for ${id}`)
+      poll()
+    }, 100)
+  }
 
   const stopPolling = () => {
     if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
-      pollIntervalRef.current = null;
+      clearInterval(pollIntervalRef.current)
+      pollIntervalRef.current = null
     }
-  };
+  }
 
-  return { stopPolling };
+  return { stopPolling }
 }

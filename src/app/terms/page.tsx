@@ -110,7 +110,7 @@ export default function TermsPage() {
               </h2>
               <p className="mb-4">
                 Audio files are processed using third-party services including
-                Replicate and Firebase. Large files may be temporarily stored in
+                AssemblyAI and Firebase. Large files may be temporarily stored in
                 Firebase Storage to facilitate processing. For details on how
                 your data is handled, please see our{" "}
                 <Link
@@ -152,7 +152,7 @@ export default function TermsPage() {
               </h2>
               <p className="mb-4">
                 The Service uses third-party APIs and services including
-                Replicate for transcription processing and Firebase for
+                AssemblyAI for transcription processing and Firebase for
                 temporary file storage. Your use of the Service is also subject
                 to the terms and policies of these third parties.
               </p>

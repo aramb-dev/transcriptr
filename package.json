@@ -52,7 +52,6 @@
     "react-dropzone": "^14.4.1",
     "react-ga4": "^2.1.0",
     "react-pdf": "^10.3.0",
-    "replicate": "^1.4.0",
     "shadcn-ui": "^0.9.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",

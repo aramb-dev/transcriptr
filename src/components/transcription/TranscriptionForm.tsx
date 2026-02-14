@@ -37,12 +37,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
   const [currentPredictionId, setCurrentPredictionId] = useState<string | null>(
     null,
   );
-  const [frameProgress, setFrameProgress] = useState<{
-    percentage: number;
-    current: number;
-    total: number;
-  } | null>(null);
-
   // Mobile detection hook
   const [isMobile, setIsMobile] = useState(false);
 
@@ -227,9 +221,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         updateSessionData({ apiResponses: updatedResponses });
       }
     },
-    onFrameProgress: (progress) => {
-      setFrameProgress(progress);
-    },
   });
 
   const getProgressColor = () => {
@@ -317,12 +308,10 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
 
     const requestBody: {
       options: {
-        modelId: string;
-        task?: string;
-        batch_size?: number;
-        return_timestamps?: boolean;
         language?: string;
         diarize?: boolean;
+        translate?: boolean;
+        temperature?: number;
       } | null;
       audioUrl?: string; // URL from input or Firebase
     } = { options: null };
@@ -435,10 +424,8 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
 
       // Set common API options
       const apiOptions = {
-        modelId:
-          process.env.NEXT_PUBLIC_REPLICATE_MODEL_ID ||
-          "victor-upmeet/whisperx:826801120720e563620006b99e412f7ed7b991dd4477e9160473d44a405ef9d9",
         language: options.language, // "auto" for auto-detect, or specific language
+        diarize: options.diarize || false,
         translate: options.translate || false,
         temperature: options.temperature || 0,
       };
@@ -659,7 +646,6 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
             apiResponses={apiResponses}
             formatTimestamp={formatTimestamp}
             onCancel={handleReset}
-            frameProgress={frameProgress}
           />
         ) : transStatus === "failed" || transStatus === "canceled" ? (
           <TranscriptionError

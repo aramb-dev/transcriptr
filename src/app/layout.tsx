@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   description:
     "Convert audio to text with AI-powered transcription. Supports multiple formats and languages, providing fast and accurate results.",
   keywords:
-    "audio transcription, ai transcription, speech to text, convert audio to text, replicate, whisper",
+    "audio transcription, ai transcription, speech to text, convert audio to text, assemblyai, whisper",
   authors: [{ name: "Transcriptr" }],
   robots: "index, follow",
   openGraph: {
