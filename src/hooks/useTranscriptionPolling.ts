@@ -55,100 +55,108 @@ export function useTranscriptionPolling({
     }
 
     let attempts = 0
-    const maxAttempts = 335 // About 5 minutes with a 900ms interval
-    const pollIntervalMs = 1500
+    let consecutiveErrors = 0
+    const maxAttempts = 120 // 10 minutes at 5s interval
+    const maxConsecutiveErrors = 5
+    const pollIntervalMs = 5000
 
     console.log(`Polling: Starting for prediction ID: ${id}`)
 
     // Create poll function that uses the closure over id
-    const poll = () => {
+    const poll = async () => {
       attempts++
       console.log(`Polling: Attempt #${attempts} for ${id}`)
 
-      fetch(getApiUrl(`prediction/${id}`))
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(
-              `Failed to check prediction status: ${response.status} ${response.statusText}`,
-            )
+      try {
+        const response = await fetch(getApiUrl(`prediction/${id}`))
+
+        if (!response.ok) {
+          let errorBody = `${response.status} ${response.statusText}`
+          try {
+            const errorJson = await response.json()
+            errorBody = errorJson.error || JSON.stringify(errorJson)
+          } catch {
+            // response body not readable
           }
-          return response.json()
-        })
-        .then((data) => {
-          console.log(`Prediction status (attempt ${attempts}):`, data)
-          onApiResponse({ timestamp: new Date(), data })
+          throw new Error(`Failed to check prediction status: ${errorBody}`)
+        }
 
-          // Update progress based on status
-          let newProgress = 50 // Default starting point for polling
+        const data = await response.json()
+        consecutiveErrors = 0 // reset on success
+        console.log(`Prediction status (attempt ${attempts}):`, data)
+        onApiResponse({ timestamp: new Date(), data })
 
-          if (data.status === "starting") {
-            // 25%-50% range for starting status
-            onStatusChange("starting")
-            const startingProgressMax = 25
-            const startingProgress =
-              (Math.min(attempts, 20) / 20) * startingProgressMax
-            newProgress = 25 + Math.floor(startingProgress)
-            onProgress(newProgress)
-          } else if (data.status === "processing") {
-            // 50%-98% range for processing status (estimate-based)
-            onStatusChange("processing")
-            const processingProgressMax = 48
-            const processingProgress =
-              (Math.min(attempts, 30) / 30) * processingProgressMax
-            newProgress = 50 + Math.floor(processingProgress)
-            onProgress(newProgress)
-          } else if (data.status === "succeeded") {
-            onProgress(100)
-            console.log(
-              "Transcription succeeded, handling output:",
-              data.output,
-            )
-            stopPolling()
-            onSuccess(data.output)
-          } else if (data.status === "failed") {
-            console.error("Transcription failed:", data.error)
-            stopPolling()
-            onStatusChange("failed")
-            onProgress(0)
-            const transcriptionError = data.error || "Unknown transcription error"
-            onError(`Transcription failed: ${transcriptionError}`)
-            onApiResponse({
-              timestamp: new Date(),
-              data: { error: `Transcription Error: ${transcriptionError}` },
-            })
-          } else if (data.status === "canceled") {
-            console.warn("Transcription canceled")
-            stopPolling()
-            onStatusChange("canceled")
-            onProgress(0)
-            onError("Transcription was canceled")
-            onApiResponse({
-              timestamp: new Date(),
-              data: { message: "Transcription canceled" },
-            })
-          }
+        // Update progress based on status
+        let newProgress = 50 // Default starting point for polling
 
-          // Timeout check
-          if (
-            attempts >= maxAttempts &&
-            (data.status === "starting" || data.status === "processing")
-          ) {
-            console.error(`Polling timeout after ${attempts} attempts`)
-            stopPolling()
-            onError("Transcription timed out after several minutes.")
-            onStatusChange("failed")
-            onProgress(0)
-            onApiResponse({
-              timestamp: new Date(),
-              data: { error: "Polling timed out" },
-            })
-          }
-        })
-        .catch((error) => {
-          console.error("Error during polling:", error)
+        if (data.status === "starting") {
+          // 25%-50% range for starting status
+          onStatusChange("starting")
+          const startingProgressMax = 25
+          const startingProgress =
+            (Math.min(attempts, 20) / 20) * startingProgressMax
+          newProgress = 25 + Math.floor(startingProgress)
+          onProgress(newProgress)
+        } else if (data.status === "processing") {
+          // 50%-98% range for processing status (estimate-based)
+          onStatusChange("processing")
+          const processingProgressMax = 48
+          const processingProgress =
+            (Math.min(attempts, 30) / 30) * processingProgressMax
+          newProgress = 50 + Math.floor(processingProgress)
+          onProgress(newProgress)
+        } else if (data.status === "succeeded") {
+          onProgress(100)
+          console.log(
+            "Transcription succeeded, handling output:",
+            data.output,
+          )
+          stopPolling()
+          onSuccess(data.output)
+        } else if (data.status === "failed") {
+          console.error("Transcription failed:", data.error)
+          stopPolling()
+          onStatusChange("failed")
+          onProgress(0)
+          const transcriptionError = data.error || "Unknown transcription error"
+          onError(`Transcription failed: ${transcriptionError}`)
+          onApiResponse({
+            timestamp: new Date(),
+            data: { error: `Transcription Error: ${transcriptionError}` },
+          })
+        } else if (data.status === "canceled") {
+          console.warn("Transcription canceled")
+          stopPolling()
+          onStatusChange("canceled")
+          onProgress(0)
+          onError("Transcription was canceled")
+          onApiResponse({
+            timestamp: new Date(),
+            data: { message: "Transcription canceled" },
+          })
+        }
 
+        // Timeout check
+        if (
+          attempts >= maxAttempts &&
+          (data.status === "starting" || data.status === "processing")
+        ) {
+          console.error(`Polling timeout after ${attempts} attempts`)
+          stopPolling()
+          onError("Transcription timed out after several minutes.")
+          onStatusChange("failed")
+          onProgress(0)
+          onApiResponse({
+            timestamp: new Date(),
+            data: { error: "Polling timed out" },
+          })
+        }
+      } catch (error) {
+        consecutiveErrors++
+        console.error(`Polling error (${consecutiveErrors}/${maxConsecutiveErrors}):`, error)
+
+        if (consecutiveErrors >= maxConsecutiveErrors) {
           const errorInfo = getUserFriendlyErrorMessage(error)
-
           stopPolling()
           onError(errorInfo.userMessage)
           onStatusChange("failed")
@@ -160,18 +168,26 @@ export function useTranscriptionPolling({
               isNetworkError: errorInfo.isNetworkError,
             },
           })
-        })
+        } else {
+          console.log(`Polling: Retrying... (${consecutiveErrors}/${maxConsecutiveErrors})`)
+          onApiResponse({
+            timestamp: new Date(),
+            data: {
+              error: `Polling retry ${consecutiveErrors}/${maxConsecutiveErrors}: ${error instanceof Error ? error.message : "Unknown error"}`,
+            },
+          })
+        }
+      }
     }
 
-    // Set up the interval first
+    // Set up the interval
     pollIntervalRef.current = setInterval(poll, pollIntervalMs)
 
-    // Use setTimeout to delay the first poll execution slightly
-    // This gives React time to update state
+    // First poll after a short delay to let React settle
     setTimeout(() => {
       console.log(`Executing first poll for ${id}`)
       poll()
-    }, 100)
+    }, 500)
   }
 
   const stopPolling = () => {

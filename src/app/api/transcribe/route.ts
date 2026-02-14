@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server"
 import { uploadBase64ToFirebase } from "@/lib/firebase-utils"
-import { startAssemblyAITranscription, TranscriptionParams } from "@/lib/assemblyai-client"
+import { assemblyai } from "@/lib/assemblyai-client"
+import type { TranscriptParams } from "assemblyai"
 
 // Helper to prepare audio input for the transcription service
-// Always uploads to Firebase to ensure Studio can access the audio
 async function prepareAudioInput(
   audioData: string | undefined,
   audioUrl: string | undefined,
@@ -64,7 +64,6 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Process audio input
     const { audioFileUrl, firebaseFilePath, firebaseUrl } = await prepareAudioInput(
       audioData,
       audioUrl,
@@ -74,87 +73,76 @@ export async function POST(request: Request) {
       throw new Error("No audio URL available for transcription.")
     }
 
-    // Build AssemblyAI params
-    const transcriptionParams: TranscriptionParams = {
+    // Build AssemblyAI params using the SDK types
+    const params: TranscriptParams = {
       audio_url: audioFileUrl,
       speech_models: ["universal-3-pro", "universal-2"],
     }
 
-    // Diarization is native in AssemblyAI — no HuggingFace token needed
     if (options.diarize) {
-      transcriptionParams.speaker_labels = true
+      params.speaker_labels = true
     }
 
-    // Language: auto-detect or specific code
     if (options.language && options.language !== "auto") {
-      transcriptionParams.language_code = options.language
+      params.language_code = options.language
     } else {
-      transcriptionParams.language_detection = true
+      params.language_detection = true
     }
 
-    // AI Intelligence features — opt-in per user selection
+    // AI Intelligence features — opt-in, mutually exclusive where noted
     const aiFeatures = options.aiFeatures || {}
 
+    // auto_chapters and summarization are mutually exclusive in AssemblyAI
     if (aiFeatures.autoChapters) {
-      transcriptionParams.auto_chapters = true
-    }
-    if (aiFeatures.summarization) {
-      transcriptionParams.summarization = true
-      transcriptionParams.summary_model = "informative"
-      transcriptionParams.summary_type = "bullets"
+      params.auto_chapters = true
+    } else if (aiFeatures.summarization) {
+      params.summarization = true
+      params.summary_model = "informative"
+      params.summary_type = "bullets"
     }
     if (aiFeatures.sentimentAnalysis) {
-      transcriptionParams.sentiment_analysis = true
+      params.sentiment_analysis = true
     }
     if (aiFeatures.entityDetection) {
-      transcriptionParams.entity_detection = true
+      params.entity_detection = true
     }
     if (aiFeatures.keyPhrases) {
-      transcriptionParams.auto_highlights = true
+      params.auto_highlights = true
     }
     if (aiFeatures.contentModeration) {
-      transcriptionParams.content_safety = true
+      params.content_safety = true
     }
     if (aiFeatures.topicDetection) {
-      transcriptionParams.iab_categories = true
+      params.iab_categories = true
     }
 
-    console.log("Starting AssemblyAI transcription...")
-    console.log("Transcription params:", JSON.stringify(transcriptionParams, null, 2))
+    console.log("Starting AssemblyAI transcription via SDK...")
+    console.log("Params:", JSON.stringify(params, null, 2))
 
-    const transcriptionData = await startAssemblyAITranscription(transcriptionParams)
+    // submit() returns immediately with queued transcript (no polling)
+    const transcript = await assemblyai.transcripts.submit(params)
 
-    // Build response matching shape client expects: { id, status, ... }
     const responseData: Record<string, unknown> = {
-      id: transcriptionData.id,
-      status: transcriptionData.status,
+      id: transcript.id,
+      status: transcript.status,
     }
 
     if (firebaseFilePath) {
       responseData.firebaseFilePath = firebaseFilePath
-      console.log("Included Firebase path in response:", firebaseFilePath)
     }
-
     if (firebaseUrl) {
       responseData.audioUrl = firebaseUrl
-      console.log("Included audio URL in response:", firebaseUrl)
     }
 
-    console.log("Successfully initiated AssemblyAI transcription:", transcriptionData.id)
+    console.log("AssemblyAI transcription submitted:", transcript.id)
     return NextResponse.json(responseData, { status: 200 })
   } catch (error: unknown) {
     console.error("Error processing transcription request:", error)
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error"
-    const statusCode =
-      errorMessage.includes("Firebase") || errorMessage.includes("AssemblyAI")
-        ? 502
-        : 500
     return NextResponse.json(
-      {
-        error: `Transcription processing failed: ${errorMessage}`,
-      },
-      { status: statusCode },
+      { error: `Transcription failed: ${errorMessage}` },
+      { status: 502 },
     )
   }
 }

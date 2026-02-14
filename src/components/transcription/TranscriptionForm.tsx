@@ -38,6 +38,13 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
   const [currentPredictionId, setCurrentPredictionId] = useState<string | null>(
     null,
   );
+  // Preserve last options + audio URL for retry-without-feature
+  const [lastAudioUrl, setLastAudioUrl] = useState<string | null>(null);
+  const [lastOptions, setLastOptions] = useState<{
+    language: string;
+    diarize: boolean;
+    aiFeatures: AIFeatures;
+  } | null>(null);
   // Mobile detection hook
   const [isMobile, setIsMobile] = useState(false);
 
@@ -272,6 +279,9 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     setTransStatus("starting"); // <--- SET STATUS TO STARTING HERE
     setProgress(5);
 
+    // Preserve options for retry-without-feature (audio URL stored after upload)
+    setLastOptions(options);
+
     // Create new session
     let audioSource: {
       type: "file" | "url";
@@ -341,6 +351,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         try {
           const uploadResult = await uploadLargeFile(file);
           requestBody.audioUrl = uploadResult.url; // Use Firebase URL
+          setLastAudioUrl(uploadResult.url); // Preserve for retry
 
           // Save URL to localStorage for Studio access
           localStorage.setItem("studioAudioUrl", uploadResult.url);
@@ -385,6 +396,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         // --- End File processing logic ---
       } else {
         requestBody.audioUrl = data.audioUrl;
+        setLastAudioUrl(data.audioUrl); // Preserve for retry
         sourceDescription = `URL: ${data.audioUrl}`;
         setProgress(15);
 
@@ -569,6 +581,20 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
     }
   };
 
+  const handleRetryWithoutFeature = (featureKey: keyof AIFeatures) => {
+    if (!lastOptions || !lastAudioUrl) {
+      console.warn("Cannot retry: missing options or audio URL");
+      handleReset();
+      return;
+    }
+
+    const updatedFeatures = { ...lastOptions.aiFeatures, [featureKey]: false };
+    const updatedOptions = { ...lastOptions, aiFeatures: updatedFeatures };
+
+    console.log(`Retrying without ${featureKey}, using URL: ${lastAudioUrl}`);
+    handleUpload({ audioUrl: lastAudioUrl }, updatedOptions);
+  };
+
   // Run cleanup of expired sessions once on component mount
   useEffect(() => {
     const cleanupExpired = async () => {
@@ -629,6 +655,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
             status={transStatus as "failed" | "canceled"}
             error={error}
             onReset={handleReset}
+            onRetryWithoutFeature={handleRetryWithoutFeature}
             apiResponses={apiResponses}
             showApiDetails={showApiDetails}
             setShowApiDetails={setShowApiDetails}
@@ -646,6 +673,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
             <TranscriptionResult
               transcription={transcription}
               summary={activeSession?.intelligence?.summary}
+              options={lastOptions}
               onNewTranscription={handleReset}
               onOpenStudio={() => {
                 // Navigate to standalone studio page with session ID

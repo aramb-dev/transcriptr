@@ -105,7 +105,7 @@ const formatFileSize = (bytes?: number): string => {
 // Audio Player Component
 interface AudioPlayerProps {
   audioUrl?: string;
-  audioRef?: React.RefObject<HTMLAudioElement | null>;
+  audioRef?: React.RefObject<HTMLVideoElement | null>;
   onTimeUpdate?: (time: number) => void;
   segments?: TranscriptionSegment[];
   onSegmentChange?: (segmentIndex: number) => void;
@@ -131,7 +131,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
   const [loopStart, setLoopStart] = useState<number | null>(null);
   const [loopEnd, setLoopEnd] = useState<number | null>(null);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
-  const internalAudioRef = useRef<HTMLAudioElement>(null);
+  const internalAudioRef = useRef<HTMLVideoElement>(null);
   const audioRef = externalAudioRef || internalAudioRef;
 
   // Get current segment index
@@ -274,7 +274,7 @@ const AudioPlayer: React.FC<AudioPlayerProps> = ({
       <CardContent>
         {audioUrl ? (
           <>
-            <audio
+            <video
               ref={audioRef}
               src={audioUrl}
               onTimeUpdate={handleTimeUpdate}
@@ -1314,7 +1314,7 @@ export const TranscriptionStudio: React.FC<TranscriptionStudioProps> = ({
   const [, setIsMuted] = useState(false);
   const [, setVolume] = useState(1);
   const [showShortcuts, setShowShortcuts] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const audioRef = useRef<HTMLVideoElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Get audio URL from localStorage or prop

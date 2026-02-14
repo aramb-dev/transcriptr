@@ -26,6 +26,7 @@
     "@radix-ui/react-tabs": "^1.1.13",
     "@tabler/icons-react": "^3.36.1",
     "@tailwindcss/typography": "^0.5.19",
+    "assemblyai": "^4.23.0",
     "clarity-js": "^0.8.54",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

@@ -3,6 +3,7 @@ import { Button } from "../ui/button";
 import { Copy, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import { ScrollRevealSection } from "../ui/scroll-reveal-section";
+import type { AIFeatures } from "./TranscriptionOptions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,16 +13,34 @@ import {
 import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 import jsPDF from "jspdf";
 
+interface TranscriptionOptions {
+  language: string
+  diarize: boolean
+  aiFeatures: AIFeatures
+}
+
 interface TranscriptionResultProps {
   transcription: string;
   summary?: string;
+  options?: TranscriptionOptions | null;
   onNewTranscription?: () => void;
   onOpenStudio?: () => void;
+}
+
+const AI_FEATURE_LABELS: Record<string, string> = {
+  autoChapters: "Auto Chapters",
+  summarization: "Summarization",
+  sentimentAnalysis: "Sentiment Analysis",
+  entityDetection: "Entity Detection",
+  keyPhrases: "Key Phrases",
+  contentModeration: "Content Moderation",
+  topicDetection: "Topic Detection",
 }
 
 export default function TranscriptionResult({
   transcription,
   summary,
+  options,
   onNewTranscription,
   onOpenStudio,
 }: TranscriptionResultProps) {
@@ -411,6 +430,38 @@ export default function TranscriptionResult({
                 </DropdownMenu>
               </div>
             </div>
+
+            {/* Options Used */}
+            {options && (
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Options:</span>
+                {options.language && options.language !== "auto" && (
+                  <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                    {options.language.toUpperCase()}
+                  </span>
+                )}
+                {options.language === "auto" && (
+                  <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-700 dark:bg-gray-700 dark:text-gray-300">
+                    Auto Detect
+                  </span>
+                )}
+                {options.diarize && (
+                  <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                    Speaker Diarization
+                  </span>
+                )}
+                {(Object.keys(options.aiFeatures || {}) as (keyof AIFeatures)[])
+                  .filter((key) => options.aiFeatures?.[key])
+                  .map((key) => (
+                    <span
+                      key={key}
+                      className="rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                    >
+                      {AI_FEATURE_LABELS[key] || key}
+                    </span>
+                  ))}
+              </div>
+            )}
 
             {/* Summary Snippet */}
             {summary && (

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-
-const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY
+import { assemblyai } from "@/lib/assemblyai-client"
 
 interface RouteParams {
   params: Promise<{ id: string }>
@@ -22,155 +21,84 @@ function mapStatus(assemblyStatus: string): string {
   }
 }
 
-interface AssemblyAIWord {
-  text: string
-  start: number
-  end: number
-  confidence: number
-  speaker?: string
-}
-
-interface AssemblyAIUtterance {
-  text: string
-  start: number
-  end: number
-  confidence: number
-  speaker: string
-  words: AssemblyAIWord[]
-}
-
-interface AssemblyAISentence {
-  text: string
-  start: number
-  end: number
-  confidence: number
-  words: AssemblyAIWord[]
-}
-
-// Convert ms timestamps to seconds for a word array
-function convertWords(words: AssemblyAIWord[]) {
-  return words.map((w) => ({
-    word: w.text,
-    start: w.start / 1000,
-    end: w.end / 1000,
-  }))
-}
-
 export async function GET(_request: NextRequest, { params }: RouteParams) {
   const { id } = await params
-  const transcriptId = id
 
-  if (!transcriptId) {
+  if (!id) {
     return NextResponse.json(
       { error: "Missing prediction ID" },
       { status: 400 },
     )
   }
 
-  if (!ASSEMBLYAI_API_KEY) {
-    return NextResponse.json(
-      { error: "AssemblyAI API key not configured" },
-      { status: 500 },
-    )
-  }
-
   try {
-    console.log(`Checking transcription status for ID: ${transcriptId}`)
+    console.log(`Checking transcription status for ID: ${id}`)
 
-    const response = await fetch(
-      `https://api.assemblyai.com/v2/transcript/${transcriptId}`,
-      {
-        headers: {
-          Authorization: ASSEMBLYAI_API_KEY,
-        },
-      },
-    )
+    const transcript = await assemblyai.transcripts.get(id)
+    const mappedStatus = mapStatus(transcript.status)
+    console.log(`Transcription ${id} status: ${transcript.status} -> ${mappedStatus}`)
 
-    const data = await response.json()
-
-    if (!response.ok) {
-      console.error(
-        `Error checking transcription status: ${response.status}`,
-        data,
-      )
-      return NextResponse.json(
-        {
-          error: `Error checking transcription: ${response.status}`,
-          details: data,
-        },
-        { status: response.status },
-      )
-    }
-
-    const mappedStatus = mapStatus(data.status)
-    console.log(`Transcription ${transcriptId} status: ${data.status} -> ${mappedStatus}`)
-
-    // Build normalized response
     const result: Record<string, unknown> = {
-      id: transcriptId,
+      id,
       status: mappedStatus,
     }
 
     if (mappedStatus === "failed") {
-      result.error = data.error || "Unknown transcription error"
+      result.error = transcript.error || "Unknown transcription error"
     }
 
     if (mappedStatus === "succeeded") {
-      // Normalize output to match WhisperX format: { segments, detected_language }
-      let segments: { start: number, end: number, text: string, speaker?: string, words?: { word: string, start: number, end: number }[] }[]
+      // Build segments from utterances (diarization) or sentences
+      let segments: {
+        start: number
+        end: number
+        text: string
+        speaker?: string
+        words?: { word: string; start: number; end: number }[]
+      }[]
 
-      if (data.utterances && data.utterances.length > 0) {
+      if (transcript.utterances && transcript.utterances.length > 0) {
         // Diarization was enabled — use utterances for speaker-labeled segments
-        segments = data.utterances.map((u: AssemblyAIUtterance) => ({
+        segments = transcript.utterances.map((u) => ({
           start: u.start / 1000,
           end: u.end / 1000,
           text: u.text,
           speaker: u.speaker,
-          words: convertWords(u.words),
+          words: u.words?.map((w) => ({
+            word: w.text,
+            start: w.start / 1000,
+            end: w.end / 1000,
+          })) || [],
         }))
       } else {
-        // No diarization — fetch sentences for segment-level output
+        // No diarization — fetch sentences via SDK
         try {
-          const sentencesRes = await fetch(
-            `https://api.assemblyai.com/v2/transcript/${transcriptId}/sentences`,
-            {
-              headers: {
-                Authorization: ASSEMBLYAI_API_KEY,
-              },
-            },
-          )
-
-          if (sentencesRes.ok) {
-            const sentencesData = await sentencesRes.json()
-            segments = sentencesData.sentences.map((s: AssemblyAISentence) => ({
-              start: s.start / 1000,
-              end: s.end / 1000,
-              text: s.text,
-              words: convertWords(s.words),
-            }))
-          } else {
-            // Fallback: single segment from full text
-            segments = [{
-              start: 0,
-              end: (data.audio_duration || 0) / 1000,
-              text: data.text || "",
-            }]
-          }
+          const sentencesResponse = await assemblyai.transcripts.sentences(id)
+          segments = sentencesResponse.sentences.map((s) => ({
+            start: s.start / 1000,
+            end: s.end / 1000,
+            text: s.text,
+            words: s.words?.map((w) => ({
+              word: w.text,
+              start: w.start / 1000,
+              end: w.end / 1000,
+            })) || [],
+          }))
         } catch (sentenceError) {
           console.error("Error fetching sentences:", sentenceError)
           segments = [{
             start: 0,
-            end: (data.audio_duration || 0) / 1000,
-            text: data.text || "",
+            end: (transcript.audio_duration || 0),
+            text: transcript.text || "",
           }]
         }
       }
 
-      // Extract AI intelligence data (all timestamps ms→s)
+      // Extract AI intelligence data
       const intelligence: Record<string, unknown> = {}
 
-      if (data.chapters && Array.isArray(data.chapters)) {
-        intelligence.chapters = data.chapters.map((ch: { gist: string, headline: string, summary: string, start: number, end: number }) => ({
+      if (transcript.chapters && Array.isArray(transcript.chapters)) {
+        intelligence.chapters = transcript.chapters.map((ch) => ({
           gist: ch.gist,
           headline: ch.headline,
           summary: ch.summary,
@@ -179,12 +107,12 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
         }))
       }
 
-      if (data.summary) {
-        intelligence.summary = data.summary
+      if (transcript.summary) {
+        intelligence.summary = transcript.summary
       }
 
-      if (data.sentiment_analysis_results && Array.isArray(data.sentiment_analysis_results)) {
-        intelligence.sentimentAnalysis = data.sentiment_analysis_results.map((s: { text: string, start: number, end: number, sentiment: string, confidence: number, speaker?: string }) => ({
+      if (transcript.sentiment_analysis_results && Array.isArray(transcript.sentiment_analysis_results)) {
+        intelligence.sentimentAnalysis = transcript.sentiment_analysis_results.map((s) => ({
           text: s.text,
           start: s.start / 1000,
           end: s.end / 1000,
@@ -194,8 +122,8 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
         }))
       }
 
-      if (data.entities && Array.isArray(data.entities)) {
-        intelligence.entities = data.entities.map((e: { entity_type: string, text: string, start: number, end: number }) => ({
+      if (transcript.entities && Array.isArray(transcript.entities)) {
+        intelligence.entities = transcript.entities.map((e) => ({
           entityType: e.entity_type,
           text: e.text,
           start: e.start / 1000,
@@ -203,35 +131,35 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
         }))
       }
 
-      if (data.auto_highlights_result?.results && Array.isArray(data.auto_highlights_result.results)) {
-        intelligence.keyPhrases = data.auto_highlights_result.results.map((h: { text: string, count: number, rank: number, timestamps: { start: number, end: number }[] }) => ({
+      if (transcript.auto_highlights_result?.results && Array.isArray(transcript.auto_highlights_result.results)) {
+        intelligence.keyPhrases = transcript.auto_highlights_result.results.map((h) => ({
           text: h.text,
           count: h.count,
           rank: h.rank,
-          timestamps: h.timestamps.map((t: { start: number, end: number }) => ({
+          timestamps: (h.timestamps || []).map((t) => ({
             start: t.start / 1000,
             end: t.end / 1000,
           })),
         }))
       }
 
-      if (data.content_safety_labels) {
+      if (transcript.content_safety_labels) {
         intelligence.contentSafety = {
-          results: data.content_safety_labels.results || [],
-          summary: data.content_safety_labels.summary || {},
+          results: transcript.content_safety_labels.results || [],
+          summary: transcript.content_safety_labels.summary || {},
         }
       }
 
-      if (data.iab_categories_result) {
+      if (transcript.iab_categories_result) {
         intelligence.topics = {
-          results: data.iab_categories_result.results || [],
-          summary: data.iab_categories_result.summary || {},
+          results: transcript.iab_categories_result.results || [],
+          summary: transcript.iab_categories_result.summary || {},
         }
       }
 
       result.output = {
         segments,
-        detected_language: data.language_code || null,
+        detected_language: transcript.language_code || null,
         intelligence: Object.keys(intelligence).length > 0 ? intelligence : undefined,
       }
     }
@@ -242,9 +170,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error"
     return NextResponse.json(
-      {
-        error: errorMessage,
-      },
+      { error: errorMessage },
       { status: 500 },
     )
   }

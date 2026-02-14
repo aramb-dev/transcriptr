@@ -1,19 +1,69 @@
-import { Button } from "../ui/button";
+import { Button } from "../ui/button"
+import type { AIFeatures } from "./TranscriptionOptions"
+
+// Map AssemblyAI API param names → our AIFeatures keys
+const API_PARAM_TO_FEATURE: Record<string, keyof AIFeatures> = {
+  iab_categories: "topicDetection",
+  auto_chapters: "autoChapters",
+  summarization: "summarization",
+  sentiment_analysis: "sentimentAnalysis",
+  entity_detection: "entityDetection",
+  auto_highlights: "keyPhrases",
+  content_safety: "contentModeration",
+}
+
+const FEATURE_DISPLAY_NAMES: Record<keyof AIFeatures, string> = {
+  topicDetection: "Topic Detection",
+  autoChapters: "Auto Chapters",
+  summarization: "Summarization",
+  sentimentAnalysis: "Sentiment Analysis",
+  entityDetection: "Entity Detection",
+  keyPhrases: "Key Phrases",
+  contentModeration: "Content Moderation",
+}
+
+interface FeatureLanguageError {
+  featureKey: keyof AIFeatures
+  featureLabel: string
+  languageCode: string
+  supportedLanguages: string[]
+}
+
+function parseFeatureLanguageError(error: string): FeatureLanguageError | null {
+  // Match: "iab_categories is not supported for language code 'ar'. iab_categories only supports the following languages: de, en, es, fr"
+  const match = error.match(
+    /(\w+) is not supported for language code '(\w+)'\.\s*\w+ only supports the following languages:\s*(.+)/i,
+  )
+  if (!match) return null
+
+  const [, apiParam, langCode, langList] = match
+  const featureKey = API_PARAM_TO_FEATURE[apiParam]
+  if (!featureKey) return null
+
+  return {
+    featureKey,
+    featureLabel: FEATURE_DISPLAY_NAMES[featureKey],
+    languageCode: langCode,
+    supportedLanguages: langList.split(",").map((l) => l.trim()),
+  }
+}
 
 interface TranscriptionErrorProps {
-  status: "failed" | "canceled";
-  error: string | null;
-  onReset: () => void;
-  apiResponses: Array<{ timestamp: Date; data: Record<string, unknown> }>;
-  showApiDetails: boolean;
-  setShowApiDetails: (show: boolean) => void;
-  formatTimestamp: (date: Date) => string;
+  status: "failed" | "canceled"
+  error: string | null
+  onReset: () => void
+  onRetryWithoutFeature?: (featureKey: keyof AIFeatures) => void
+  apiResponses: Array<{ timestamp: Date; data: Record<string, unknown> }>
+  showApiDetails: boolean
+  setShowApiDetails: (show: boolean) => void
+  formatTimestamp: (date: Date) => string
 }
 
 export function TranscriptionError({
   status,
   error,
   onReset,
+  onRetryWithoutFeature,
   apiResponses,
   showApiDetails,
   setShowApiDetails,
@@ -22,7 +72,9 @@ export function TranscriptionError({
   const statusMessages = {
     failed: "The transcription encountered an error during processing.",
     canceled: "This transcription was cancelled, please try again.",
-  };
+  }
+
+  const featureLangError = error ? parseFeatureLanguageError(error) : null
 
   return (
     <div className="p-8 text-center">
@@ -68,26 +120,61 @@ export function TranscriptionError({
             </svg>
           </div>
         </div>
-        <p
-          className={`mb-2 text-lg font-medium ${
-            status === "failed"
-              ? "text-red-600 dark:text-red-400"
-              : "text-orange-600 dark:text-orange-400"
-          }`}
-        >
-          {statusMessages[status]}
-        </p>
-        {error && (
-          <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
-            Error: {error}
-          </p>
+
+        {featureLangError ? (
+          <>
+            <p className="mb-2 text-lg font-medium text-red-600 dark:text-red-400">
+              Language not supported by {featureLangError.featureLabel}
+            </p>
+            <p className="mb-1 text-sm text-gray-600 dark:text-gray-300">
+              The detected language ({featureLangError.languageCode.toUpperCase()}) is not supported by the{" "}
+              <span className="font-medium">{featureLangError.featureLabel}</span> feature.
+            </p>
+            <p className="mb-4 text-xs text-gray-500 dark:text-gray-400">
+              Supported languages: {featureLangError.supportedLanguages.map((l) => l.toUpperCase()).join(", ")}
+            </p>
+            <div className="flex flex-col items-center gap-2 sm:flex-row sm:justify-center">
+              {onRetryWithoutFeature && (
+                <Button
+                  onClick={() => onRetryWithoutFeature(featureLangError.featureKey)}
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  Retry without {featureLangError.featureLabel}
+                </Button>
+              )}
+              <Button
+                onClick={onReset}
+                variant="outline"
+                className="bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+              >
+                Start Over
+              </Button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p
+              className={`mb-2 text-lg font-medium ${
+                status === "failed"
+                  ? "text-red-600 dark:text-red-400"
+                  : "text-orange-600 dark:text-orange-400"
+              }`}
+            >
+              {statusMessages[status]}
+            </p>
+            {error && (
+              <p className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                Error: {error}
+              </p>
+            )}
+            <Button
+              onClick={onReset}
+              className="mt-2 bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
+            >
+              Try Again
+            </Button>
+          </>
         )}
-        <Button
-          onClick={onReset}
-          className="mt-2 bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300"
-        >
-          Try Again
-        </Button>
       </div>
 
       {apiResponses.length > 0 && (
@@ -121,5 +208,5 @@ export function TranscriptionError({
         </div>
       )}
     </div>
-  );
+  )
 }

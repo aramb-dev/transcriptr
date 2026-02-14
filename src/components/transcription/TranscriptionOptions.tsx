@@ -70,8 +70,8 @@ const AI_FEATURE_LIST: {
   label: string
   description: string
 }[] = [
-  { key: "autoChapters", label: "Auto Chapters", description: "Break transcript into time-stamped chapters with summaries" },
-  { key: "summarization", label: "Summarization", description: "Generate a bullet-point summary of the audio" },
+  { key: "autoChapters", label: "Auto Chapters", description: "Break transcript into time-stamped chapters with summaries (excludes Summarization)" },
+  { key: "summarization", label: "Summarization", description: "Generate a bullet-point summary of the audio (excludes Auto Chapters)" },
   { key: "sentimentAnalysis", label: "Sentiment Analysis", description: "Detect positive/negative/neutral sentiment per sentence" },
   { key: "entityDetection", label: "Entity Detection", description: "Identify people, locations, organizations mentioned" },
   { key: "keyPhrases", label: "Key Phrases", description: "Extract important phrases and keywords" },
@@ -90,7 +90,10 @@ export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
   const [showDonateModal, setShowDonateModal] = useState(false)
   const hasShownModal = useRef(false)
 
-  const allEnabled = AI_FEATURE_LIST.every((f) => aiFeatures[f.key])
+  // summarization is excluded from "all" since it's mutually exclusive with autoChapters
+  const allEnabled = AI_FEATURE_LIST
+    .filter((f) => f.key !== "summarization")
+    .every((f) => aiFeatures[f.key])
   const anyEnabled = diarize || AI_FEATURE_LIST.some((f) => aiFeatures[f.key])
 
   const maybeShowModal = () => {
@@ -117,6 +120,12 @@ export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
 
   const handleFeatureToggle = (key: keyof AIFeatures) => {
     const updated = { ...aiFeatures, [key]: !aiFeatures[key] }
+    // autoChapters and summarization are mutually exclusive in AssemblyAI
+    if (key === "autoChapters" && updated.autoChapters) {
+      updated.summarization = false
+    } else if (key === "summarization" && updated.summarization) {
+      updated.autoChapters = false
+    }
     if (updated[key]) maybeShowModal()
     setAiFeatures(updated)
     emitChange(language, diarize, updated)
@@ -126,7 +135,7 @@ export function TranscriptionOptions({ onChange }: TranscriptionOptionsProps) {
     if (checked) maybeShowModal()
     const updated: AIFeatures = {
       autoChapters: checked,
-      summarization: checked,
+      summarization: false, // mutually exclusive with autoChapters
       sentimentAnalysis: checked,
       entityDetection: checked,
       keyPhrases: checked,
