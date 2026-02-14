@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
-import { Card, CardProps } from "./card";
+import { Card } from "./card";
 
-export function AnimatedCard({ children, className, ...props }: CardProps) {
+export function AnimatedCard({ children, className, ...props }: React.ComponentProps<typeof Card>) {
   return (
     <motion.div
       whileHover={{
