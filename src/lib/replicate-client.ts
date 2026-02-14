@@ -20,6 +20,7 @@ if (!REPLICATE_API_TOKEN) {
 
 interface TranscriptionInput {
   audio?: string;
+  audio_file?: string; // WhisperX uses audio_file
   batch_size?: number;
   [key: string]: unknown;
 }
@@ -77,13 +78,18 @@ export async function startReplicateTranscription(
       );
       console.log(
         "Input type:",
-        currentParams.audio
-          ? typeof currentParams.audio === "string" &&
-            currentParams.audio.startsWith("http")
+        currentParams.audio_file
+          ? typeof currentParams.audio_file === "string" &&
+            currentParams.audio_file.startsWith("http")
             ? "URL"
             : "base64_data"
-          : "none",
+          : currentParams.audio
+            ? "audio (legacy)"
+            : "none",
       );
+      
+      // Log the actual parameters being sent to Replicate
+      console.log("Replicate input params:", JSON.stringify(currentParams, null, 2));
 
       const response = await fetch(REPLICATE_API_URL, {
         method: "POST",

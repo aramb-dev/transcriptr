@@ -130,16 +130,37 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       setProgress(100);
 
       // Parse the output to extract the transcription text and segments
+      // WhisperX returns: { segments: [{ start, end, text, words? }], detected_language: string }
       let finalTranscription = "Error: Could not parse transcription.";
       let segments = undefined;
 
       if (typeof output === "string") {
         finalTranscription = output;
       } else if (output && typeof output === "object") {
-        // OpenAI Whisper model returns { transcription: string, segments: array, ... }
-        if ("transcription" in output && typeof output.transcription === "string") {
+        // WhisperX model returns { segments: array, detected_language: string }
+        if ("segments" in output && Array.isArray(output.segments)) {
+          segments = output.segments.map((seg: { start: number; end: number; text: string; speaker?: string; words?: unknown[] }, idx: number) => ({
+            id: idx,
+            start: seg.start,
+            end: seg.end,
+            text: seg.text,
+            speaker: seg.speaker, // For diarization
+            words: seg.words, // Word-level timestamps from align_output
+          }));
+          // Combine all segment text into full transcription
+          finalTranscription = output.segments
+            .map((seg: { text: string }) => seg.text)
+            .join(" ")
+            .trim();
+          
+          console.log("WhisperX output parsed:", {
+            segmentCount: segments ? segments.length : 0,
+            detectedLanguage: (output as { detected_language?: string }).detected_language,
+          });
+        }
+        // Fallback for OpenAI Whisper model format
+        else if ("transcription" in output && typeof output.transcription === "string") {
           finalTranscription = output.transcription;
-          // Extract segments if available
           if ("segments" in output && Array.isArray(output.segments)) {
             segments = output.segments;
           }
@@ -416,7 +437,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       const apiOptions = {
         modelId:
           process.env.NEXT_PUBLIC_REPLICATE_MODEL_ID ||
-          "openai/whisper:8099696689d249cf8b122d833c36ac3f75505c666a395ca40ef26f68e7d3d16e",
+          "victor-upmeet/whisperx:826801120720e563620006b99e412f7ed7b991dd4477e9160473d44a405ef9d9",
         language: options.language, // "auto" for auto-detect, or specific language
         translate: options.translate || false,
         temperature: options.temperature || 0,
