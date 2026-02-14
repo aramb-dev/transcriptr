@@ -5,11 +5,22 @@ if (!ASSEMBLYAI_API_KEY) {
   console.error("FATAL: ASSEMBLYAI_API_KEY environment variable is not set.")
 }
 
-interface TranscriptionParams {
+export interface TranscriptionParams {
   audio_url: string
+  speech_models: string[]
   speaker_labels?: boolean
   language_detection?: boolean
   language_code?: string
+  // AI Intelligence features (opt-in, billed per hour of audio)
+  auto_chapters?: boolean
+  summarization?: boolean
+  summary_model?: string
+  summary_type?: string
+  sentiment_analysis?: boolean
+  entity_detection?: boolean
+  auto_highlights?: boolean
+  content_safety?: boolean
+  iab_categories?: boolean
 }
 
 interface TranscriptionResponse {

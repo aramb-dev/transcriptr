@@ -86,7 +86,6 @@ Transcriptr requires several environment variables to function properly. Create 
 
 | Variable                           | Description                                                                      | Default       |
 | ---------------------------------- | -------------------------------------------------------------------------------- | ------------- |
-| `NEXT_PUBLIC_CLOUDCONVERT_API_KEY` | CloudConvert API key for automatic audio format conversion (M4A, AAC, WMA → MP3) | None          |
 | `PORT`                             | Port for the server to listen on                                                 | `3000`        |
 | `NODE_ENV`                         | Environment mode (`development` or `production`)                                 | `development` |
 
@@ -101,7 +100,6 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789012
 NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789012:web:abcdef1234567890
 NEXT_PUBLIC_PRINTERZ_API_KEY=your_printerz_api_key
-NEXT_PUBLIC_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
 ```
 
 ### Getting API Keys
@@ -109,8 +107,6 @@ NEXT_PUBLIC_CLOUDCONVERT_API_KEY=your_cloudconvert_api_key
 - **AssemblyAI API Key**: Sign up at [AssemblyAI](https://www.assemblyai.com/) and create an API key
 - **Firebase**: Set up a project in [Firebase Console](https://console.firebase.google.com/) and get your credentials
 - **Printerz**: Create an account at [Printerz](https://printerz.dev/) and get your API key
-- **CloudConvert** (optional): Register at [CloudConvert](https://cloudconvert.com/) to enable automatic conversion of M4A, AAC, WMA, and other formats to MP3
-
 ## Build and Deployment
 
 ### Building for Production
@@ -191,32 +187,11 @@ Next.js API Routes are used for the backend. The API endpoints are located in th
 
 ## Audio Format Support
 
-Transcriptr supports a wide range of audio formats with **automatic conversion**:
+Transcriptr natively supports 25+ audio and video formats via AssemblyAI:
 
-### 🚀 Directly Supported (Fastest Processing)
+**Audio:** MP3, WAV, FLAC, OGG, M4A, AAC, WMA, AIFF, OPUS, AMR, WebM, CAF, 3GP, APE, AU, GSM, RA, VOC
 
-- MP3 (.mp3) - Most common format
-- WAV (.wav) - Uncompressed audio
-- FLAC (.flac) - Lossless compression
-- OGG (.ogg) - Open-source format
-
-### 🔄 Auto-Converted Formats (Slightly Longer Processing)
-
-- M4A (.m4a) - iPhone/macOS recordings
-- AAC (.aac) - Advanced Audio Coding
-- MP4 (.mp4) - Video files with audio
-- WMA (.wma) - Windows Media Audio
-- AIFF (.aiff) - Apple format
-- CAF (.caf) - Core Audio Format
-
-### How It Works
-
-1. **Upload any supported format** - No manual conversion needed!
-2. **Automatic detection** - System identifies if conversion is required
-3. **Seamless processing** - Unsupported formats are converted to MP3 automatically
-4. **Transparent progress** - View conversion status in real-time
-
-> **Note**: To enable automatic conversion, you need to set up the `CLOUDCONVERT_API_KEY` environment variable. See the [Environment Variables](#environment-variables) section for details.
+**Video:** MP4, MOV, AVI, MKV, WMV, FLV, TS, M4V
 
 ## Contributing
 

@@ -3,7 +3,7 @@
 
 :root {
   --color-border: #e5e7eb;
-  --color-input: #f3f4f6;
+  --color-input: #e5e7eb;
   --color-ring: #3b82f6;
   --color-background: #ffffff;
   --color-foreground: #111827;
@@ -25,6 +25,27 @@
   --dark-text-secondary: #d1d5db;
   --dark-text-muted: #9ca3af;
   font-family: "Space Grotesk", sans-serif;
+}
+
+.dark {
+  --color-border: #374151;
+  --color-input: #374151;
+  --color-ring: #3b82f6;
+  --color-background: #111827;
+  --color-foreground: #f9fafb;
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #1f2937;
+  --color-secondary-foreground: #f9fafb;
+  --color-destructive: #ef4444;
+  --color-muted: #1f2937;
+  --color-muted-foreground: #9ca3af;
+  --color-accent: #1f2937;
+  --color-accent-foreground: #f9fafb;
+  --color-popover: #1f2937;
+  --color-popover-foreground: #f9fafb;
+  --color-card: #1f2937;
+  --color-card-foreground: #f9fafb;
 }
 
 /* Dark mode text fixes for specific elements */

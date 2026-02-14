@@ -1,22 +1,20 @@
 // Constants
 export type TranscriptionStatus =
   | "idle"
-  | "converting"
   | "starting"
   | "processing"
   | "succeeded"
   | "failed"
-  | "canceled";
+  | "canceled"
 
 export const statusMessages: Record<TranscriptionStatus, string> = {
   idle: "Ready to transcribe",
-  converting: "Converting audio file to MP3 format...",
   starting: "Transcription queued. Waiting for processing...",
-  processing: "Processing audio. This will depend on the length of your audio.",
+  processing: "Analyzing audio and transcribing...",
   succeeded: "Processing complete! Loading result...",
   failed: "The transcription encountered an error during processing.",
   canceled: "This transcription was cancelled, please try again.",
-};
+}
 
 export const getApiUrl = (endpoint: string) => {
   return `/api/${endpoint}`;

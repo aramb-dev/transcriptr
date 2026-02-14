@@ -152,8 +152,8 @@ export default function DocumentationPage() {
                     </h3>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Supports 10+ audio formats with automatic conversion for
-                    M4A, AAC, WMA, and more
+                    Supports 25+ audio and video formats natively — MP3, WAV,
+                    M4A, MP4, and more
                   </p>
                 </div>
               </div>
@@ -162,27 +162,18 @@ export default function DocumentationPage() {
             {/* Supported Formats */}
             <section className="mb-10">
               <h2 className="mb-6 text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                📁 Supported Audio Formats
+                📁 Supported Formats
               </h2>
               <div className="rounded-lg bg-gray-50 p-6 dark:bg-gray-900/50">
-                <div className="mb-6 rounded-md bg-green-50 p-4 dark:bg-green-900/20">
-                  <div className="mb-2 flex items-center gap-2">
-                    <span className="text-2xl">🔄</span>
-                    <h4 className="font-semibold text-green-800 dark:text-green-200">
-                      Automatic Format Conversion
-                    </h4>
-                  </div>
-                  <p className="text-sm text-green-700 dark:text-green-300">
-                    <strong>New!</strong> Transcriptr now automatically converts
-                    unsupported formats (M4A, AAC, MP4, WMA, etc.) to MP3 before
-                    transcription. No manual conversion needed!
-                  </p>
-                </div>
+                <p className="mb-4 text-gray-700 dark:text-gray-300">
+                  Transcriptr supports 25+ audio and video formats natively — no
+                  conversion step needed.
+                </p>
 
                 <div className="grid gap-6 md:grid-cols-2">
                   <div>
                     <h4 className="mb-3 font-medium text-gray-900 dark:text-gray-100">
-                      ✅ Directly Supported (Fast Processing)
+                      Audio Formats
                     </h4>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                       <li className="flex items-center gap-2">
@@ -201,141 +192,35 @@ export default function DocumentationPage() {
                         <span className="text-green-500">•</span>
                         <strong>OGG</strong> - Open-source audio format
                       </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-500">•</span>
+                        <strong>M4A</strong> - MPEG-4 Audio (iPhone recordings)
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="text-green-500">•</span>
+                        <strong>AAC, WMA, AIFF, OPUS, WebM, CAF</strong> - and
+                        more
+                      </li>
                     </ul>
                   </div>
                   <div>
                     <h4 className="mb-3 font-medium text-gray-900 dark:text-gray-100">
-                      🔄 Auto-Converted (Slightly Longer Processing)
+                      Video Formats
                     </h4>
                     <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
                       <li className="flex items-center gap-2">
-                        <span className="text-blue-500">•</span>
-                        <strong>M4A</strong> - MPEG-4 Audio (iPhone recordings)
+                        <span className="text-green-500">•</span>
+                        <strong>MP4</strong> - MPEG-4 video
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="text-blue-500">•</span>
-                        <strong>AAC</strong> - Advanced Audio Coding
+                        <span className="text-green-500">•</span>
+                        <strong>MOV</strong> - QuickTime
                       </li>
                       <li className="flex items-center gap-2">
-                        <span className="text-blue-500">•</span>
-                        <strong>MP4</strong> - MPEG-4 with audio track
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-blue-500">•</span>
-                        <strong>WMA</strong> - Windows Media Audio
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-blue-500">•</span>
-                        <strong>AIFF</strong> - Audio Interchange File Format
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <span className="text-blue-500">•</span>
-                        <strong>CAF</strong> - Core Audio Format (macOS)
+                        <span className="text-green-500">•</span>
+                        <strong>AVI, MKV, WMV, FLV, M4V</strong> - and more
                       </li>
                     </ul>
-                  </div>
-                </div>
-                <div className="mt-6 space-y-3">
-                  <div className="rounded-md bg-blue-50 p-3 dark:bg-blue-900/20">
-                    <p className="text-sm text-blue-800 dark:text-blue-200">
-                      💡 <strong>Tip:</strong> Directly supported formats (MP3,
-                      WAV, FLAC, OGG) process immediately, while other formats
-                      are automatically converted first.
-                    </p>
-                  </div>
-                  <div className="rounded-md bg-yellow-50 p-3 dark:bg-yellow-900/20">
-                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                      ⏱️ <strong>Processing Time:</strong> Auto-converted files
-                      take 30-60 seconds longer due to the conversion step, but
-                      the process is fully automated.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Audio Conversion Process */}
-            <section className="mb-10">
-              <h2 className="mb-6 text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                🔄 Audio Conversion Process
-              </h2>
-              <div className="rounded-lg bg-gradient-to-r from-purple-50 to-pink-50 p-6 dark:from-purple-900/20 dark:to-pink-900/20">
-                <p className="mb-4 text-gray-700 dark:text-gray-300">
-                  When you upload unsupported formats like M4A or AAC, here's
-                  what happens automatically:
-                </p>
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-sm font-semibold text-white">
-                        1
-                      </span>
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100">
-                          Format Detection
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          System automatically detects if conversion is needed
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-sm font-semibold text-white">
-                        2
-                      </span>
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100">
-                          Secure Upload
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Your file is securely uploaded to temporary storage
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-sm font-semibold text-white">
-                        3
-                      </span>
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100">
-                          Automatic Conversion
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          CloudConvert API converts your audio to MP3 format
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-600 text-sm font-semibold text-white">
-                        4
-                      </span>
-                      <div>
-                        <h4 className="font-medium text-gray-900 dark:text-gray-100">
-                          Start Transcription
-                        </h4>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          Converted MP3 is sent for AI transcription processing
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-4 space-y-2">
-                  <div className="rounded-md bg-indigo-50 p-3 dark:bg-indigo-900/20">
-                    <p className="text-sm text-indigo-800 dark:text-indigo-200">
-                      🔒 <strong>Privacy:</strong> All temporary files are
-                      automatically deleted after processing. Your original
-                      audio is never permanently stored.
-                    </p>
-                  </div>
-                  <div className="rounded-md bg-green-50 p-3 dark:bg-green-900/20">
-                    <p className="text-sm text-green-800 dark:text-green-200">
-                      👁️ <strong>Transparency:</strong> You can view detailed
-                      conversion progress in the "View Details" section during
-                      processing.
-                    </p>
                   </div>
                 </div>
               </div>
@@ -427,9 +312,9 @@ export default function DocumentationPage() {
                     What audio formats can I upload?
                   </h4>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    You can upload almost any audio format! We support MP3, WAV,
-                    FLAC, OGG directly, and automatically convert M4A, AAC, MP4,
-                    WMA, AIFF, and CAF files to MP3 before transcription.
+                    You can upload almost any audio or video format! We natively
+                    support MP3, WAV, FLAC, OGG, M4A, AAC, MP4, MOV, MKV, and
+                    many more — no conversion needed.
                   </p>
                 </div>
                 <div className="rounded-lg bg-gray-50 p-4 dark:bg-gray-900/50">

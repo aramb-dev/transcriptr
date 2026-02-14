@@ -187,6 +187,7 @@ function StudioContent() {
         transcription={session.result}
         audioSource={session.audioSource}
         segments={session.segments}
+        intelligence={session.intelligence}
         onNewTranscription={handleNewTranscription}
       />
 

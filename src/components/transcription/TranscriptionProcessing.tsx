@@ -1,15 +1,15 @@
-import { Button } from "../ui/button";
+import { Button } from "../ui/button"
 
 interface TranscriptionProcessingProps {
-  progress: number;
-  transStatus: "converting" | "starting" | "processing";
-  getProgressColor: () => string;
-  statusMessages: Record<string, string>;
-  showApiDetails: boolean;
-  setShowApiDetails: (show: boolean) => void;
-  apiResponses: Array<{ timestamp: Date; data: Record<string, unknown> }>;
-  formatTimestamp: (date: Date) => string;
-  onCancel: () => void;
+  progress: number
+  transStatus: "starting" | "processing"
+  getProgressColor: () => string
+  statusMessages: Record<string, string>
+  showApiDetails: boolean
+  setShowApiDetails: (show: boolean) => void
+  apiResponses: Array<{ timestamp: Date; data: Record<string, unknown> }>
+  formatTimestamp: (date: Date) => string
+  onCancel: () => void
 }
 
 export function TranscriptionProcessing({
@@ -28,9 +28,7 @@ export function TranscriptionProcessing({
       <div className="mx-auto w-full max-w-md">
         <div className="mb-1 flex justify-between">
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {progress < 15 && transStatus === "starting"
-              ? "Converting Format"
-              : transStatus.charAt(0).toUpperCase() + transStatus.slice(1)}
+            {transStatus.charAt(0).toUpperCase() + transStatus.slice(1)}
           </span>
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
             {Math.floor(progress)}%
@@ -45,9 +43,7 @@ export function TranscriptionProcessing({
       </div>
 
       <p className="max-w-md text-center font-medium text-gray-700 dark:text-gray-300">
-        {progress < 15 && transStatus === "starting"
-          ? "Converting audio format for better compatibility..."
-          : statusMessages[transStatus]}
+        {statusMessages[transStatus]}
       </p>
 
       <div className="w-full max-w-md">
@@ -97,5 +93,5 @@ export function TranscriptionProcessing({
         </div>
       </div>
     </div>
-  );
+  )
 }

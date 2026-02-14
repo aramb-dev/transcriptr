@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { uploadBase64ToFirebase } from "@/lib/firebase-utils"
-import { startAssemblyAITranscription } from "@/lib/assemblyai-client"
+import { startAssemblyAITranscription, TranscriptionParams } from "@/lib/assemblyai-client"
 
 // Helper to prepare audio input for the transcription service
 // Always uploads to Firebase to ensure Studio can access the audio
@@ -75,13 +75,9 @@ export async function POST(request: Request) {
     }
 
     // Build AssemblyAI params
-    const transcriptionParams: {
-      audio_url: string
-      speaker_labels?: boolean
-      language_detection?: boolean
-      language_code?: string
-    } = {
+    const transcriptionParams: TranscriptionParams = {
       audio_url: audioFileUrl,
+      speech_models: ["universal-3-pro", "universal-2"],
     }
 
     // Diarization is native in AssemblyAI — no HuggingFace token needed
@@ -94,6 +90,33 @@ export async function POST(request: Request) {
       transcriptionParams.language_code = options.language
     } else {
       transcriptionParams.language_detection = true
+    }
+
+    // AI Intelligence features — opt-in per user selection
+    const aiFeatures = options.aiFeatures || {}
+
+    if (aiFeatures.autoChapters) {
+      transcriptionParams.auto_chapters = true
+    }
+    if (aiFeatures.summarization) {
+      transcriptionParams.summarization = true
+      transcriptionParams.summary_model = "informative"
+      transcriptionParams.summary_type = "bullets"
+    }
+    if (aiFeatures.sentimentAnalysis) {
+      transcriptionParams.sentiment_analysis = true
+    }
+    if (aiFeatures.entityDetection) {
+      transcriptionParams.entity_detection = true
+    }
+    if (aiFeatures.keyPhrases) {
+      transcriptionParams.auto_highlights = true
+    }
+    if (aiFeatures.contentModeration) {
+      transcriptionParams.content_safety = true
+    }
+    if (aiFeatures.topicDetection) {
+      transcriptionParams.iab_categories = true
     }
 
     console.log("Starting AssemblyAI transcription...")

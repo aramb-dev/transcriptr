@@ -166,9 +166,73 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
         }
       }
 
+      // Extract AI intelligence data (all timestamps ms→s)
+      const intelligence: Record<string, unknown> = {}
+
+      if (data.chapters && Array.isArray(data.chapters)) {
+        intelligence.chapters = data.chapters.map((ch: { gist: string, headline: string, summary: string, start: number, end: number }) => ({
+          gist: ch.gist,
+          headline: ch.headline,
+          summary: ch.summary,
+          start: ch.start / 1000,
+          end: ch.end / 1000,
+        }))
+      }
+
+      if (data.summary) {
+        intelligence.summary = data.summary
+      }
+
+      if (data.sentiment_analysis_results && Array.isArray(data.sentiment_analysis_results)) {
+        intelligence.sentimentAnalysis = data.sentiment_analysis_results.map((s: { text: string, start: number, end: number, sentiment: string, confidence: number, speaker?: string }) => ({
+          text: s.text,
+          start: s.start / 1000,
+          end: s.end / 1000,
+          sentiment: s.sentiment,
+          confidence: s.confidence,
+          speaker: s.speaker || null,
+        }))
+      }
+
+      if (data.entities && Array.isArray(data.entities)) {
+        intelligence.entities = data.entities.map((e: { entity_type: string, text: string, start: number, end: number }) => ({
+          entityType: e.entity_type,
+          text: e.text,
+          start: e.start / 1000,
+          end: e.end / 1000,
+        }))
+      }
+
+      if (data.auto_highlights_result?.results && Array.isArray(data.auto_highlights_result.results)) {
+        intelligence.keyPhrases = data.auto_highlights_result.results.map((h: { text: string, count: number, rank: number, timestamps: { start: number, end: number }[] }) => ({
+          text: h.text,
+          count: h.count,
+          rank: h.rank,
+          timestamps: h.timestamps.map((t: { start: number, end: number }) => ({
+            start: t.start / 1000,
+            end: t.end / 1000,
+          })),
+        }))
+      }
+
+      if (data.content_safety_labels) {
+        intelligence.contentSafety = {
+          results: data.content_safety_labels.results || [],
+          summary: data.content_safety_labels.summary || {},
+        }
+      }
+
+      if (data.iab_categories_result) {
+        intelligence.topics = {
+          results: data.iab_categories_result.results || [],
+          summary: data.iab_categories_result.summary || {},
+        }
+      }
+
       result.output = {
         segments,
         detected_language: data.language_code || null,
+        intelligence: Object.keys(intelligence).length > 0 ? intelligence : undefined,
       }
     }
 

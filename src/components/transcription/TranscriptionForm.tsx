@@ -3,6 +3,7 @@ import { useTranscriptionPolling } from "@/hooks/useTranscriptionPolling";
 import { useSessionPersistence } from "@/hooks/useSessionPersistence";
 import { UploadAudio } from "../UploadAudio";
 import { TranscriptionProcessing } from "./TranscriptionProcessing";
+import type { AIFeatures } from "./TranscriptionOptions";
 import { TranscriptionError } from "./TranscriptionError";
 import { MobileTranscriptionResult } from "./MobileTranscriptionResult";
 import TranscriptionResult from "./TranscriptionResult";
@@ -127,29 +128,36 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       // WhisperX returns: { segments: [{ start, end, text, words? }], detected_language: string }
       let finalTranscription = "Error: Could not parse transcription.";
       let segments = undefined;
+      let intelligence = undefined;
 
       if (typeof output === "string") {
         finalTranscription = output;
       } else if (output && typeof output === "object") {
-        // WhisperX model returns { segments: array, detected_language: string }
+        // AssemblyAI returns { segments, detected_language, intelligence? }
         if ("segments" in output && Array.isArray(output.segments)) {
           segments = output.segments.map((seg: { start: number; end: number; text: string; speaker?: string; words?: unknown[] }, idx: number) => ({
             id: idx,
             start: seg.start,
             end: seg.end,
             text: seg.text,
-            speaker: seg.speaker, // For diarization
-            words: seg.words, // Word-level timestamps from align_output
+            speaker: seg.speaker,
+            words: seg.words,
           }));
           // Combine all segment text into full transcription
           finalTranscription = output.segments
             .map((seg: { text: string }) => seg.text)
             .join(" ")
             .trim();
-          
-          console.log("WhisperX output parsed:", {
+
+          // Extract intelligence data if available
+          if ("intelligence" in output && output.intelligence) {
+            intelligence = output.intelligence;
+          }
+
+          console.log("AssemblyAI output parsed:", {
             segmentCount: segments ? segments.length : 0,
             detectedLanguage: (output as { detected_language?: string }).detected_language,
+            hasIntelligence: !!intelligence,
           });
         }
         // Fallback for OpenAI Whisper model format
@@ -173,13 +181,14 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       }
       setTranscription(finalTranscription);
 
-      // Update session with completed result and segments
+      // Update session with completed result, segments, and intelligence
       if (activeSession) {
         updateSessionData({
           status: "succeeded",
           progress: 100,
           result: finalTranscription,
           segments: segments,
+          intelligence: intelligence,
         });
       }
     },
@@ -241,19 +250,17 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
   };
 
   const isLoading =
-    transStatus === "converting" ||
     transStatus === "starting" ||
     transStatus === "processing";
 
   const handleUpload = async (
     data:
       | FormData
-      | { audioUrl: string; originalFile?: { name: string; size: number } },
+      | { audioUrl: string },
     options: {
       language: string;
       diarize: boolean;
-      translate?: boolean;
-      temperature?: number;
+      aiFeatures: AIFeatures;
     },
   ) => {
     // --- Reset State ---
@@ -287,20 +294,10 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         };
       }
     } else if ("audioUrl" in data) {
-      // Check if this is a converted file (has originalFile metadata)
-      if (data.originalFile) {
-        audioSource = {
-          type: "file", // Treat converted files as file uploads in history
-          name: data.originalFile.name,
-          size: data.originalFile.size,
-        };
-      } else {
-        // Regular URL input
-        audioSource = {
-          type: "url",
-          url: data.audioUrl,
-        };
-      }
+      audioSource = {
+        type: "url",
+        url: data.audioUrl,
+      };
     }
 
     // Create new session and store in state
@@ -310,10 +307,9 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
       options: {
         language?: string;
         diarize?: boolean;
-        translate?: boolean;
-        temperature?: number;
+        aiFeatures?: AIFeatures;
       } | null;
-      audioUrl?: string; // URL from input or Firebase
+      audioUrl?: string;
     } = { options: null };
 
     trackEvent("Transcription", "Start", options.language);
@@ -388,29 +384,11 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         }
         // --- End File processing logic ---
       } else {
-        // Handle URL input (includes converted video files from CloudConvert)
-        requestBody.audioUrl = data.audioUrl; // Use the provided URL directly
+        requestBody.audioUrl = data.audioUrl;
         sourceDescription = `URL: ${data.audioUrl}`;
-        setProgress(15); // Set progress for URL case
+        setProgress(15);
 
-        // Save converted audio URL to localStorage for Studio access
-        // This handles video files that were converted to audio via CloudConvert
         localStorage.setItem("studioAudioUrl", data.audioUrl);
-        console.log("Saved converted audio URL to localStorage:", data.audioUrl);
-
-        // Update session with audio URL for Studio playback
-        if (data.originalFile) {
-          // This is a converted file (video → audio)
-          updateSessionData({
-            audioSource: {
-              type: "file",
-              name: data.originalFile.name,
-              size: data.originalFile.size,
-              url: data.audioUrl,
-            },
-          });
-          console.log("Updated session with converted audio URL:", data.audioUrl);
-        }
       }
 
       console.log(`Processing ${sourceDescription}`);
@@ -424,10 +402,9 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
 
       // Set common API options
       const apiOptions = {
-        language: options.language, // "auto" for auto-detect, or specific language
+        language: options.language,
         diarize: options.diarize || false,
-        translate: options.translate || false,
-        temperature: options.temperature || 0,
+        aiFeatures: options.aiFeatures,
       };
       requestBody.options = apiOptions;
 
@@ -637,7 +614,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
           <TranscriptionProcessing
             progress={progress}
             transStatus={
-              transStatus as "converting" | "starting" | "processing"
+              transStatus as "starting" | "processing"
             }
             getProgressColor={getProgressColor}
             statusMessages={statusMessages}
@@ -668,6 +645,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
             // Desktop result view - links to standalone studio page
             <TranscriptionResult
               transcription={transcription}
+              summary={activeSession?.intelligence?.summary}
               onNewTranscription={handleReset}
               onOpenStudio={() => {
                 // Navigate to standalone studio page with session ID
@@ -683,28 +661,7 @@ export function TranscriptionForm({ initialSession }: TranscriptionFormProps) {
         ) : (
           // Default: show upload form when idle or if something unexpected happened
           <div className="mobile:p-6 p-8">
-            <UploadAudio
-              onUpload={handleUpload}
-              onConversionStart={() => setTransStatus("converting")}
-              onConversionComplete={() =>
-                console.log("Conversion completed, starting transcription...")
-              }
-              onConversionError={(error) => {
-                console.error("Conversion failed:", error);
-                setError(`Audio conversion failed: ${error}`);
-                setTransStatus("failed");
-              }}
-              onApiResponse={(response) => {
-                console.log("API Response:", response.data);
-                setApiResponses((prev) => [
-                  ...prev,
-                  response as {
-                    timestamp: Date;
-                    data: Record<string, unknown>;
-                  },
-                ]);
-              }}
-            />
+            <UploadAudio onUpload={handleUpload} />
           </div>
         )}
       </div>

@@ -4,19 +4,9 @@
  */
 
 import { TranscriptionStatus } from "@/services/transcription";
+import type { TranscriptionSegment, TranscriptionIntelligence } from "@/types/transcription";
 
-// Type definitions
-export interface TranscriptionSegment {
-  id: number;
-  start: number; // Start time in seconds
-  end: number; // End time in seconds
-  text: string;
-  tokens?: number[];
-  avg_logprob?: number;
-  temperature?: number;
-  no_speech_prob?: number;
-  compression_ratio?: number;
-}
+export type { TranscriptionSegment };
 
 export interface TranscriptionSession {
   id: string; // Unique session ID
@@ -46,6 +36,7 @@ export interface TranscriptionSession {
   }>;
   result?: string; // Final transcription result if available
   segments?: TranscriptionSegment[]; // Transcription segments with timestamps
+  intelligence?: TranscriptionIntelligence; // AI intelligence data
 }
 
 // Constants

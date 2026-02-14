@@ -14,12 +14,14 @@ import jsPDF from "jspdf";
 
 interface TranscriptionResultProps {
   transcription: string;
+  summary?: string;
   onNewTranscription?: () => void;
   onOpenStudio?: () => void;
 }
 
 export default function TranscriptionResult({
   transcription,
+  summary,
   onNewTranscription,
   onOpenStudio,
 }: TranscriptionResultProps) {
@@ -409,6 +411,21 @@ export default function TranscriptionResult({
                 </DropdownMenu>
               </div>
             </div>
+
+            {/* Summary Snippet */}
+            {summary && (
+              <div className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/20">
+                <h3 className="mb-2 text-sm font-semibold text-blue-800 dark:text-blue-300">
+                  AI Summary
+                </h3>
+                <p className="text-sm leading-relaxed text-blue-700 dark:text-blue-200">
+                  {summary.split("\n").filter(Boolean).slice(0, 3).map((line) =>
+                    line.replace(/^[\-\*\u2022]\s*/, "")
+                  ).join(" ")}
+                  {summary.split("\n").filter(Boolean).length > 3 && "..."}
+                </p>
+              </div>
+            )}
 
             {/* Transcript Content */}
             <div className="rounded-lg border border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-900">

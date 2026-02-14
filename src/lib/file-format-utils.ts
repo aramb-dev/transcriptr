@@ -1,194 +1,65 @@
 /**
- * File format detection utilities for audio transcription service
- * Handles detection of supported vs. convertible audio formats
+ * File format utilities for audio transcription service
+ * AssemblyAI natively supports all these formats — no conversion needed
  */
 
-// Formats natively supported by the transcription service
-export const NATIVELY_SUPPORTED_FORMATS = [
-  "mp3",
-  "wav",
-  "flac",
-  "ogg",
-] as const;
+export const SUPPORTED_FORMATS = [
+  // Audio
+  "mp3", "wav", "flac", "ogg", "m4a", "aac", "wma", "aiff",
+  "opus", "amr", "webm", "caf", "3gp", "ape", "au", "gsm", "ra", "voc",
+  // Video (AssemblyAI extracts audio automatically)
+  "mp4", "mov", "avi", "mkv", "wmv", "flv", "ts", "m4v",
+] as const
 
-// Formats that can be converted to MP3 via CloudConvert
-export const CONVERTIBLE_FORMATS = [
-  "m4a", // iPhone recordings
-  "aac", // Advanced Audio Coding
-  "mp4", // Video with audio track
-  "wma", // Windows Media Audio
-  "aiff", // Audio Interchange File Format
-  "caf", // Core Audio Format (macOS)
-  "opus", // Opus codec
-  "3gp", // 3GPP multimedia
-  "amr", // Adaptive Multi-Rate
-  "ape", // Monkey's Audio
-  "au", // Sun Microsystems audio
-  "gsm", // GSM 06.10 audio
-  "ra", // RealAudio
-  "voc", // Creative Voice
-  "webm", // WebM audio
-] as const;
+export type SupportedFormat = (typeof SUPPORTED_FORMATS)[number]
 
-export type NativelySupportedFormat =
-  (typeof NATIVELY_SUPPORTED_FORMATS)[number];
-export type ConvertibleFormat = (typeof CONVERTIBLE_FORMATS)[number];
-export type SupportedFormat = NativelySupportedFormat | ConvertibleFormat;
-
-/**
- * Extract file extension from filename or File object
- */
 export function getFileExtension(file: File | string): string {
-  const filename = typeof file === "string" ? file : file.name;
-  const extension = filename.toLowerCase().split(".").pop() || "";
-  return extension;
+  const filename = typeof file === "string" ? file : file.name
+  return filename.toLowerCase().split(".").pop() || ""
 }
 
-/**
- * Check if a file format is natively supported by the transcription service
- */
-export function isNativelySupported(file: File | string): boolean {
-  const extension = getFileExtension(file);
-  return NATIVELY_SUPPORTED_FORMATS.includes(
-    extension as NativelySupportedFormat,
-  );
-}
-
-/**
- * Check if a file format requires conversion before transcription
- */
-export function requiresConversion(file: File | string): boolean {
-  const extension = getFileExtension(file);
-  return CONVERTIBLE_FORMATS.includes(extension as ConvertibleFormat);
-}
-
-/**
- * Check if a file format is supported at all (either natively or via conversion)
- */
 export function isSupported(file: File | string): boolean {
-  return isNativelySupported(file) || requiresConversion(file);
+  const extension = getFileExtension(file)
+  return SUPPORTED_FORMATS.includes(extension as SupportedFormat)
 }
 
-/**
- * Get all natively supported formats
- */
-export function getNativelySupportedFormats(): readonly string[] {
-  return NATIVELY_SUPPORTED_FORMATS;
-}
-
-/**
- * Get all convertible formats
- */
-export function getConvertibleFormats(): readonly string[] {
-  return CONVERTIBLE_FORMATS;
-}
-
-/**
- * Get all supported formats (native + convertible)
- */
 export function getAllSupportedFormats(): readonly string[] {
-  return [...NATIVELY_SUPPORTED_FORMATS, ...CONVERTIBLE_FORMATS];
+  return SUPPORTED_FORMATS
 }
 
-/**
- * Get a human-readable description of what will happen to a file
- */
-export function getProcessingDescription(file: File | string): {
-  supported: boolean;
-  requiresConversion: boolean;
-  action: "transcribe" | "convert-then-transcribe" | "unsupported";
-  message: string;
-} {
-  const extension = getFileExtension(file);
-  const filename = typeof file === "string" ? file : file.name;
-
-  if (isNativelySupported(file)) {
-    return {
-      supported: true,
-      requiresConversion: false,
-      action: "transcribe",
-      message: `${filename} will be transcribed directly (${extension.toUpperCase()} is natively supported)`,
-    };
-  }
-
-  if (requiresConversion(file)) {
-    return {
-      supported: true,
-      requiresConversion: true,
-      action: "convert-then-transcribe",
-      message: `${filename} will be converted to MP3 and then transcribed (${extension.toUpperCase()} → MP3)`,
-    };
-  }
-
-  return {
-    supported: false,
-    requiresConversion: false,
-    action: "unsupported",
-    message: `${filename} is not supported. Please use one of: ${getAllSupportedFormats().join(", ")}`,
-  };
-}
-
-/**
- * Validate file format and return appropriate error message if invalid
- */
 export function validateFileFormat(file: File | string): {
-  valid: boolean;
-  error?: string;
-  requiresConversion?: boolean;
+  valid: boolean
+  error?: string
 } {
-  const extension = getFileExtension(file);
+  const extension = getFileExtension(file)
 
   if (!extension) {
     return {
       valid: false,
-      error:
-        "File has no extension. Please ensure your file has a valid audio format extension.",
-    };
+      error: "File has no extension. Please ensure your file has a valid audio format extension.",
+    }
   }
 
-  if (isNativelySupported(file)) {
-    return {
-      valid: true,
-      requiresConversion: false,
-    };
+  if (isSupported(file)) {
+    return { valid: true }
   }
 
-  if (requiresConversion(file)) {
-    return {
-      valid: true,
-      requiresConversion: true,
-    };
-  }
-
-  const supportedList = getAllSupportedFormats().join(", ");
+  const supportedList = SUPPORTED_FORMATS.join(", ")
   return {
     valid: false,
     error: `${extension.toUpperCase()} files are not supported. Supported formats: ${supportedList}`,
-  };
+  }
 }
 
-/**
- * Get MIME type patterns for file input accept attribute
- */
 export function getAcceptedMimeTypes(): string {
-  const audioTypes = [
+  const types = [
     "audio/*",
-    "video/mp4", // For MP4 files with audio
-    "video/quicktime", // For MOV files with audio
-    ".m4a",
-    ".mp3",
-    ".wav",
-    ".flac",
-    ".ogg",
-    ".aac",
-    ".wma",
-    ".aiff",
-    ".caf",
-    ".opus",
-    ".3gp",
-    ".amr",
-    ".webm",
-  ];
-
-  return audioTypes.join(",");
+    "video/mp4",
+    "video/quicktime",
+    "video/x-msvideo",
+    "video/x-matroska",
+    "video/webm",
+    ...SUPPORTED_FORMATS.map((f) => `.${f}`),
+  ]
+  return types.join(",")
 }
