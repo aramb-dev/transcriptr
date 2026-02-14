@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, lazy } from "react";
+import { Suspense, useState, useEffect, lazy } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent } from "../components/ui/card";
 import { Header } from "../components/layout/Header";
@@ -35,6 +35,14 @@ export default function Page() {
   const [selectedSession, setSelectedSession] =
     useState<TranscriptionSession | null>(null);
   const [transcriptionResult] = useState<string | null>(null);
+
+  // Auto-show V3.2 announcement for users who haven't seen it
+  useEffect(() => {
+    const hasSeen = localStorage.getItem("v3.2SAW")
+    if (!hasSeen) {
+      setShowV3Modal(true)
+    }
+  }, [])
 
   // Updated to use the new window method instead of direct DOM manipulation
   const openFeedbackModal = (type: "general" | "issue" | "feature") => {

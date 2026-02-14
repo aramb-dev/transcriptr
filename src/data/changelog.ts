@@ -10,6 +10,33 @@ export interface ChangeItem {
 
 export const changelogItems: ChangeItem[] = [
   {
+    date: "Fri, 14 Feb 2026",
+    version: "3.2.0",
+    changes: {
+      new: [
+        "**AssemblyAI SDK Integration**: Migrated transcription engine to the official AssemblyAI JavaScript SDK for better reliability and type safety",
+        "**AI Analysis Features**: Opt-in AI intelligence features including Auto Chapters, Summarization, Sentiment Analysis, Entity Detection, Key Phrases, Content Moderation, and Topic Detection",
+        "**Speaker Diarization**: Identify different speakers in interviews, meetings, and conversations",
+        "**Smart Error Recovery**: Feature-language incompatibility errors now show a clear explanation and a one-click retry button that automatically disables the unsupported feature",
+        "**Options Badges**: Selected transcription options (language, diarize, AI features) are shown as badges on the result screen",
+        "**shadcn/ui v3 Upgrade**: All UI components upgraded to shadcn v3 (radix-vega) with unified Radix UI package and Tabler icons",
+        "**Intelligence Panels**: New Studio tabs for Chapters, Summary, Sentiment, Entities, and Key Phrases when AI features are enabled",
+      ],
+      improved: [
+        "**Video File Playback**: Studio player now uses a video element to handle both audio and video containers (MP4, WebM, etc.)",
+        "**Polling Resilience**: Transcription status polling retries up to 5 consecutive errors before failing, with 5-second intervals",
+        "**Mutual Exclusivity Handling**: Auto Chapters and Summarization are mutually exclusive in the UI with clear descriptions",
+        "**Donation Transparency**: Premium features show a one-time donation nudge explaining processing costs",
+      ],
+      fixed: [
+        "**Null Safety**: Added guards on nullable SDK fields to prevent crashes during polling",
+        "**Polling Error Details**: Error responses are now fully read and displayed instead of generic messages",
+        "**Dialog Overlay**: Fixed nearly invisible modal overlay (was 10% opacity, now 50%)",
+        "**CSS Variable System**: Cleaned up theme variables to work correctly with shadcn v3 and Tailwind CSS v4",
+      ],
+    },
+  },
+  {
     date: "Fri, 31 Oct 2025",
     version: "3.0.0",
     changes: {

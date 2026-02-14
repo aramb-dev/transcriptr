@@ -1,53 +1,51 @@
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { X, Sparkles, Music2, Play } from "lucide-react";
-import Confetti from "react-confetti";
-import { Button } from "./ui/button";
-import { AnimatedBackdrop } from "./ui/animated-backdrop";
-import { expandCenter } from "../lib/animations";
+import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
+import { X, Brain, Languages, RefreshCw } from "lucide-react"
+import Confetti from "react-confetti"
+import { Button } from "./ui/button"
+import { AnimatedBackdrop } from "./ui/animated-backdrop"
+import { expandCenter } from "../lib/animations"
+
+const STORAGE_KEY = "v3.2SAW"
 
 interface V3AnnouncementModalProps {
-  onClose: () => void;
+  onClose: () => void
 }
 
 export function V3AnnouncementModal({ onClose }: V3AnnouncementModalProps) {
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false)
   const [windowDimensions, setWindowDimensions] = useState({
     width: 0,
     height: 0,
-  });
+  })
 
   useEffect(() => {
-    // Set window dimensions for confetti
     const updateWindowDimensions = () => {
       setWindowDimensions({
         width: window.innerWidth,
         height: window.innerHeight,
-      });
-    };
+      })
+    }
 
-    updateWindowDimensions();
-    window.addEventListener("resize", updateWindowDimensions);
+    updateWindowDimensions()
+    window.addEventListener("resize", updateWindowDimensions)
 
-    // Start confetti animation
-    setShowConfetti(true);
+    setShowConfetti(true)
 
-    // Stop confetti after 6 seconds
     const confettiTimer = setTimeout(() => {
-      setShowConfetti(false);
-    }, 6800);
+      setShowConfetti(false)
+    }, 6800)
 
     return () => {
-      window.removeEventListener("resize", updateWindowDimensions);
-      clearTimeout(confettiTimer);
-    };
-  }, []);
+      window.removeEventListener("resize", updateWindowDimensions)
+      clearTimeout(confettiTimer)
+    }
+  }, [])
 
   const handleClose = () => {
-    // Set the flag to prevent showing again
-    localStorage.setItem("seenV3", "true");
-    onClose();
-  };
+    localStorage.setItem(STORAGE_KEY, "true")
+    onClose()
+  }
 
   return (
     <>
@@ -66,10 +64,10 @@ export function V3AnnouncementModal({ onClose }: V3AnnouncementModalProps) {
             <div className="mb-6 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="rounded-full bg-gradient-to-r from-blue-500 to-purple-600 p-2">
-                  <Play className="h-6 w-6 text-white" />
+                  <Brain className="h-6 w-6 text-white" />
                 </div>
                 <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-2xl font-bold text-transparent dark:from-blue-400 dark:to-purple-400">
-                  V3 is here!
+                  V3.2 -- AI Intelligence
                 </h1>
               </div>
               <Button
@@ -85,57 +83,58 @@ export function V3AnnouncementModal({ onClose }: V3AnnouncementModalProps) {
             {/* Main content */}
             <div className="space-y-6">
               <p className="text-lg text-gray-700 dark:text-gray-300">
-                Experience the future of transcription with Transcription Studio!
-                V3 brings a revolutionary interactive workspace with OpenAI's
-                official Whisper model for unmatched accuracy.
+                Transcriptr now runs on the AssemblyAI SDK with opt-in AI
+                analysis features. Get chapters, summaries, sentiment, entities,
+                and more -- all from a single transcription.
               </p>
 
               {/* Feature highlights */}
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <div className="mt-1 rounded-full bg-blue-100 p-1 dark:bg-blue-900">
-                    <Play className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    <Brain className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
                     <h3 className="font-medium text-blue-600 dark:text-blue-400">
-                      🎬 Transcription Studio
+                      AI Analysis Features
                     </h3>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
-                      Brand new interactive workspace with an integrated audio
-                      player. Click any segment to jump to that exact moment in
-                      the audio!
+                      Toggle Auto Chapters, Summarization, Sentiment Analysis,
+                      Entity Detection, Key Phrases, Content Moderation, and
+                      Topic Detection. Each feature appears as a new tab in the
+                      Studio.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <div className="mt-1 rounded-full bg-purple-100 p-1 dark:bg-purple-900">
-                    <Music2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <Languages className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
                     <h3 className="font-medium text-purple-600 dark:text-purple-400">
-                      🤖 OpenAI Whisper Model
+                      30+ Language Support
                     </h3>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
-                      Upgraded to OpenAI's official Whisper model with precise
-                      timestamps for every segment. Better accuracy, better
-                      results.
+                      Auto-detect or manually select from 20+ languages.
+                      AssemblyAI natively supports audio and video formats --
+                      no conversion step needed.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
                   <div className="mt-1 rounded-full bg-green-100 p-1 dark:bg-green-900">
-                    <Sparkles className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    <RefreshCw className="h-4 w-4 text-green-600 dark:text-green-400" />
                   </div>
                   <div>
                     <h3 className="font-medium text-green-600 dark:text-green-400">
-                      ⏱️ Interactive Playback
+                      Smart Error Recovery
                     </h3>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
-                      Watch segments highlight in real-time as audio plays. Export
-                      professional SRT and VTT subtitle files with perfect
-                      timestamps.
+                      If a feature does not support the detected language, you
+                      get a clear explanation and a one-click retry that
+                      automatically disables the unsupported feature.
                     </p>
                   </div>
                 </div>
@@ -144,8 +143,8 @@ export function V3AnnouncementModal({ onClose }: V3AnnouncementModalProps) {
               {/* Call to action */}
               <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900">
                 <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-                  Try the new Studio! Upload an audio file and click "Open in
-                  Studio" to experience interactive playback.
+                  Enable AI features in the Transcription Options panel before
+                  uploading. Results appear as tabs in the Studio.
                 </p>
               </div>
 
@@ -175,17 +174,17 @@ export function V3AnnouncementModal({ onClose }: V3AnnouncementModalProps) {
               numberOfPieces={200}
               gravity={0.3}
               colors={[
-                "#3b82f6", // blue-500
-                "#10b981", // emerald-500
-                "#f59e0b", // amber-500
-                "#ef4444", // red-500
-                "#8b5cf6", // violet-500
-                "#06b6d4", // cyan-500
+                "#3b82f6",
+                "#10b981",
+                "#f59e0b",
+                "#ef4444",
+                "#8b5cf6",
+                "#06b6d4",
               ]}
             />
           </div>
         )}
       </AnimatedBackdrop>
     </>
-  );
+  )
 }
